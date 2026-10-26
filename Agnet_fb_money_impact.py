@@ -1,6 +1,6 @@
 import sys
 import faulthandler
-SCRIPT_VERSION = "2026-10-26-money-impact-strict-llm-fix2"
+SCRIPT_VERSION = "2026-10-26-money-impact-strict-llm-fix3"
 print(f"▶ Python démarré (version {SCRIPT_VERSION}), chargement des modules…", flush=True)
 faulthandler.enable()
 faulthandler.dump_traceback_later(90, repeat=True, file=sys.stderr)
@@ -88,21 +88,17 @@ def groq_keys():
 
 
 # ---- Modèles (modifiables par variable d'environnement, séparés par des virgules) ----
-# Cloudflare LLM
 CF_TEXT_MODELS = _csv_env("CF_TEXT_MODELS", (
     "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
     "@cf/mistralai/mistral-small-3.1-24b-instruct",
     "@cf/meta/llama-3.1-8b-instruct",
 ))
-# Hugging Face LLM : modèles équivalents, essayés dans l'ordre
 HF_TEXT_MODELS = _csv_env("HF_TEXT_MODELS", (
     "Qwen/Qwen2.5-72B-Instruct",
     "meta-llama/Llama-3.3-70B-Instruct",
     "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
     "Qwen/Qwen3-32B",
 ))
-# Groq : modèles actuels de la plateforme (si tous sont refusés, le script
-# interroge /models et utilise ceux que ta clé peut réellement employer)
 GROQ_MODELS = _csv_env("GROQ_MODELS", (
     "llama-3.3-70b-versatile",
     "llama-3.1-8b-instant",
@@ -111,7 +107,6 @@ GROQ_MODELS = _csv_env("GROQ_MODELS", (
     "openai/gpt-oss-120b",
     "openai/gpt-oss-20b",
 ))
-# Images
 CF_IMAGE_MODELS = _csv_env("CF_IMAGE_MODELS", (
     "@cf/black-forest-labs/flux-1-schnell",
     "@cf/bytedance/stable-diffusion-xl-lightning",
@@ -166,28 +161,6 @@ def _find_logo():
 LOGO_PATH = _find_logo()
 LOGO_BACKDROP = os.getenv("LOGO_BACKDROP", "0") == "1"
 
-FALLBACK_SCENES = [
-    (("gold", "xau", "bullion"),
-     "Stack of gold bars on dark polished surface inside a bank vault, blurred safety deposit boxes behind"),
-    (("oil", "crude", "wti", "brent", "opec"),
-     "Oil refinery towers at dusk with glowing flare stacks, blurred pipelines and storage tanks in background"),
-    (("bitcoin", "crypto", "btc", "ethereum"),
-     "Single physical gold bitcoin coin standing on dark reflective glass, blurred server racks behind"),
-    (("dollar", "usd", "fed ", "fomc", "powell", "treasury", "yield"),
-     "Stack of US hundred-dollar bills on dark marble desk, blurred columns of a federal building behind"),
-    (("euro", "eur", "ecb", "lagarde"),
-     "Euro banknotes fanned out on dark stone surface, blurred European central bank facade behind"),
-    (("yen", "jpy", "boj"),
-     "Japanese yen banknotes and coins on dark lacquered surface, blurred Tokyo skyline at dusk behind"),
-    (("pound", "gbp", "boe", "sterling"),
-     "British pound notes on dark slate surface, blurred London financial district behind"),
-    (("stock", "nasdaq", "s&p", "dow", "equities", "wall street"),
-     "New York Stock Exchange facade with large columns and flags, dramatic evening light, blurred street below"),
-]
-DEFAULT_SCENE = (
-    "Stack of gold bars on dark marble surface, blurred bank vault door in background"
-)
-
 STYLE_SUFFIX = (
     "warm cinematic side lighting, shot on Canon EOS R5, 85mm f/1.4 lens, "
     "shallow depth of field, creamy bokeh, tack-sharp focus on the hero subject, "
@@ -195,6 +168,18 @@ STYLE_SUFFIX = (
     "photorealistic, ultra detailed, 8k, hero subject in the upper 60% of the frame, lower 40% of the frame dark, smooth and uncluttered, "
     "no text, no letters, no logos, no people"
 )
+
+# ---------------------------------------------------------------------
+# Expressions régulières du parseur de prompt d'image.
+# CORRECTIF fix3 : elles sont au NIVEAU MODULE (et non dans la classe), donc
+# impossible de les « perdre » par une erreur d'indentation.
+# ---------------------------------------------------------------------
+_LABEL_POS_RE = re.compile(
+    r"(?:positive\s*prompt|prompt\s*positif|positive)\s*(?:\([^)]*\))?\s*[:：\-–]\s*", re.I)
+_LABEL_NEG_RE = re.compile(
+    r"\n?\s*(?:negative\s*prompt|prompt\s*n[ée]gatif|negative)\s*(?:\([^)]*\))?\s*[:：\-–]", re.I)
+_REFUSAL_RE = re.compile(
+    r"\b(i can(?:['’]t|not)|i['’]m sorry|i am sorry|as an ai)\b", re.I)
 
 
 # ======================================================================
@@ -281,7 +266,6 @@ def explain_graph_error(data):
 
 # ======================================================================
 # SERVICES DÉSACTIVÉS (partagé LLM + images) : "cf:1", "hf:2", "groq:0"...
-# Un compte épuisé pour le LLM l'est aussi pour les images (quota commun).
 # ======================================================================
 _DEAD = set()
 _CACHE = {}
@@ -322,8 +306,7 @@ def _llm_cloudflare(messages, temperature, max_tokens):
                 out = res.get("response")
                 if not out and res.get("choices"):
                     out = res["choices"][0].get("message", {}).get("content")
-                # CORRECTIF : Cloudflare renvoie parfois un JSON déjà parsé (dict/list).
-                # str(dict) donnerait du pseudo-JSON Python invalide ('True', apostrophes).
+                # Cloudflare renvoie parfois un JSON déjà parsé (dict/list).
                 if isinstance(out, (dict, list)):
                     out = json.dumps(out, ensure_ascii=False)
                 if out and str(out).strip():
@@ -362,7 +345,6 @@ def _llm_hf(messages, temperature, max_tokens):
                     log(f"HF compte {label} : token refusé -> compte suivant.", level="WARN")
                     _DEAD.add(dk)
                     break
-                # autre erreur (modèle indisponible...) : on tente le modèle équivalent suivant
     return None
 
 
@@ -408,7 +390,7 @@ def _llm_groq(messages, temperature, max_tokens):
                     break
                 if r.status_code == 404 or (r.status_code == 400 and "model" in r.text.lower()):
                     log(f"Groq clé {label} : modèle {model} indisponible.", level="WARN")
-                    if not queue and not auto_done:   # tous refusés : on demande la liste réelle
+                    if not queue and not auto_done:
                         auto_done = True
                         try:
                             queue = [m for m in _groq_models(key) if m not in seen][:5]
@@ -426,7 +408,6 @@ def _llm_groq(messages, temperature, max_tokens):
             except Exception as e:
                 log(f"Groq clé {label} {model} : {type(e).__name__} {str(e)[:110]}", level="WARN")
     return None
-
 
 
 def llm_chat(messages, temperature=0.2, max_tokens=1800, order=None):
@@ -484,7 +465,7 @@ class TextPost:
         5. Palette: deep navy blue and warm gold.
         6. FORBIDDEN: people, faces, hands, text, letters, numbers, logos, watermarks,
            abstract shapes, 3D renders, neon, computer screens with charts.
-        7. Max 80 words. End with: photorealistic, 85mm lens, sharp focus.
+        7. Max 60 words. End with: photorealistic, 85mm lens, sharp focus.
 
         OUTPUT ONLY this format:
         POSITIVE PROMPT:
@@ -512,19 +493,14 @@ class TextPost:
             temperature=temp, order=order,
         ) or ""
         return r
-        _LABEL_POS = re.compile(
-            r"(?:positive\s*prompt|prompt\s*positif|positive)\s*(?:\([^)]*\))?\s*[:：\-–]\s*", re.I)
-        _LABEL_NEG = re.compile(
-            r"\n?\s*(?:negative\s*prompt|prompt\s*n[ée]gatif|negative)\s*(?:\([^)]*\))?\s*[:：\-–]", re.I)
-        _REFUSAL = re.compile(r"\b(i can(?:'|no)t|i'm sorry|i am sorry|as an ai)\b", re.I)
 
-    @classmethod
-    def _parse_prompts(cls, text):
+    @staticmethod
+    def _parse_prompts(text):
         """Tolérant : markdown, casse, labels absents, JSON, intro parasite."""
         text = re.sub(r"<think>.*?</think>", "", text or "", flags=re.S | re.I)
         text = text.replace("**", "").replace("__", "").replace("`", "")
         text = re.sub(r"^\s*#+\s*", "", text, flags=re.M).strip()
-        if not text or cls._REFUSAL.search(text[:200]):
+        if not text or _REFUSAL_RE.search(text[:200]):
             return None, None
 
         # Cas JSON : {"positive_prompt": "...", "negative_prompt": "..."}
@@ -541,16 +517,16 @@ class TextPost:
             except Exception:
                 pass
 
-        m_neg = cls._LABEL_NEG.search(text)
+        m_neg = _LABEL_NEG_RE.search(text)
         head = text[:m_neg.start()] if m_neg else text
         negative = text[m_neg.end():].strip() if m_neg else ""
-        m_pos = cls._LABEL_POS.search(head)
+        m_pos = _LABEL_POS_RE.search(head)
         if m_pos:
             head = head[m_pos.end():]
 
         # retire les lignes d'intro du type "Here is the description:"
-        lines = [l.strip() for l in head.splitlines() if l.strip()]
-        lines = [l for l in lines if not l.endswith(":")]
+        lines = [ln.strip() for ln in head.splitlines() if ln.strip()]
+        lines = [ln for ln in lines if not ln.endswith(":")]
         positive = " ".join(" ".join(lines).split())
         positive = positive.strip(' "\'“”«»[]')
         return (positive or None), negative
@@ -576,7 +552,13 @@ class TextPost:
                 log("Réponse vide, nouvel essai avec un autre fournisseur.", level="WARN")
                 continue
             got_any_text = True
-            positive, _ = self._parse_prompts(text)
+            # CORRECTIF fix3 : un bug de parsing ne doit JAMAIS faire planter le run.
+            try:
+                positive, _ = self._parse_prompts(text)
+            except Exception as e:
+                log(f"Parseur de prompt : {type(e).__name__} {str(e)[:150]} -> essai suivant.",
+                    level="WARN")
+                positive = None
             if self._valid_positive(positive):
                 log("LLM : prompt photo reçu et validé.", level="OK")
                 positive = " ".join(positive.split()[:70])
@@ -590,7 +572,7 @@ class TextPost:
         raise RuntimeError("Prompt d'image invalide après 4 essais sur plusieurs fournisseurs.")
 
     # ------------------------------------------------------------------
-    # 2) Génération d'image : Cloudflare (comptes x modèles) -> HF (tokens x modèles) -> fond
+    # 2) Génération d'image : Cloudflare (comptes x modèles) -> HF (tokens x modèles)
     # ------------------------------------------------------------------
     def _image_cloudflare(self, prompt, seed=None):
         accounts = cf_accounts()
@@ -709,22 +691,6 @@ class TextPost:
                 return img, nom
             log(f"{nom} : pas d'image, service suivant…", level="WARN")
         return None, None
-
-    @staticmethod
-    def _image_fallback_design():
-        w, h = IMG_W, IMG_H
-        img = Image.new("RGB", (w, h))
-        d = ImageDraw.Draw(img)
-        top, bot = (10, 30, 70), (3, 8, 22)
-        for y in range(h):
-            t = y / h
-            d.line([(0, y), (w, y)],
-                   fill=tuple(int(top[i] + (bot[i] - top[i]) * t) for i in range(3)))
-        glow = Image.new("RGB", (w, h), (0, 0, 0))
-        ImageDraw.Draw(glow).ellipse([w * 0.15, h * 0.05, w * 0.85, h * 0.55],
-                                     fill=(120, 85, 10))
-        glow = glow.filter(ImageFilter.GaussianBlur(120))
-        return ImageChops.add(img, glow)
 
     # ------------------------------------------------------------------
     # 3) Sélection du meilleur candidat
@@ -1413,7 +1379,6 @@ Use relevant=false when uncertain. No markdown.
         try:
             data = self._extract_json(raw)
             relevant = data.get("relevant")
-            # CORRECTIF : tolère "true"/"false" renvoyés sous forme de chaîne.
             if isinstance(relevant, str):
                 low = relevant.strip().lower()
                 if low in ("true", "false"):
@@ -1423,7 +1388,6 @@ Use relevant=false when uncertain. No markdown.
             if not isinstance(relevant, bool):
                 raise ValueError("champ relevant absent ou non booléen")
             if relevant and category not in ALLOWED_NEWS_CATEGORIES:
-                # tolérance sur la casse (ex. "forex" -> "Forex")
                 match = next((c for c in ALLOWED_NEWS_CATEGORIES
                               if c.lower() == category.lower()), None)
                 if match is None:
@@ -1453,7 +1417,6 @@ Use relevant=false when uncertain. No markdown.
         except json.JSONDecodeError:
             pass
 
-        # Cherche chaque accolade ouvrante et essaie de décoder un objet complet.
         decoder = json.JSONDecoder()
         for match in re.finditer(r"\{", text):
             try:
@@ -1463,8 +1426,6 @@ Use relevant=false when uncertain. No markdown.
             except json.JSONDecodeError:
                 continue
 
-        # CORRECTIF : filet de sécurité pour un dict au format Python
-        # ({'relevant': True, ...}) issu d'un str(dict).
         start, end = text.find("{"), text.rfind("}")
         if start != -1 and end > start:
             try:
@@ -1494,8 +1455,6 @@ Use relevant=false when uncertain. No markdown.
             {"role": "user", "content": f"SOURCE TEXT TO TRANSLATE:\n{text}"},
         ]
 
-        # Important : si un fournisseur renvoie du JSON invalide, essayer le fournisseur
-        # suivant au lieu de s'arrêter après la première réponse non vide.
         providers = (
             ("Cloudflare", _llm_cloudflare),
             ("Hugging Face", _llm_hf),
@@ -1519,14 +1478,12 @@ Use relevant=false when uncertain. No markdown.
                 if not caption:
                     raise ValueError("champ 'caption' absent ou vide")
                 if not headline:
-                    # Une légende valide reste exploitable; le titre sera généré à partir de celle-ci.
                     headline = caption[:100].strip()
                     data["headline"] = headline
                 data["caption"] = caption
                 log(f"Traduction reçue via {provider_name} en {time.time() - t:.1f}s", level="OK")
                 return data
             except Exception as e:
-                # Journaliser un extrait limité, sans afficher d'identifiants API.
                 excerpt = re.sub(r"\s+", " ", str(raw))[:350]
                 log(f"Traduction {provider_name} : JSON invalide ({e}); extrait={excerpt!r}", level="WARN")
                 log(f"Nouvel essai avec le fournisseur suivant ({provider_name} a échoué).", level="WARN")
