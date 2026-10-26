@@ -830,7 +830,7 @@ class TextPost:
             f_logo = self._load_font(int(w * 0.046))
             wa = probe.textlength(part_a, font=f_logo)
             wb = probe.textlength(part_b, font=f_logo)
-            logo_bb = f_logo_code_616.getbbox(part_a + part_b)
+            logo_bb = f_logo.getbbox(part_a + part_b)
             pad_x, pad_y = int(w * 0.022), int(w * 0.013)
             logo_box = [lx, ly, lx + wa + wb + 2 * pad_x, ly + logo_bb[3] + 2 * pad_y]
 
