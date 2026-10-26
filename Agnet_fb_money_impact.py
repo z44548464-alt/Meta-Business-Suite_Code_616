@@ -1,6 +1,6 @@
 import sys
 import faulthandler
-SCRIPT_VERSION = "2026-10-24-cloudflare-logo"
+SCRIPT_VERSION = "2026-10-26-cf-hf-groq"
 print(f"▶ Python démarré (version {SCRIPT_VERSION}), chargement des modules…", flush=True)
 faulthandler.enable()
 # Si le script reste figé, affiche la pile d'appel toutes les 90 s (montre OÙ il bloque)
@@ -13,7 +13,6 @@ import traceback
 import json
 import re
 import time
-import urllib.parse
 from pathlib import Path
 from datetime import datetime, timezone
 
@@ -28,7 +27,6 @@ from PIL import (
     ImageFilter, ImageChops, ImageStat, features,
 )
 from groq import Groq
-from langchain_groq import ChatGroq
 from huggingface_hub import InferenceClient
 
 try:
@@ -49,12 +47,27 @@ TRUSTED_WEB_SOURCES = {
     "ActionForex Fundamental": "https://www.actionforex.com/category/fundamental-analysis/feed/",
 }
 
-# Modifiables par variables d'environnement (sans toucher au code)
-GROQ_MODEL = os.getenv("GROQ_MODEL", "qwen/qwen3.8-27b")
-# Générateurs d'image, essayés dans cet ordre : Cloudflare -> Hugging Face -> Pollinations
+# ---- Modèles (modifiables par variables d'environnement, sans toucher au code) ----
+# LLM (traduction + prompt image) : Cloudflare -> Hugging Face -> Groq
+CF_TEXT_MODELS = ("@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+                  "@cf/mistralai/mistral-small-3.1-24b-instruct")
+HF_TEXT_MODEL = os.getenv("HF_TEXT_MODEL", "Qwen/Qwen2.5-72B-Instruct")
+GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+# Images : Cloudflare -> Hugging Face -> fond graphique de secours
 CF_IMAGE_MODEL = os.getenv("CF_IMAGE_MODEL", "@cf/black-forest-labs/flux-1-schnell")
 HF_IMAGE_MODEL = os.getenv("HF_IMAGE_MODEL", "black-forest-labs/FLUX.1-schnell")
 GRAPH_URL = "https://graph.facebook.com/" + os.getenv("GRAPH_VERSION", "v26.0")
+
+# Pour publier sur la 2e page, mets META_SUFFIX=_MONEY_IMPAC dans le workflow :
+# le script lira alors PAGE_ID_MONEY_IMPAC, PAGE_ACCESS_TOKEN_MONEY_IMPAC et
+# INSTAGRAM_BUSINESS_ID_MONEY_IMPAC. Vide = première page (PAGE_ID, etc.).
+META_SUFFIX = os.getenv("META_SUFFIX", "")
+
+
+def menv(name):
+    """Lit un secret Meta en tenant compte du suffixe de page."""
+    return os.getenv(name + META_SUFFIX, "")
+
 
 # Génération directement en portrait -> aucun recadrage destructif
 IMG_W, IMG_H = 1024, 1280      # multiples de 16 (requis par FLUX)
@@ -79,6 +92,7 @@ AR_FONT_ENV = os.getenv("AR_FONT_PATH", "")
 BASE_DIR = Path(__file__).resolve().parent if "__file__" in globals() else Path.cwd()
 OUTPUT_DIR = BASE_DIR / "output"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
 
 # Logo de la page (PNG transparent conseillé), affiché en haut à gauche
 def _find_logo():
@@ -111,7 +125,7 @@ FALLBACK_SCENES = [
     (("yen", "jpy", "boj"),
      "Japanese yen banknotes and coins on dark lacquered surface, blurred Tokyo skyline at dusk behind"),
     (("pound", "gbp", "boe", "sterling"),
-     "British pound notes on dark oak-free slate surface, blurred London financial district behind"),
+     "British pound notes on dark slate surface, blurred London financial district behind"),
     (("stock", "nasdaq", "s&p", "dow", "equities", "wall street"),
      "New York Stock Exchange facade with large columns and flags, dramatic evening light, blurred street below"),
 ]
@@ -139,9 +153,11 @@ except Exception:
 
 IS_GHA = os.getenv("GITHUB_ACTIONS", "").lower() == "true"
 T0 = time.time()
-SECRET_ENV_NAMES = ("TOKEN_AI_DESCRYB_IMG", "HF_TOKEN", "PAGE_ACCESS_TOKEN",
-                    "CLOUDINARY_API_KEY", "CLOUDINARY_API_SECRET",
-                    "CF_API_TOKEN", "CF_ACCOUNT_ID")
+SECRET_ENV_NAMES = (
+    "TOKEN_AI_DESCRYB_IMG", "HF_TOKEN", "CF_API_TOKEN", "CF_ACCOUNT_ID",
+    "CLOUDINARY_API_KEY", "CLOUDINARY_API_SECRET",
+    "PAGE_ACCESS_TOKEN", "PAGE_ACCESS_TOKEN_MONEY_IMPAC",
+)
 _ICONS = {"INFO": "  ", "STEP": "➡️ ", "OK": "✅", "WARN": "⚠️ ", "ERROR": "❌"}
 
 # Compteurs pour le résumé final
@@ -213,6 +229,79 @@ def explain_graph_error(data):
 
 
 # ======================================================================
+# LLM : Cloudflare -> Hugging Face -> Groq (bascule automatique)
+# ======================================================================
+_LLM_DEAD = set()   # services désactivés pour le reste de l'exécution (token refusé...)
+
+
+def llm_chat(messages, temperature=0.2, max_tokens=1800):
+    """Renvoie le texte du premier service LLM qui répond, sinon None."""
+    # --- 1) Cloudflare Workers AI ---
+    acc, cf_tok = os.getenv("CF_ACCOUNT_ID", ""), os.getenv("CF_API_TOKEN", "")
+    if acc and cf_tok and "cf" not in _LLM_DEAD:
+        for model in CF_TEXT_MODELS:
+            try:
+                r = requests.post(
+                    f"https://api.cloudflare.com/client/v4/accounts/{acc}/ai/run/{model}",
+                    headers={"Authorization": f"Bearer {cf_tok}"},
+                    json={"messages": messages, "temperature": temperature,
+                          "max_tokens": max_tokens},
+                    timeout=90,
+                )
+                if r.status_code in (401, 403):
+                    log("Cloudflare LLM : accès refusé (vérifie CF_API_TOKEN / permission "
+                        "Workers AI) -> ignoré.", level="WARN")
+                    _LLM_DEAD.add("cf")
+                    break
+                if r.status_code == 429:
+                    log("Cloudflare LLM : quota atteint -> ignoré.", level="WARN")
+                    _LLM_DEAD.add("cf")
+                    break
+                r.raise_for_status()
+                out = (r.json().get("result") or {}).get("response")
+                if out and str(out).strip():
+                    log(f"LLM : Cloudflare {model}", level="OK")
+                    return str(out)
+                log(f"LLM Cloudflare {model} : réponse vide", level="WARN")
+            except Exception as e:
+                log(f"LLM Cloudflare {model} : {type(e).__name__} {str(e)[:150]}", level="WARN")
+
+    # --- 2) Hugging Face ---
+    hf = os.getenv("HF_TOKEN", "")
+    if hf and "hf" not in _LLM_DEAD:
+        try:
+            res = InferenceClient(api_key=hf).chat_completion(
+                model=HF_TEXT_MODEL, messages=messages,
+                temperature=max(temperature, 0.01), max_tokens=max_tokens,
+            )
+            out = res.choices[0].message.content
+            if out and out.strip():
+                log(f"LLM : Hugging Face {HF_TEXT_MODEL}", level="OK")
+                return out
+        except Exception as e:
+            log(f"LLM Hugging Face : {type(e).__name__} {str(e)[:150]}", level="WARN")
+            if "402" in str(e) or "401" in str(e):
+                _LLM_DEAD.add("hf")
+
+    # --- 3) Groq (dernier recours) ---
+    groq_key = os.getenv("TOKEN_AI_DESCRYB_IMG", "")
+    if groq_key and "groq" not in _LLM_DEAD:
+        try:
+            res = Groq(api_key=groq_key, timeout=60, max_retries=1).chat.completions.create(
+                model=GROQ_MODEL, messages=messages, temperature=temperature,
+            )
+            out = res.choices[0].message.content
+            if out and out.strip():
+                log(f"LLM : Groq {GROQ_MODEL}", level="OK")
+                return out
+        except Exception as e:
+            log(f"LLM Groq : {type(e).__name__} {str(e)[:150]}", level="WARN")
+            if "401" in str(e) or "invalid" in str(e).lower():
+                _LLM_DEAD.add("groq")
+    return None
+
+
+# ======================================================================
 # GÉNÉRATION DE POST (image + publication)
 # ======================================================================
 class TextPost:
@@ -221,13 +310,7 @@ class TextPost:
     _dead = set()
 
     def __init__(self):
-        self.llm = ChatGroq(
-            model_name=GROQ_MODEL,
-            temperature=0.4,
-            groq_api_key=os.getenv("TOKEN_AI_DESCRYB_IMG", ""),
-            timeout=60,
-            max_retries=1,
-        )
+        pass
 
     # ------------------------------------------------------------------
     # 1) Prompt d'image
@@ -278,18 +361,16 @@ class TextPost:
         3d render, neon, cartoon, illustration, painting, blurry, low quality
         """
 
-        try:
-            return self.llm.invoke([
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt},
-            ])
-        except Exception as e:
-            log(f"LLM prompt image : erreur {type(e).__name__} : {str(e)[:300]}", level="ERROR")
+        class _Reponse:   # même interface qu'avant (.content)
+            content = ""
 
-            class Fallback:
-                content = ""
-
-            return Fallback()
+        r = _Reponse()
+        r.content = llm_chat(
+            [{"role": "system", "content": system_prompt},
+             {"role": "user", "content": user_prompt}],
+            temperature=0.4,
+        ) or ""
+        return r
 
     @staticmethod
     def _parse_prompts(text):
@@ -324,7 +405,7 @@ class TextPost:
         return f"{positive}, {STYLE_SUFFIX}"
 
     # ------------------------------------------------------------------
-    # 2) Génération d'image : Cloudflare -> Hugging Face -> Pollinations
+    # 2) Génération d'image : Cloudflare -> Hugging Face -> fond de secours
     # ------------------------------------------------------------------
     def _image_cloudflare(self, prompt, seed=None):
         """Cloudflare Workers AI (FLUX.1 schnell) : 10 000 neurons gratuits par jour."""
@@ -420,42 +501,19 @@ class TextPost:
                         level="WARN")
                     self._dead.add("hf")
                     return None
+                if "401" in str(e) or "403" in str(e):
+                    log("HF : token refusé -> service ignoré pour cette exécution.",
+                        level="WARN")
+                    self._dead.add("hf")
+                    return None
                 time.sleep(2)
         log("HF : tous les essais ont échoué.", level="WARN")
         return None
-
-    def _image_pollinations(self, prompt, seed=None):
-        if "pollinations" in self._dead:
-            return None
-        seed = seed if seed is not None else int(time.time())
-        url = (
-            "https://image.pollinations.ai/prompt/"
-            + urllib.parse.quote(prompt)
-            + f"?model=flux&width={IMG_W}&height={IMG_H}&nologo=true&seed={seed}&enhance=false"
-        )
-        t = time.time()
-        try:
-            log("Pollinations : requête en cours (peut prendre jusqu'à 3 min)…")
-            r = requests.get(url, timeout=180)
-            log(f"Pollinations : HTTP {r.status_code} | {len(r.content) // 1024} Ko "
-                f"| {time.time() - t:.1f}s")
-            r.raise_for_status()
-            img = Image.open(io.BytesIO(r.content)).convert("RGB")
-            # Retire un éventuel bandeau/filigrane en bas
-            w, h = img.size
-            log(f"Pollinations OK -> image {w}x{h}", level="OK")
-            return img.crop((0, 0, w, int(h * 0.94)))
-        except Exception as e:
-            log(f"Pollinations indisponible ({type(e).__name__}) : {str(e)[:200]} "
-                "-> service ignoré pour cette exécution.", level="WARN")
-            self._dead.add("pollinations")
-            return None
 
     def _generate_one(self, prompt, seed):
         services = (
             ("Cloudflare", self._image_cloudflare),
             ("Hugging Face", self._image_hf),
-            ("Pollinations", self._image_pollinations),
         )
         for nom, fonction in services:
             img = fonction(prompt, seed)
@@ -875,15 +933,15 @@ class TextPost:
     # ------------------------------------------------------------------
     def generer_image(self, news_original=None, headline=None):
         t0 = time.time()
-        log("Image 1/5 : demande du prompt photo au LLM (Groq)…")
+        log("Image 1/5 : demande du prompt photo au LLM…")
         prompt = self._build_prompt(news_original)
         log(f"Image 2/5 : prompt final ({len(prompt.split())} mots) :")
         log("      " + prompt)
         log(f"Image 3/5 : génération de {max(1, IMAGE_CANDIDATES)} candidat(s)…")
         img = self._best_image(prompt)
         if img is None:
-            log("Aucun générateur d'image disponible (Cloudflare, Hugging Face et "
-                "Pollinations ont échoué) -> fond graphique de secours.", level="WARN")
+            log("Aucun générateur d'image disponible (Cloudflare et Hugging Face ont "
+                "échoué) -> fond graphique de secours.", level="WARN")
             img = self._image_fallback_design()
 
         log("Image 4/5 : recadrage 4:5, netteté, couleurs, vignette, grain…")
@@ -1005,23 +1063,24 @@ class TextPost:
                 raise FileNotFoundError(f"Image générée introuvable : {chemin.resolve()}")
             resultats["image"] = str(chemin.resolve())
 
-            page_id = os.getenv("PAGE_ID", "")
-            token = os.getenv("PAGE_ACCESS_TOKEN", "")
-            ig_id = os.getenv("INSTAGRAM_BUSINESS_ID", "")
+            page_id = menv("PAGE_ID")
+            token = menv("PAGE_ACCESS_TOKEN")
+            ig_id = menv("INSTAGRAM_BUSINESS_ID")
             cloud = (os.getenv("CLOUDINARY_CLOUD_NAME", ""), os.getenv("CLOUDINARY_API_KEY", ""),
                      os.getenv("CLOUDINARY_API_SECRET", ""))
             if not token:
-                raise ValueError("PAGE_ACCESS_TOKEN est absent (secret non transmis au job ?)")
+                raise ValueError(f"PAGE_ACCESS_TOKEN{META_SUFFIX} est absent "
+                                 "(secret non transmis au job ?)")
 
             log("── Publication Facebook ──", level="STEP")
             if page_id:
                 resultats["facebook"] = self._publier_facebook(chemin, news_translited,
                                                                page_id, token)
             else:
-                log("Facebook IGNORÉ : PAGE_ID est vide.", level="WARN")
+                log(f"Facebook IGNORÉ : PAGE_ID{META_SUFFIX} est vide.", level="WARN")
 
             log("── Publication Instagram ──", level="STEP")
-            manque = [n for n, v in (("INSTAGRAM_BUSINESS_ID", ig_id),
+            manque = [n for n, v in ((f"INSTAGRAM_BUSINESS_ID{META_SUFFIX}", ig_id),
                                      ("CLOUDINARY_CLOUD_NAME", cloud[0]),
                                      ("CLOUDINARY_API_KEY", cloud[1]),
                                      ("CLOUDINARY_API_SECRET", cloud[2])) if not v]
@@ -1043,9 +1102,6 @@ class TextPost:
 # ======================================================================
 class Extract_post:
     def __init__(self):
-        self.model_groq_name = GROQ_MODEL
-        self.client = Groq(api_key=os.getenv("TOKEN_AI_DESCRYB_IMG", ""), timeout=60,
-                           max_retries=1)
         self.TRUSTED_WEB_SOURCES = TRUSTED_WEB_SOURCES
 
     def clean_html(self, text):
@@ -1162,44 +1218,28 @@ class Extract_post:
         market impact if any), no emojis, no hashtags, no quotation marks, no source name.
         """
         t = time.time()
-        log(f"Traduction en arabe (Groq, modèle {self.model_groq_name})…")
+        log("Traduction en arabe (Cloudflare -> Hugging Face -> Groq)…")
         messages = [
             {"role": "system", "content": prompt},
             {"role": "user", "content": f"SOURCE TEXT TO TRANSLATE:\n{text}"},
         ]
-        last_error = None
-        for mode_json in (True, False):   # 1) mode JSON strict, 2) texte libre puis extraction
+        raw = llm_chat(messages, temperature=0.0, max_tokens=2500)
+        if raw:
             try:
-                kwargs = {"response_format": {"type": "json_object"}} if mode_json else {}
-                response = self.client.chat.completions.create(
-                    model=self.model_groq_name,
-                    messages=messages,
-                    temperature=0.0,
-                    **kwargs,
-                )
-                data = self._extract_json(response.choices[0].message.content)
+                data = self._extract_json(raw)
                 if isinstance(data, dict) and str(data.get("caption") or "").strip():
                     log(f"Traduction reçue en {time.time() - t:.1f}s", level="OK")
                     return data
-                last_error = f"réponse sans 'caption' : {str(data)[:150]}"
-                log(f"Traduction inexploitable ({last_error})", level="WARN")
+                log(f"Traduction inexploitable : {str(data)[:150]}", level="WARN")
             except Exception as e:
-                last_error = f"{type(e).__name__} : {str(e)[:300]}"
-                log(f"Traduction essai {'JSON' if mode_json else 'texte'} échoué ({last_error})",
-                    level="WARN")
-        log(f"Traduction ÉCHOUÉE : {last_error}", level="ERROR")
-        if last_error and "model" in last_error.lower() and (
-                "not" in last_error.lower() or "exist" in last_error.lower()):
-            log("   -> le modèle Groq n'existe pas / n'est plus disponible : "
-                "change la variable GROQ_MODEL.", level="WARN")
+                log(f"Traduction : JSON illisible ({e})", level="WARN")
+        log("Traduction ÉCHOUÉE : aucun LLM n'a répondu correctement.", level="ERROR")
         return None
 
 
 # ======================================================================
 # MAIN
 # ======================================================================
-GROQ_FALLBACKS = ("llama-3.3-70b-versatile", "openai/gpt-oss-120b", "qwen/qwen3-32b",
-                  "llama-3.1-8b-instant")
 TOTAL_STEPS = 6
 
 
@@ -1229,19 +1269,22 @@ def diagnostic_environnement():
         f"GitHub Actions : {'oui' if IS_GHA else 'non'}")
     log(f"Script : {Path(__file__).name} | version {SCRIPT_VERSION}")
     log(f"Heure UTC : {datetime.now(timezone.utc):%Y-%m-%d %H:%M:%S}")
-    log(f"Réglages : Groq={GROQ_MODEL} | image CF={CF_IMAGE_MODEL} | image HF={HF_IMAGE_MODEL} | "
-        f"candidats={IMAGE_CANDIDATES} | max posts={MAX_POSTS_PER_RUN} | "
-        f"max tentatives={MAX_ATTEMPTS_PER_RUN} | âge max={MAX_NEWS_AGE_HOURS}h | "
-        f"Graph={GRAPH_URL.rsplit('/', 1)[-1]}")
+    log(f"Réglages : LLM CF={CF_TEXT_MODELS[0]} | LLM HF={HF_TEXT_MODEL} | Groq={GROQ_MODEL} | "
+        f"image CF={CF_IMAGE_MODEL} | image HF={HF_IMAGE_MODEL} | candidats={IMAGE_CANDIDATES} | "
+        f"max posts={MAX_POSTS_PER_RUN} | max tentatives={MAX_ATTEMPTS_PER_RUN} | "
+        f"âge max={MAX_NEWS_AGE_HOURS}h | Graph={GRAPH_URL.rsplit('/', 1)[-1]} | "
+        f"page={META_SUFFIX or 'principale'}")
 
+    s = META_SUFFIX
+    # (nom, obligatoire, rôle)
     variables = [
-        ("TOKEN_AI_DESCRYB_IMG", True, "Groq (traduction + prompt image)"),
-        ("PAGE_ACCESS_TOKEN", True, "token Meta (Facebook + Instagram)"),
-        ("CF_ACCOUNT_ID", False, "Cloudflare Workers AI (images FLUX gratuites)"),
-        ("CF_API_TOKEN", False, "Cloudflare Workers AI (images FLUX gratuites)"),
-        ("HF_TOKEN", False, "Hugging Face (images FLUX) -> secours"),
-        ("PAGE_ID", False, "ID de la page Facebook -> sinon Facebook ignoré"),
-        ("INSTAGRAM_BUSINESS_ID", False, "ID Instagram -> sinon Instagram ignoré"),
+        ("CF_ACCOUNT_ID", False, "Cloudflare Workers AI (LLM + images FLUX)"),
+        ("CF_API_TOKEN", False, "Cloudflare Workers AI (LLM + images FLUX)"),
+        ("HF_TOKEN", False, "Hugging Face (LLM + images) -> secours"),
+        ("TOKEN_AI_DESCRYB_IMG", False, "Groq (LLM) -> dernier secours"),
+        ("PAGE_ACCESS_TOKEN" + s, True, "token Meta (Facebook + Instagram)"),
+        ("PAGE_ID" + s, False, "ID de la page Facebook -> sinon Facebook ignoré"),
+        ("INSTAGRAM_BUSINESS_ID" + s, False, "ID Instagram -> sinon Instagram ignoré"),
         ("CLOUDINARY_CLOUD_NAME", False, "Cloudinary (requis pour Instagram)"),
         ("CLOUDINARY_API_KEY", False, "Cloudinary (requis pour Instagram)"),
         ("CLOUDINARY_API_SECRET", False, "Cloudinary (requis pour Instagram)"),
@@ -1249,11 +1292,17 @@ def diagnostic_environnement():
     manquants = []
     for nom, obligatoire, role in variables:
         if os.getenv(nom, ""):
-            log(f"{nom:<24} présent        | {role}", level="OK")
+            log(f"{nom:<34} présent        | {role}", level="OK")
         else:
-            log(f"{nom:<24} ABSENT/VIDE     | {role}", level="ERROR" if obligatoire else "WARN")
+            log(f"{nom:<34} ABSENT/VIDE     | {role}", level="ERROR" if obligatoire else "WARN")
             if obligatoire:
                 manquants.append(nom)
+
+    # Il faut au moins un service LLM
+    cf_ok = bool(os.getenv("CF_ACCOUNT_ID") and os.getenv("CF_API_TOKEN"))
+    if not (cf_ok or os.getenv("HF_TOKEN") or os.getenv("TOKEN_AI_DESCRYB_IMG")):
+        log("Aucun service LLM configuré (Cloudflare, Hugging Face ou Groq).", level="ERROR")
+        manquants.append("CF_ACCOUNT_ID+CF_API_TOKEN ou HF_TOKEN ou TOKEN_AI_DESCRYB_IMG")
     if IS_GHA:
         log("   (un secret n'est visible du script que s'il est listé dans 'env:' du workflow)")
 
@@ -1268,35 +1317,10 @@ def diagnostic_environnement():
     return manquants
 
 
-def resoudre_modele_groq():
-    """Vérifie que le modèle Groq existe ; sinon bascule sur un modèle disponible."""
-    global GROQ_MODEL
-    try:
-        client = Groq(api_key=os.getenv("TOKEN_AI_DESCRYB_IMG", ""), timeout=30, max_retries=1)
-        ids = sorted(m.id for m in client.models.list().data)
-    except Exception as e:
-        log(f"Groq inaccessible ({type(e).__name__}) : {str(e)[:300]}", level="ERROR")
-        log("   -> clé TOKEN_AI_DESCRYB_IMG invalide, ou réseau bloqué.", level="WARN")
-        return False
-    log(f"Groq : clé valide, {len(ids)} modèles disponibles", level="OK")
-    if GROQ_MODEL in ids:
-        log(f"Groq : modèle '{GROQ_MODEL}' disponible", level="OK")
-        return True
-    log(f"Le modèle Groq '{GROQ_MODEL}' N'EXISTE PAS.", level="ERROR")
-    log("   Modèles disponibles : " + ", ".join(ids))
-    for cand in GROQ_FALLBACKS:
-        if cand in ids:
-            GROQ_MODEL = cand
-            log(f"   -> bascule automatique sur '{cand}' (fixe GROQ_MODEL pour le garder)",
-                level="WARN")
-            return True
-    return False
-
-
 def verifier_meta():
     """Teste les tokens Meta AVANT de générer des images. Renvoie (facebook_ok, instagram_ok)."""
-    token = os.getenv("PAGE_ACCESS_TOKEN", "")
-    page_id, ig_id = os.getenv("PAGE_ID", ""), os.getenv("INSTAGRAM_BUSINESS_ID", "")
+    token = menv("PAGE_ACCESS_TOKEN")
+    page_id, ig_id = menv("PAGE_ID"), menv("INSTAGRAM_BUSINESS_ID")
     fb_ok = ig_ok = False
 
     def appel(obj_id, champs):
@@ -1368,7 +1392,9 @@ def terminer(code, statut):
 
 def main():
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    fichier_json = os.path.join(base_dir, "historique_posts.json")
+    # Un historique séparé par page évite de mélanger les publications
+    nom_hist = "historique_posts.json" if not META_SUFFIX else f"historique_posts{META_SUFFIX.lower()}.json"
+    fichier_json = os.path.join(base_dir, nom_hist)
 
     # ---------------- ÉTAPE 1 : environnement ----------------
     banner(1, TOTAL_STEPS, "Configuration et environnement")
@@ -1380,10 +1406,12 @@ def main():
         terminer(1, "ÉCHEC (configuration)")
 
     # ---------------- ÉTAPE 2 : accès aux services ----------------
-    banner(2, TOTAL_STEPS, "Vérification des accès (Groq, Facebook, Instagram)")
-    if not resoudre_modele_groq():
-        STATS["echecs"].append(("Groq", "clé invalide ou aucun modèle utilisable"))
-        terminer(1, "ÉCHEC (Groq)")
+    banner(2, TOTAL_STEPS, "Vérification des accès (LLM, Facebook, Instagram)")
+    if llm_chat([{"role": "user", "content": "ok"}], max_tokens=5) is None:
+        log("Aucun service LLM ne répond (Cloudflare, Hugging Face, Groq) : arrêt.",
+            level="ERROR")
+        STATS["echecs"].append(("LLM", "aucun service LLM disponible"))
+        terminer(1, "ÉCHEC (LLM)")
     fb_ok, ig_ok = verifier_meta()
     if not (fb_ok or ig_ok):
         log("Aucune destination utilisable (Facebook et Instagram refusés) : arrêt, inutile de "
