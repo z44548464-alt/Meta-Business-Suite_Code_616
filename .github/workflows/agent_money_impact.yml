@@ -68,6 +68,10 @@ jobs:
           CF_API_TOKEN1: ${{ secrets.CF_API_TOKEN1 }}
           CF_ACCOUNT_ID2: ${{ secrets.CF_ACCOUNT_ID2 }}
           CF_API_TOKEN2: ${{ secrets.CF_API_TOKEN2 }}
+          CF_ACCOUNT_ID3: ${{ secrets.CF_ACCOUNT_ID3 }}
+          CF_API_TOKEN3: ${{ secrets.CF_API_TOKEN3 }}
+          CF_ACCOUNT_ID4: ${{ secrets.CF_ACCOUNT_ID4 }}
+          CF_API_TOKEN4: ${{ secrets.CF_API_TOKEN4 }}
 
           #information of pages 
           PAGE_ID: ${{ secrets.PAGE_ID_MONEY_IMPAC }}
