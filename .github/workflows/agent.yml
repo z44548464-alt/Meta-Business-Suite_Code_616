@@ -50,8 +50,8 @@ jobs:
         run: |
           ls -la
           ls -la fonts imgs 2>/dev/null || echo "Dossiers fonts/ ou imgs/ absents"
-          grep -c "def banner" Agent_fb_in.py || echo ">>> ANCIENNE VERSION du script <<<"
-          python -m py_compile Agent_fb_in.py && echo "Syntaxe OK"
+          grep -c "def banner" Agent_fb_IN_Code_616.py || echo ">>> ANCIENNE VERSION du script <<<"
+          python -m py_compile Agent_fb_IN_Code_616.py && echo "Syntaxe OK"
 
       - name: Lancer l'agent
         timeout-minutes: 10
