@@ -9,7 +9,7 @@ permissions:
   contents: write              # nécessaire pour sauvegarder historique_posts.json
 
 concurrency:
-  group: agent-facebook(money_imact)
+  group: agent-facebook-money-impact
   cancel-in-progress: false    # évite deux exécutions en même temps
 
 env:
@@ -20,7 +20,7 @@ env:
 jobs:
   publier:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
 
     steps:
       - name: Checkout
@@ -32,12 +32,13 @@ jobs:
           python-version: "3.11"
           cache: pip
 
-      - name: Installer les dépendances système (Raqm + polices arabes)
-        timeout-minutes: 5
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            libraqm0 libfribidi0 libharfbuzz0b fonts-dejavu-core fonts-noto-core
+      # Installé UNE SEULE FOIS, puis restauré depuis le cache GitHub (quelques secondes)
+      - name: Dépendances système (Raqm + polices) avec cache
+        uses: awalsh128/cache-apt-pkgs-action@v1
+        timeout-minutes: 15
+        with:
+          packages: libraqm0 libfribidi0 libharfbuzz0b fonts-dejavu-core fonts-noto-core
+          version: v1
 
       - name: Installer les dépendances Python
         timeout-minutes: 8
