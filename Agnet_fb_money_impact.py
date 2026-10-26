@@ -428,9 +428,10 @@ def _llm_groq(messages, temperature, max_tokens):
     return None
 
 
-def llm_chat(messages, temperature=0.2, max_tokens=1800):
-    """Cloudflare (tous les comptes) -> Hugging Face (tous les tokens) -> Groq (toutes les clés)."""
-    for fn in (_llm_cloudflare, _llm_hf, _llm_groq):
+
+def llm_chat(messages, temperature=0.2, max_tokens=1800, order=None):
+    """Cloudflare -> Hugging Face -> Groq (ordre modifiable via `order`)."""
+    for fn in (order or (_llm_cloudflare, _llm_hf, _llm_groq)):
         try:
             out = fn(messages, temperature, max_tokens)
             if out and str(out).strip():
@@ -450,7 +451,7 @@ class TextPost:
     # ------------------------------------------------------------------
     # 1) Prompt d'image
     # ------------------------------------------------------------------
-    def donne_moi_prompt_images(self, news):
+        def donne_moi_prompt_images(self, news, attempt=0, order=None):
         system_prompt = (
             "You are an award-winning Reuters financial photojournalist and editorial "
             "art director. You write vivid, specific, physically realistic photo "
@@ -459,7 +460,6 @@ class TextPost:
             "and depth of field. You forbid abstract designs, 3D renders, neon, "
             "wireframes and futuristic shapes."
         )
-
         user_prompt = f"""
         FINANCIAL NEWS:
         "{(news or '')[:800]}"
@@ -472,20 +472,19 @@ class TextPost:
         - gold -> gold bars in a vault
         - oil -> refinery at dusk or oil barrels
         - central bank -> central bank building facade
-        - US dollar -> dollar banknotes
+        - US dollar / Aussie / other currency -> banknotes of that currency
         - stock selloff / rally -> stock exchange facade
         - crypto -> physical coin on reflective surface
 
         Rules:
         1. The FIRST WORDS must name the exact physical hero subject.
         2. Hero subject sits in the UPPER 60% of the frame, sharp focus, slightly off-center.
-        3. Background: relevant but blurred (bokeh). Specific lighting (e.g. golden
-           hour side-light, tungsten vault light, cold blue dawn light).
-        4. The lower 40% of the frame must be dark, smooth and uncluttered (a headline will be printed there).
+        3. Background: relevant but blurred (bokeh). Specific lighting.
+        4. The lower 40% of the frame must be dark, smooth and uncluttered.
         5. Palette: deep navy blue and warm gold.
         6. FORBIDDEN: people, faces, hands, text, letters, numbers, logos, watermarks,
            abstract shapes, 3D renders, neon, computer screens with charts.
-        7. Max 60 words. End with: photorealistic, 85mm lens, sharp focus.
+        7. Max 80 words. End with: photorealistic, 85mm lens, sharp focus.
 
         OUTPUT ONLY this format:
         POSITIVE PROMPT:
@@ -495,41 +494,101 @@ class TextPost:
         people, faces, hands, text, letters, numbers, logos, watermark, abstract,
         3d render, neon, cartoon, illustration, painting, blurry, low quality
         """
+        if attempt >= 1:
+            user_prompt += (
+                "\n\nIMPORTANT: reply with ONE single paragraph of plain text "
+                "(the photo description only, max 60 words). "
+                "No labels, no markdown, no preface, no explanation."
+            )
 
         class _Reponse:
             content = ""
 
         r = _Reponse()
+        temp = (0.4, 0.3, 0.6, 0.2)[min(attempt, 3)]
         r.content = llm_chat(
             [{"role": "system", "content": system_prompt},
              {"role": "user", "content": user_prompt}],
-            temperature=0.4,
+            temperature=temp, order=order,
         ) or ""
         return r
 
-    @staticmethod
-    def _parse_prompts(text):
+    _LABEL_POS = re.compile(
+        r"(?:positive\s*prompt|prompt\s*positif|positive)\s*(?:\([^)]*\))?\s*[:：\-–]\s*", re.I)
+    _LABEL_NEG = re.compile(
+        r"\n?\s*(?:negative\s*prompt|prompt\s*n[ée]gatif|negative)\s*(?:\([^)]*\))?\s*[:：\-–]", re.I)
+    _REFUSAL = re.compile(r"\b(i can(?:'|no)t|i'm sorry|i am sorry|as an ai)\b", re.I)
+
+    @classmethod
+    def _parse_prompts(cls, text):
+        """Tolérant : markdown, casse, labels absents, JSON, intro parasite."""
         text = re.sub(r"<think>.*?</think>", "", text or "", flags=re.S | re.I)
-        pos = re.search(r"POSITIVE PROMPT:\s*(.*?)\s*NEGATIVE PROMPT:", text, re.S | re.I)
-        neg = re.search(r"NEGATIVE PROMPT:\s*(.*)", text, re.S | re.I)
-        if not pos or not neg:
+        text = text.replace("**", "").replace("__", "").replace("`", "")
+        text = re.sub(r"^\s*#+\s*", "", text, flags=re.M).strip()
+        if not text or cls._REFUSAL.search(text[:200]):
             return None, None
-        positive = pos.group(1).strip().strip('"').strip("[]")
-        return positive, neg.group(1).strip()
+
+        # Cas JSON : {"positive_prompt": "...", "negative_prompt": "..."}
+        a, b = text.find("{"), text.rfind("}")
+        if a != -1 and b > a:
+            try:
+                d = json.loads(text[a:b + 1])
+                if isinstance(d, dict):
+                    pos = next((str(v) for k, v in d.items() if "pos" in k.lower()
+                                or k.lower() in ("prompt", "description")), "")
+                    neg = next((str(v) for k, v in d.items() if "neg" in k.lower()), "")
+                    if pos.strip():
+                        return " ".join(pos.split()), neg.strip()
+            except Exception:
+                pass
+
+        m_neg = cls._LABEL_NEG.search(text)
+        head = text[:m_neg.start()] if m_neg else text
+        negative = text[m_neg.end():].strip() if m_neg else ""
+        m_pos = cls._LABEL_POS.search(head)
+        if m_pos:
+            head = head[m_pos.end():]
+
+        # retire les lignes d'intro du type "Here is the description:"
+        lines = [l.strip() for l in head.splitlines() if l.strip()]
+        lines = [l for l in lines if not l.endswith(":")]
+        positive = " ".join(" ".join(lines).split())
+        positive = positive.strip(' "\'“”«»[]')
+        return (positive or None), negative
+
+    @staticmethod
+    def _valid_positive(positive):
+        return bool(positive) and len(positive.split()) >= 6
 
     def _build_prompt(self, news):
-        t = time.time()
-        text = self.donne_moi_prompt_images(news).content
-        log(f"LLM : réponse en {time.time() - t:.1f}s ({len(text or '')} caractères)")
-        if not text or not text.strip():
+        orders = (
+            None,                                    # Cloudflare -> HF -> Groq
+            (_llm_hf, _llm_groq, _llm_cloudflare),   # autre fournisseur en premier
+            (_llm_groq, _llm_cloudflare, _llm_hf),
+            None,
+        )
+        got_any_text = False
+        for attempt, order in enumerate(orders):
+            t = time.time()
+            text = self.donne_moi_prompt_images(news, attempt, order).content
+            log(f"LLM : réponse prompt image (essai {attempt + 1}/{len(orders)}) "
+                f"en {time.time() - t:.1f}s ({len(text or '')} caractères)")
+            if not text or not text.strip():
+                log("Réponse vide, nouvel essai avec un autre fournisseur.", level="WARN")
+                continue
+            got_any_text = True
+            positive, _ = self._parse_prompts(text)
+            if self._valid_positive(positive):
+                log("LLM : prompt photo reçu et validé.", level="OK")
+                positive = " ".join(positive.split()[:70])
+                return f"{positive}, {STYLE_SUFFIX}"
+            log(f"Prompt invalide (essai {attempt + 1}). Réponse brute : "
+                f"{re.sub(chr(10), ' ', text)[:300]!r}", level="WARN")
+
+        if not got_any_text:
             log("Aucune API LLM n'a fourni le prompt d'image : arrêt obligatoire.", level="ERROR")
             terminer(1, "ÉCHEC (LLM indisponible pour le prompt image)")
-        positive, _ = self._parse_prompts(text)
-        if not positive or len(positive.split()) < 6:
-            raise RuntimeError("Le LLM a répondu, mais son prompt d'image est invalide : aucun prompt de secours autorisé.")
-        log("LLM : prompt photo reçu et validé.", level="OK")
-        positive = " ".join(positive.split()[:70])
-        return f"{positive}, {STYLE_SUFFIX}"
+        raise RuntimeError("Prompt d'image invalide après 4 essais sur plusieurs fournisseurs.")
 
     # ------------------------------------------------------------------
     # 2) Génération d'image : Cloudflare (comptes x modèles) -> HF (tokens x modèles) -> fond
