@@ -93,5 +93,140 @@
         "source": "ActionForex Fundamental",
         "titre": "Preview of RBNZ October 2026 Monetary Policy Review: Following On?",
         "date": "2026-10-22 06:12"
+    },
+    "The Hacker News_Two Critical Wasmtime Flaws Could Let Malicious WebAssembly Modules Escape Sandboxes_2026-10-26 11:52": {
+        "source": "The Hacker News",
+        "titre": "Two Critical Wasmtime Flaws Could Let Malicious WebAssembly Modules Escape Sandboxes",
+        "date": "2026-10-26 11:52"
+    },
+    "The Hacker News_Between alerts: What Attackers Do in the Spaces Ordinary Detection Misses_2026-10-26 11:23": {
+        "source": "The Hacker News",
+        "titre": "Between alerts: What Attackers Do in the Spaces Ordinary Detection Misses",
+        "date": "2026-10-26 11:23"
+    },
+    "InfoQ_Article: The Evolution of Agentic Harnesses: From Chains to Graph to Code_2026-10-26 11:00": {
+        "source": "InfoQ",
+        "titre": "Article: The Evolution of Agentic Harnesses: From Chains to Graph to Code",
+        "date": "2026-10-26 11:00"
+    },
+    "BleepingComputer_Kali Linux 2026.3 released with 6 new tools, desktop updates_2026-10-26 10:26": {
+        "source": "BleepingComputer",
+        "titre": "Kali Linux 2026.3 released with 6 new tools, desktop updates",
+        "date": "2026-10-26 10:26"
+    },
+    "InfoQ_Cloudflare’s Auto Router Rates Each Request for Stakes, from the Most Recent Turns_2026-10-26 10:20": {
+        "source": "InfoQ",
+        "titre": "Cloudflare’s Auto Router Rates Each Request for Stakes, from the Most Recent Turns",
+        "date": "2026-10-26 10:20"
+    },
+    "The Hacker News_uCreator Android Spyware Can Steal Telegram 2FA Passwords and Clone WeChat Accounts_2026-10-26 09:54": {
+        "source": "The Hacker News",
+        "titre": "uCreator Android Spyware Can Steal Telegram 2FA Passwords and Clone WeChat Accounts",
+        "date": "2026-10-26 09:54"
+    },
+    "BleepingComputer_PHP2Shell security flaws now sucessfully exploited in the wild_2026-10-26 09:19": {
+        "source": "BleepingComputer",
+        "titre": "PHP2Shell security flaws now sucessfully exploited in the wild",
+        "date": "2026-10-26 09:19"
+    },
+    "The Hacker News_Microsoft 365 Token-Replay Attacks Compromise 97 Accounts at 79 Organizations_2026-10-26 08:35": {
+        "source": "The Hacker News",
+        "titre": "Microsoft 365 Token-Replay Attacks Compromise 97 Accounts at 79 Organizations",
+        "date": "2026-10-26 08:35"
+    },
+    "InfoQ_MCP C# SDK 2.0 Makes HTTP Stateless by Default and Adds Multi Round-Trip Requests_2026-10-26 08:00": {
+        "source": "InfoQ",
+        "titre": "MCP C# SDK 2.0 Makes HTTP Stateless by Default and Adds Multi Round-Trip Requests",
+        "date": "2026-10-26 08:00"
+    },
+    "The Hacker News_Gheist Uses Stolen GitHub Tokens to Steal Private Repository Secrets via Actions Logs_2026-10-26 07:49": {
+        "source": "The Hacker News",
+        "titre": "Gheist Uses Stolen GitHub Tokens to Steal Private Repository Secrets via Actions Logs",
+        "date": "2026-10-26 07:49"
+    },
+    "The Hacker News_Malicious File in Downloads Folder Tries to Trick AI Coding Agent Into Installing Malware_2026-10-26 06:03": {
+        "source": "The Hacker News",
+        "titre": "Malicious File in Downloads Folder Tries to Trick AI Coding Agent Into Installing Malware",
+        "date": "2026-10-26 06:03"
+    },
+    "Rust Blog_How to fund Rust contributors_2026-10-26 00:00": {
+        "source": "Rust Blog",
+        "titre": "How to fund Rust contributors",
+        "date": "2026-10-26 00:00"
+    },
+    "TechCrunch AI_Grok releases the first seven minutes of its AI-generated ‘Odyssey’_2026-10-25 21:31": {
+        "source": "TechCrunch AI",
+        "titre": "Grok releases the first seven minutes of its AI-generated ‘Odyssey’",
+        "date": "2026-10-25 21:31"
+    },
+    "InfoQ_PHP Patches Two Critical RCE Flaws That Were Already Under Attack_2026-10-25 18:07": {
+        "source": "InfoQ",
+        "titre": "PHP Patches Two Critical RCE Flaws That Were Already Under Attack",
+        "date": "2026-10-25 18:07"
+    },
+    "InfoQ_PyTorch Conference 2026: Google and Meta Open-Source TorchTPU for Native PyTorch on TPUs_2026-10-25 18:00": {
+        "source": "InfoQ",
+        "titre": "PyTorch Conference 2026: Google and Meta Open-Source TorchTPU for Native PyTorch on TPUs",
+        "date": "2026-10-25 18:00"
+    },
+    "The Hacker News_Unpatched Tailscale SSH Flaws Could Let a Hacked Device Reach Root on Other Servers_2026-10-25 17:44": {
+        "source": "The Hacker News",
+        "titre": "Unpatched Tailscale SSH Flaws Could Let a Hacked Device Reach Root on Other Servers",
+        "date": "2026-10-25 17:44"
+    },
+    "The Hacker News_PHP2Shell Exploitation Attempts Continue Amid Suspected N. Korea Global Scanning Activity_2026-10-25 17:19": {
+        "source": "The Hacker News",
+        "titre": "PHP2Shell Exploitation Attempts Continue Amid Suspected N. Korea Global Scanning Activity",
+        "date": "2026-10-25 17:19"
+    },
+    "InfoQ_Google ML Drift Accelerates On-Device AI Inference Across Diverse GPUs_2026-10-25 17:00": {
+        "source": "InfoQ",
+        "titre": "Google ML Drift Accelerates On-Device AI Inference Across Diverse GPUs",
+        "date": "2026-10-25 17:00"
+    },
+    "TechCrunch AI_AI delivers ‘zero financial payoff’ to most companies, Apollo economist says_2026-10-25 16:57": {
+        "source": "TechCrunch AI",
+        "titre": "AI delivers ‘zero financial payoff’ to most companies, Apollo economist says",
+        "date": "2026-10-25 16:57"
+    },
+    "BleepingComputer_AI coding agents hijacked using AGENTS.md file in Downloads folder_2026-10-25 15:49": {
+        "source": "BleepingComputer",
+        "titre": "AI coding agents hijacked using AGENTS.md file in Downloads folder",
+        "date": "2026-10-25 15:49"
+    },
+    "TechCrunch AI_The hottest AI wearables and gadgets you should know about_2026-10-25 14:10": {
+        "source": "TechCrunch AI",
+        "titre": "The hottest AI wearables and gadgets you should know about",
+        "date": "2026-10-25 14:10"
+    },
+    "The Hacker News_OpenAI AI Agents Demonstrate VM Escapes and Secret Cross-Sandbox Communication_2026-10-25 06:54": {
+        "source": "The Hacker News",
+        "titre": "OpenAI AI Agents Demonstrate VM Escapes and Secret Cross-Sandbox Communication",
+        "date": "2026-10-25 06:54"
+    },
+    "InfoQ_PingCAP Breach Exposes Customer Records and Source Code_2026-10-25 06:27": {
+        "source": "InfoQ",
+        "titre": "PingCAP Breach Exposes Customer Records and Source Code",
+        "date": "2026-10-25 06:27"
+    },
+    "TechCrunch AI_The AI graveyard: a running list of projects and startups that didn’t make it_2026-10-24 19:00": {
+        "source": "TechCrunch AI",
+        "titre": "The AI graveyard: a running list of projects and startups that didn’t make it",
+        "date": "2026-10-24 19:00"
+    },
+    "TechCrunch AI_Block’s new voice model sounds eerily human_2026-10-24 16:00": {
+        "source": "TechCrunch AI",
+        "titre": "Block’s new voice model sounds eerily human",
+        "date": "2026-10-24 16:00"
+    },
+    "InfoQ_Google Optimizes Agent Development Kit's 200K-line Python Codebase Overnight with Gemini 4 Argon_2026-10-24 16:00": {
+        "source": "InfoQ",
+        "titre": "Google Optimizes Agent Development Kit's 200K-line Python Codebase Overnight with Gemini 4 Argon",
+        "date": "2026-10-24 16:00"
+    },
+    "TechCrunch AI_Forced to pick, Grok’s AI model chooses Republicans. OpenAI’s picks Democrats._2026-10-24 15:00": {
+        "source": "TechCrunch AI",
+        "titre": "Forced to pick, Grok’s AI model chooses Republicans. OpenAI’s picks Democrats.",
+        "date": "2026-10-24 15:00"
     }
 }
