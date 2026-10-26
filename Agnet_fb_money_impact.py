@@ -1,6 +1,6 @@
 import sys
 import faulthandler
-SCRIPT_VERSION = "2026-10-24-cloudflare-logo"
+SCRIPT_VERSION = "2026-10-26-robust-images"
 print(f"▶ Python démarré (version {SCRIPT_VERSION}), chargement des modules…", flush=True)
 faulthandler.enable()
 # Si le script reste figé, affiche la pile d'appel toutes les 90 s (montre OÙ il bloque)
@@ -8,6 +8,7 @@ faulthandler.dump_traceback_later(90, repeat=True, file=sys.stderr)
 
 import os
 import io
+import glob
 import base64
 import traceback
 import json
@@ -50,10 +51,15 @@ TRUSTED_WEB_SOURCES = {
 }
 
 # Modifiables par variables d'environnement (sans toucher au code)
-GROQ_MODEL = os.getenv("GROQ_MODEL", "qwen/qwen3.8-27b")
-# Générateurs d'image, essayés dans cet ordre : Cloudflare -> Hugging Face -> Pollinations
-CF_IMAGE_MODEL = os.getenv("CF_IMAGE_MODEL", "@cf/black-forest-labs/flux-1-schnell")
+GROQ_MODEL = os.getenv("GROQ_MODEL", "qwen/qwen3.8-27b")                 # traduction
+GROQ_PROMPT_MODEL = os.getenv("GROQ_PROMPT_MODEL", "llama-3.3-70b-versatile")  # prompt d'image
+# Générateurs d'image essayés dans l'ordre : Cloudflare -> Gemini -> Together -> HF -> Pollinations
+CF_IMAGE_MODELS = os.getenv(
+    "CF_IMAGE_MODELS",
+    "@cf/black-forest-labs/flux-1-schnell,@cf/leonardo/lucid-origin")
 HF_IMAGE_MODEL = os.getenv("HF_IMAGE_MODEL", "black-forest-labs/FLUX.1-schnell")
+GEMINI_IMAGE_MODEL = os.getenv("GEMINI_IMAGE_MODEL", "gemini-2.5-flash-image")
+TOGETHER_IMAGE_MODEL = os.getenv("TOGETHER_IMAGE_MODEL", "black-forest-labs/FLUX.1-schnell")
 GRAPH_URL = "https://graph.facebook.com/" + os.getenv("GRAPH_VERSION", "v26.0")
 
 # Génération directement en portrait -> aucun recadrage destructif
@@ -61,7 +67,7 @@ IMG_W, IMG_H = 1024, 1280      # multiples de 16 (requis par FLUX)
 OUT_W, OUT_H = 1080, 1350      # sortie finale 4:5 (Facebook / Instagram)
 
 # Nombre de candidats générés ; le meilleur est sélectionné automatiquement
-IMAGE_CANDIDATES = int(os.getenv("IMAGE_CANDIDATES", "2"))
+IMAGE_CANDIDATES = int(os.getenv("IMAGE_CANDIDATES", "1"))
 
 # Contrôle de publication
 MAX_POSTS_PER_RUN = int(os.getenv("MAX_POSTS_PER_RUN", "300"))
@@ -79,6 +85,7 @@ AR_FONT_ENV = os.getenv("AR_FONT_PATH", "")
 BASE_DIR = Path(__file__).resolve().parent if "__file__" in globals() else Path.cwd()
 OUTPUT_DIR = BASE_DIR / "output"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
 
 # Logo de la page (PNG transparent conseillé), affiché en haut à gauche
 def _find_logo():
@@ -111,8 +118,8 @@ FALLBACK_SCENES = [
     (("yen", "jpy", "boj"),
      "Japanese yen banknotes and coins on dark lacquered surface, blurred Tokyo skyline at dusk behind"),
     (("pound", "gbp", "boe", "sterling"),
-     "British pound notes on dark oak-free slate surface, blurred London financial district behind"),
-    (("stock", "nasdaq", "s&p", "dow", "equities", "wall street"),
+     "British pound notes on dark slate surface, blurred London financial district behind"),
+    (("stock", "nasdaq", "s&p", "dow", "equities", "wall street", "shares", "europe"),
      "New York Stock Exchange facade with large columns and flags, dramatic evening light, blurred street below"),
 ]
 DEFAULT_SCENE = (
@@ -123,7 +130,8 @@ STYLE_SUFFIX = (
     "warm cinematic side lighting, shot on Canon EOS R5, 85mm f/1.4 lens, "
     "shallow depth of field, creamy bokeh, tack-sharp focus on the hero subject, "
     "editorial photography, professional color grading in deep navy blue and warm gold, "
-    "photorealistic, ultra detailed, 8k, hero subject in the upper 60% of the frame, lower 40% of the frame dark, smooth and uncluttered, "
+    "photorealistic, ultra detailed, 8k, hero subject in the upper 60% of the frame, "
+    "lower 40% of the frame dark, smooth and uncluttered, "
     "no text, no letters, no logos, no people"
 )
 
@@ -141,7 +149,8 @@ IS_GHA = os.getenv("GITHUB_ACTIONS", "").lower() == "true"
 T0 = time.time()
 SECRET_ENV_NAMES = ("TOKEN_AI_DESCRYB_IMG", "HF_TOKEN", "PAGE_ACCESS_TOKEN",
                     "CLOUDINARY_API_KEY", "CLOUDINARY_API_SECRET",
-                    "CF_API_TOKEN", "CF_ACCOUNT_ID")
+                    "CF_API_TOKEN", "CF_ACCOUNT_ID", "GEMINI_API_KEY",
+                    "TOGETHER_API_KEY", "POLLINATIONS_API_KEY")
 _ICONS = {"INFO": "  ", "STEP": "➡️ ", "OK": "✅", "WARN": "⚠️ ", "ERROR": "❌"}
 
 # Compteurs pour le résumé final
@@ -149,6 +158,10 @@ STATS = {
     "flux_ok": 0, "flux_ko": 0, "news_total": 0, "deja": 0, "anciennes": 0,
     "candidates": 0, "tentatives": 0, "publies": 0, "echecs": [],
 }
+
+
+class NoImageError(RuntimeError):
+    """Aucun générateur d'image n'a répondu : on n'a pas publié de post."""
 
 
 def _redact(text):
@@ -216,13 +229,13 @@ def explain_graph_error(data):
 # GÉNÉRATION DE POST (image + publication)
 # ======================================================================
 class TextPost:
-    # Services d'image désactivés pour le reste de l'exécution
-    # (crédits épuisés, token refusé...) : évite de perdre du temps à chaque image.
-    _dead = set()
+    # service -> timestamp de réactivation. Un service n'est désactivé que
+    # temporairement (quota) ou longtemps (clé/crédits refusés).
+    _dead = {}
 
     def __init__(self):
         self.llm = ChatGroq(
-            model_name=GROQ_MODEL,
+            model_name=GROQ_PROMPT_MODEL,
             temperature=0.4,
             groq_api_key=os.getenv("TOKEN_AI_DESCRYB_IMG", ""),
             timeout=60,
@@ -255,18 +268,23 @@ class TextPost:
         - oil -> refinery at dusk or oil barrels
         - central bank -> central bank building facade
         - US dollar -> dollar banknotes
-        - stock selloff / rally -> stock exchange facade
+        - euro / European markets -> euro banknotes and coins, or a European stock exchange facade
+        - stock selloff / rally -> stock exchange facade with columns
+        - tech stocks -> close-up of a silicon microchip on a dark surface
         - crypto -> physical coin on reflective surface
+        - anything else -> a physical coin stack, banknotes or a bank facade
 
         Rules:
-        1. The FIRST WORDS must name the exact physical hero subject.
+        1. The FIRST WORDS must name the exact physical hero subject
+           (a real object or building, never a floor, a room or a concept).
         2. Hero subject sits in the UPPER 60% of the frame, sharp focus, slightly off-center.
         3. Background: relevant but blurred (bokeh). Specific lighting (e.g. golden
            hour side-light, tungsten vault light, cold blue dawn light).
         4. The lower 40% of the frame must be dark, smooth and uncluttered (a headline will be printed there).
         5. Palette: deep navy blue and warm gold.
         6. FORBIDDEN: people, faces, hands, text, letters, numbers, logos, watermarks,
-           abstract shapes, 3D renders, neon, computer screens with charts.
+           abstract shapes, 3D renders, neon, computer screens with charts,
+           churches, pews, religious buildings.
         7. Max 60 words. End with: photorealistic, 85mm lens, sharp focus.
 
         OUTPUT ONLY this format:
@@ -324,139 +342,165 @@ class TextPost:
         return f"{positive}, {STYLE_SUFFIX}"
 
     # ------------------------------------------------------------------
-    # 2) Génération d'image : Cloudflare -> Hugging Face -> Pollinations
+    # 2) Génération d'image : Cloudflare -> Gemini -> Together -> HF -> Pollinations
     # ------------------------------------------------------------------
-    def _image_cloudflare(self, prompt, seed=None):
-        """Cloudflare Workers AI (FLUX.1 schnell) : 10 000 neurons gratuits par jour."""
-        account = os.getenv("CF_ACCOUNT_ID", "")
-        token = os.getenv("CF_API_TOKEN", "")
-        if not (account and token):
-            if "cloudflare_absent" not in self._dead:
-                log("CF_ACCOUNT_ID / CF_API_TOKEN absents -> Cloudflare ignoré.", level="WARN")
-                self._dead.add("cloudflare_absent")
+    @classmethod
+    def _is_dead(cls, name):
+        return cls._dead.get(name, 0) > time.time()
+
+    @classmethod
+    def _kill(cls, name, seconds, why):
+        cls._dead[name] = time.time() + seconds
+        log(f"{name} : désactivé {seconds // 60} min ({why})", level="WARN")
+
+    @staticmethod
+    def _img_from_response(r):
+        """Accepte une réponse image brute OU un JSON contenant une image base64."""
+        if r.headers.get("content-type", "").startswith("image/"):
+            return Image.open(io.BytesIO(r.content)).convert("RGB")
+        data = r.json()
+        b64 = None
+        if isinstance(data, dict):
+            b64 = ((data.get("result") or {}).get("image") or data.get("image")
+                   or ((data.get("data") or [{}])[0]).get("b64_json"))
+            if not b64:                                      # format Gemini
+                for c in data.get("candidates", []) or []:
+                    for p in (c.get("content") or {}).get("parts", []) or []:
+                        b64 = (p.get("inlineData") or p.get("inline_data") or {}).get("data") or b64
+        if not b64:
+            raise ValueError(f"pas d'image dans la réponse : {str(data)[:200]}")
+        return Image.open(io.BytesIO(base64.b64decode(b64))).convert("RGB")
+
+    def _post_image(self, name, url, tries=3, **kw):
+        """POST avec réessais. Désactive le service seulement si l'erreur est définitive."""
+        if self._is_dead(name):
             return None
-        if "cloudflare" in self._dead:
-            return None
-
-        url = (f"https://api.cloudflare.com/client/v4/accounts/{account}"
-               f"/ai/run/{CF_IMAGE_MODEL}")
-        headers = {"Authorization": f"Bearer {token}"}
-        body = {"prompt": prompt[:2000], "steps": 6}   # schnell : 8 steps maximum
-        if seed is not None:
-            body["seed"] = int(seed) % 2_000_000_000
-
-        t = time.time()
-        try:
-            log(f"Cloudflare : {CF_IMAGE_MODEL} (steps={body['steps']})…")
-            r = requests.post(url, headers=headers, json=body, timeout=120)
-            if r.status_code == 400 and "seed" in body:   # seed refusé : on réessaie sans
-                body.pop("seed")
-                r = requests.post(url, headers=headers, json=body, timeout=120)
-            if r.status_code in (401, 403):
-                log(f"Cloudflare : accès refusé (HTTP {r.status_code}) -> vérifie CF_API_TOKEN "
-                    "(permissions Workers AI) et CF_ACCOUNT_ID. Service ignoré.", level="ERROR")
-                self._dead.add("cloudflare")
-                return None
-            if r.status_code == 429:
-                log("Cloudflare : limite atteinte (quota du jour ?) -> service ignoré.",
-                    level="WARN")
-                self._dead.add("cloudflare")
-                return None
-            r.raise_for_status()
-            data = r.json()
-            b64 = (data.get("result") or {}).get("image")
-            if not b64:
-                log(f"Cloudflare : réponse sans image : {str(data)[:300]}", level="WARN")
-                return None
-            img = Image.open(io.BytesIO(base64.b64decode(b64))).convert("RGB")
-            log(f"Cloudflare OK en {time.time() - t:.1f}s -> image {img.size[0]}x{img.size[1]}",
-                level="OK")
-            return img
-        except Exception as e:
-            log(f"Cloudflare indisponible ({type(e).__name__}) : {str(e)[:300]}", level="WARN")
-            return None
-
-    def _image_hf(self, prompt, seed=None):
-        token = os.getenv("HF_TOKEN", "")
-        if not token:
-            log("HF_TOKEN absent -> Hugging Face ignoré.", level="WARN")
-            return None
-        if "hf" in self._dead:
-            return None
-
-        model = HF_IMAGE_MODEL
-        is_schnell = "schnell" in model.lower()
-        # schnell : distillé pour 1-4 steps, ignore la guidance
-        # dev : 28-35 steps, guidance ~3.5
-        params = {"width": IMG_W, "height": IMG_H,
-                  "num_inference_steps": 4 if is_schnell else 30}
-        if not is_schnell:
-            params["guidance_scale"] = 3.5
-        if seed is not None:
-            params["seed"] = seed
-
-        client = InferenceClient(api_key=token)
-
-        # Dégradation progressive des paramètres si l'API en refuse certains
-        attempts = [
-            params,
-            {k: v for k, v in params.items() if k != "seed"},
-            {"width": IMG_W, "height": IMG_H},
-            {},
-        ]
-        for i, p in enumerate(attempts):
+        for i in range(1, tries + 1):
             t = time.time()
             try:
-                log(f"HF essai {i + 1}/{len(attempts)} : {model} | {p}")
-                image = client.text_to_image(prompt, model=model, **p)
-                log(f"HF OK en {time.time() - t:.1f}s -> image {image.size[0]}x{image.size[1]}",
-                    level="OK")
-                return image.convert("RGB")
-            except Exception as e:
-                log(f"HF essai {i + 1} échoué en {time.time() - t:.1f}s "
-                    f"({type(e).__name__}) : {str(e)[:300]}", level="WARN")
-                if "402" in str(e) or "Payment Required" in str(e):
-                    log("HF : crédits épuisés -> service ignoré pour cette exécution.",
-                        level="WARN")
-                    self._dead.add("hf")
+                log(f"{name} : essai {i}/{tries}…")
+                r = requests.post(url, timeout=150, **kw)
+                if r.ok:
+                    img = self._img_from_response(r)
+                    log(f"{name} OK en {time.time() - t:.1f}s -> {img.size[0]}x{img.size[1]}",
+                        level="OK")
+                    return img
+                log(f"{name} essai {i}/{tries} : HTTP {r.status_code} -> {r.text[:300]}",
+                    level="WARN")
+                if r.status_code in (401, 402, 403):
+                    self._kill(name, 86400, f"HTTP {r.status_code} : clé/crédits")
                     return None
-                time.sleep(2)
-        log("HF : tous les essais ont échoué.", level="WARN")
+                if r.status_code == 429:
+                    self._kill(name, 900, "quota/limite atteinte")
+                    return None
+                body = kw.get("json")
+                if r.status_code == 400 and isinstance(body, dict) and "seed" in body:
+                    body.pop("seed")          # seed refusé : on réessaie sans
+                    continue
+            except Exception as e:
+                log(f"{name} essai {i}/{tries} : {type(e).__name__} {str(e)[:200]}", level="WARN")
+            time.sleep(3 * i)
         return None
 
-    def _image_pollinations(self, prompt, seed=None):
-        if "pollinations" in self._dead:
+    # ---- Cloudflare : plusieurs modèles essayés dans l'ordre
+    def _image_cloudflare(self, prompt, seed=None):
+        account, token = os.getenv("CF_ACCOUNT_ID", ""), os.getenv("CF_API_TOKEN", "")
+        if not (account and token):
+            if not self._is_dead("Cloudflare_absent"):
+                log("CF_ACCOUNT_ID / CF_API_TOKEN absents -> Cloudflare ignoré.", level="WARN")
+                self._dead["Cloudflare_absent"] = time.time() + 86400
             return None
-        seed = seed if seed is not None else int(time.time())
-        url = (
-            "https://image.pollinations.ai/prompt/"
-            + urllib.parse.quote(prompt)
-            + f"?model=flux&width={IMG_W}&height={IMG_H}&nologo=true&seed={seed}&enhance=false"
-        )
+        for model in [m.strip() for m in CF_IMAGE_MODELS.split(",") if m.strip()]:
+            body = {"prompt": prompt[:2000]}
+            if "schnell" in model:
+                body["steps"] = 8
+            else:
+                body.update({"width": IMG_W, "height": IMG_H})
+            if seed is not None:
+                body["seed"] = int(seed) % 2_000_000_000
+            img = self._post_image(
+                f"Cloudflare[{model.split('/')[-1]}]",
+                f"https://api.cloudflare.com/client/v4/accounts/{account}/ai/run/{model}",
+                tries=2, headers={"Authorization": f"Bearer {token}"}, json=body)
+            if img is not None:
+                return img
+        return None
+
+    # ---- Google Gemini (image) : clé gratuite sur aistudio.google.com
+    def _image_gemini(self, prompt, seed=None):
+        key = os.getenv("GEMINI_API_KEY", "")
+        if not key:
+            return None
+        return self._post_image(
+            "Gemini",
+            f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_IMAGE_MODEL}:generateContent",
+            tries=2, headers={"x-goog-api-key": key},
+            json={"contents": [{"parts": [{"text": prompt}]}],
+                  "generationConfig": {"responseModalities": ["IMAGE"],
+                                       "imageConfig": {"aspectRatio": "4:5"}}})
+
+    # ---- Together AI (FLUX)
+    def _image_together(self, prompt, seed=None):
+        key = os.getenv("TOGETHER_API_KEY", "")
+        if not key:
+            return None
+        return self._post_image(
+            "Together",
+            "https://api.together.xyz/v1/images/generations",
+            tries=2, headers={"Authorization": f"Bearer {key}"},
+            json={"model": TOGETHER_IMAGE_MODEL, "prompt": prompt,
+                  "width": IMG_W, "height": IMG_H, "steps": 4,
+                  "n": 1, "response_format": "b64_json"})
+
+    # ---- Hugging Face
+    def _image_hf(self, prompt, seed=None):
+        token = os.getenv("HF_TOKEN", "")
+        if not token or self._is_dead("HuggingFace"):
+            return None
         t = time.time()
         try:
-            log("Pollinations : requête en cours (peut prendre jusqu'à 3 min)…")
-            r = requests.get(url, timeout=180)
-            log(f"Pollinations : HTTP {r.status_code} | {len(r.content) // 1024} Ko "
-                f"| {time.time() - t:.1f}s")
+            log(f"HuggingFace : {HF_IMAGE_MODEL}…")
+            image = InferenceClient(api_key=token).text_to_image(
+                prompt, model=HF_IMAGE_MODEL, width=IMG_W, height=IMG_H)
+            log(f"HuggingFace OK en {time.time() - t:.1f}s", level="OK")
+            return image.convert("RGB")
+        except Exception as e:
+            msg = str(e)
+            log(f"HuggingFace : {type(e).__name__} {msg[:300]}", level="WARN")
+            if any(c in msg for c in ("402", "Payment", "401", "403")):
+                self._kill("HuggingFace", 86400, "crédits/clé")
+            return None
+
+    # ---- Pollinations (clé optionnelle)
+    def _image_pollinations(self, prompt, seed=None):
+        if self._is_dead("Pollinations"):
+            return None
+        seed = seed if seed is not None else int(time.time())
+        url = ("https://image.pollinations.ai/prompt/" + urllib.parse.quote(prompt)
+               + f"?model=flux&width={IMG_W}&height={IMG_H}&nologo=true&seed={seed}")
+        headers = {}
+        if os.getenv("POLLINATIONS_API_KEY"):
+            headers["Authorization"] = "Bearer " + os.getenv("POLLINATIONS_API_KEY")
+        t = time.time()
+        try:
+            log("Pollinations : requête en cours…")
+            r = requests.get(url, headers=headers, timeout=150)
+            log(f"Pollinations : HTTP {r.status_code} | {time.time() - t:.1f}s")
             r.raise_for_status()
             img = Image.open(io.BytesIO(r.content)).convert("RGB")
-            # Retire un éventuel bandeau/filigrane en bas
             w, h = img.size
-            log(f"Pollinations OK -> image {w}x{h}", level="OK")
-            return img.crop((0, 0, w, int(h * 0.94)))
+            return img.crop((0, 0, w, int(h * 0.94)))   # retire un éventuel bandeau
         except Exception as e:
-            log(f"Pollinations indisponible ({type(e).__name__}) : {str(e)[:200]} "
-                "-> service ignoré pour cette exécution.", level="WARN")
-            self._dead.add("pollinations")
+            log(f"Pollinations : {type(e).__name__} {str(e)[:200]}", level="WARN")
+            self._kill("Pollinations", 900, type(e).__name__)
             return None
 
     def _generate_one(self, prompt, seed):
-        services = (
-            ("Cloudflare", self._image_cloudflare),
-            ("Hugging Face", self._image_hf),
-            ("Pollinations", self._image_pollinations),
-        )
+        services = (("Cloudflare", self._image_cloudflare),
+                    ("Gemini", self._image_gemini),
+                    ("Together", self._image_together),
+                    ("Hugging Face", self._image_hf),
+                    ("Pollinations", self._image_pollinations))
         for nom, fonction in services:
             img = fonction(prompt, seed)
             if img is not None:
@@ -466,7 +510,7 @@ class TextPost:
 
     @staticmethod
     def _image_fallback_design():
-        """Dernier recours : fond graphique bleu nuit et or (le titre arabe est ajouté dessus)."""
+        """(Non utilisé par défaut) fond graphique bleu nuit et or."""
         w, h = IMG_W, IMG_H
         img = Image.new("RGB", (w, h))
         d = ImageDraw.Draw(img)
@@ -514,6 +558,7 @@ class TextPost:
                 candidates.append((score, img))
             else:
                 log(f"Candidat {i + 1}/{n} : aucune image exploitable.", level="WARN")
+                break   # tous les services ont échoué : inutile de réessayer tout de suite
         if not candidates:
             return None
         best = max(candidates, key=lambda c: c[0])
@@ -572,13 +617,17 @@ class TextPost:
 
     @staticmethod
     def _ar_font_candidates():
+        noto_bold = sorted(glob.glob("/usr/share/fonts/**/NotoSansArabic*Bold*.ttf", recursive=True))
+        noto_any = sorted(glob.glob("/usr/share/fonts/**/NotoSansArabic*.ttf", recursive=True))
+        naskh = sorted(glob.glob("/usr/share/fonts/**/NotoNaskhArabic*Bold*.ttf", recursive=True))
         return [
             AR_FONT_ENV,
             str(BASE_DIR / "fonts" / "Cairo-Bold.ttf"),
             str(BASE_DIR / "fonts" / "Tajawal-Bold.ttf"),
             str(BASE_DIR / "fonts" / "NotoSansArabic-Bold.ttf"),
-            "/usr/share/fonts/truetype/noto/NotoSansArabic-Bold.ttf",
-            "/usr/share/fonts/truetype/noto/NotoNaskhArabic-Bold.ttf",
+            *noto_bold,
+            *naskh,
+            *noto_any,
             "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
             "/usr/share/fonts/truetype/freefont/FreeSansBold.ttf",
         ]
@@ -747,9 +796,9 @@ class TextPost:
                 log(f"Logo introuvable ({LOGO_PATH}) : logo texte utilisé à la place.")
                 return None
             logo = Image.open(LOGO_PATH).convert("RGBA")
-            ratio = min(int(w * 0.24) / logo_money_impact.width, int(h * 0.11) / logo_money_impact.height)
-            size = (max(1, int(logo_money_impact.width * ratio)), max(1, int(logo_money_impact.height * ratio)))
-            return logo_money_impact.resize(size, Image.LANCZOS)
+            ratio = min(int(w * 0.24) / logo.width, int(h * 0.11) / logo.height)
+            size = (max(1, int(logo.width * ratio)), max(1, int(logo.height * ratio)))
+            return logo.resize(size, Image.LANCZOS)
         except Exception as e:
             log(f"Logo illisible : {e}")
             return None
@@ -780,7 +829,7 @@ class TextPost:
         part_a, part_b = BRAND_NAME
 
         if logo is not None:
-            logo_box = [lx, ly, lx + logo_money_impact.width, ly + logo_money_impact.height]
+            logo_box = [lx, ly, lx + logo.width, ly + logo.height]
         else:  # secours : logo en texte
             f_logo = self._load_font(int(w * 0.046))
             wa = probe.textlength(part_a, font=f_logo)
@@ -818,8 +867,8 @@ class TextPost:
         soft = Image.new("RGBA", (w, h), (0, 0, 0, 0))
         sd = ImageDraw.Draw(soft)
         if logo is not None:
-            shadow = Image.new("RGBA", logo_money_impact.size, (0, 0, 0, 0))
-            shadow.putalpha(logo_money_impact.getchannel("A").point(lambda a: int(a * 0.75)))
+            shadow = Image.new("RGBA", logo.size, (0, 0, 0, 0))
+            shadow.putalpha(logo.getchannel("A").point(lambda a: int(a * 0.75)))
             soft.alpha_composite(shadow, (lx + 3, ly + 4))
         if title_data:
             font, lines, line_h, top = title_data[:4]
@@ -882,9 +931,9 @@ class TextPost:
         log(f"Image 3/5 : génération de {max(1, IMAGE_CANDIDATES)} candidat(s)…")
         img = self._best_image(prompt)
         if img is None:
-            log("Aucun générateur d'image disponible (Cloudflare, Hugging Face et "
-                "Pollinations ont échoué) -> fond graphique de secours.", level="WARN")
-            img = self._image_fallback_design()
+            # Pas d'image de mauvaise qualité : le post est annulé et sera retenté au prochain run
+            raise NoImageError("Aucun générateur d'image n'a répondu : post annulé "
+                               "(sera retenté au prochain run)")
 
         log("Image 4/5 : recadrage 4:5, netteté, couleurs, vignette, grain…")
         img = ImageOps.fit(img, (OUT_W, OUT_H), Image.LANCZOS, centering=(0.5, 0.4))
@@ -996,7 +1045,8 @@ class TextPost:
         return False
 
     def publier_texte_partout(self, news_original, news_translited, headline=None):
-        resultats = {"image": None, "facebook": False, "instagram": False, "erreur": None}
+        resultats = {"image": None, "facebook": False, "instagram": False,
+                     "erreur": None, "no_image": False}
 
         try:
             log("── Génération de l'image ──", level="STEP")
@@ -1030,6 +1080,10 @@ class TextPost:
             else:
                 resultats["instagram"] = self._publier_instagram(chemin, news_translited,
                                                                  ig_id, token, cloud)
+        except NoImageError as e:
+            resultats["erreur"] = str(e)
+            resultats["no_image"] = True
+            log(str(e), level="ERROR")
         except Exception as e:
             resultats["erreur"] = f"{type(e).__name__}: {e}"
             log(f"Échec de la génération/préparation : {resultats['erreur']}", level="ERROR")
@@ -1229,7 +1283,8 @@ def diagnostic_environnement():
         f"GitHub Actions : {'oui' if IS_GHA else 'non'}")
     log(f"Script : {Path(__file__).name} | version {SCRIPT_VERSION}")
     log(f"Heure UTC : {datetime.now(timezone.utc):%Y-%m-%d %H:%M:%S}")
-    log(f"Réglages : Groq={GROQ_MODEL} | image CF={CF_IMAGE_MODEL} | image HF={HF_IMAGE_MODEL} | "
+    log(f"Réglages : Groq traduction={GROQ_MODEL} | Groq prompt={GROQ_PROMPT_MODEL} | "
+        f"image CF={CF_IMAGE_MODELS} | image HF={HF_IMAGE_MODEL} | "
         f"candidats={IMAGE_CANDIDATES} | max posts={MAX_POSTS_PER_RUN} | "
         f"max tentatives={MAX_ATTEMPTS_PER_RUN} | âge max={MAX_NEWS_AGE_HOURS}h | "
         f"Graph={GRAPH_URL.rsplit('/', 1)[-1]}")
@@ -1239,7 +1294,10 @@ def diagnostic_environnement():
         ("PAGE_ACCESS_TOKEN", True, "token Meta (Facebook + Instagram)"),
         ("CF_ACCOUNT_ID", False, "Cloudflare Workers AI (images FLUX gratuites)"),
         ("CF_API_TOKEN", False, "Cloudflare Workers AI (images FLUX gratuites)"),
+        ("GEMINI_API_KEY", False, "Google Gemini (images) -> secours de qualité"),
+        ("TOGETHER_API_KEY", False, "Together AI (FLUX) -> secours"),
         ("HF_TOKEN", False, "Hugging Face (images FLUX) -> secours"),
+        ("POLLINATIONS_API_KEY", False, "Pollinations (optionnel)"),
         ("PAGE_ID", False, "ID de la page Facebook -> sinon Facebook ignoré"),
         ("INSTAGRAM_BUSINESS_ID", False, "ID Instagram -> sinon Instagram ignoré"),
         ("CLOUDINARY_CLOUD_NAME", False, "Cloudinary (requis pour Instagram)"),
@@ -1256,6 +1314,11 @@ def diagnostic_environnement():
                 manquants.append(nom)
     if IS_GHA:
         log("   (un secret n'est visible du script que s'il est listé dans 'env:' du workflow)")
+
+    nb_images = sum(1 for n in ("CF_API_TOKEN", "GEMINI_API_KEY", "TOGETHER_API_KEY", "HF_TOKEN")
+                    if os.getenv(n, ""))
+    log(f"Générateurs d'image configurés : {nb_images} (+ Pollinations sans clé)",
+        level="OK" if nb_images else "WARN")
 
     log(f"Logo : {'trouvé' if LOGO_PATH.is_file() else 'ABSENT'} ({LOGO_PATH})",
         level="OK" if LOGO_PATH.is_file() else "WARN")
@@ -1279,6 +1342,9 @@ def resoudre_modele_groq():
         log("   -> clé TOKEN_AI_DESCRYB_IMG invalide, ou réseau bloqué.", level="WARN")
         return False
     log(f"Groq : clé valide, {len(ids)} modèles disponibles", level="OK")
+    if GROQ_PROMPT_MODEL not in ids:
+        log(f"Groq : modèle de prompt '{GROQ_PROMPT_MODEL}' absent -> scènes de secours possibles. "
+            "Change GROQ_PROMPT_MODEL.", level="WARN")
     if GROQ_MODEL in ids:
         log(f"Groq : modèle '{GROQ_MODEL}' disponible", level="OK")
         return True
@@ -1487,6 +1553,10 @@ def main():
             raison = resultat.get("erreur") or "Facebook et Instagram n'ont pas confirmé (voir ❌ ci-dessus)"
             STATS["echecs"].append((title, raison))
             log(f"NON PUBLIÉ : {raison}", level="ERROR")
+            if resultat.get("no_image"):
+                log("Tous les générateurs d'image sont indisponibles : arrêt du run "
+                    "(les news restantes seront retentées au prochain run).", level="WARN")
+                break
 
     # ---------------- ÉTAPE 6 : résumé ----------------
     if STATS["publies"] > 0:
