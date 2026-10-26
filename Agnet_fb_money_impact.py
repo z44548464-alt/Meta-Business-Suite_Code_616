@@ -1299,24 +1299,40 @@ class Extract_post:
 
     @staticmethod
     def _extract_json(text):
+        """Extrait un objet JSON d'une réponse LLM, même entourée de Markdown/texte."""
         text = re.sub(r"<think>.*?</think>", "", text or "", flags=re.S | re.I).strip()
+        text = re.sub(r"^```(?:json)?\s*", "", text, flags=re.I)
+        text = re.sub(r"\s*```$", "", text).strip()
+
         try:
-            return json.loads(text)
-        except Exception:
-            m = re.search(r"\{.*\}", text, re.S)
-            if m:
-                return json.loads(m.group(0))
-            raise
+            data = json.loads(text)
+            if isinstance(data, dict):
+                return data
+        except json.JSONDecodeError:
+            pass
+
+        # Cherche chaque accolade ouvrante et essaie de décoder un objet complet.
+        decoder = json.JSONDecoder()
+        for match in re.finditer(r"\{", text):
+            try:
+                data, _ = decoder.raw_decode(text[match.start():])
+                if isinstance(data, dict):
+                    return data
+            except json.JSONDecodeError:
+                continue
+
+        raise ValueError("Aucun objet JSON valide trouvé dans la réponse du modèle")
 
     def tradication_of_text(self, text):
         prompt = """
         You are a professional Arabic translator specializing in financial news.
         Translate into natural Modern Standard Arabic. Preserve financial meaning and facts.
-        Return ONLY a valid JSON object with two fields:
-        {"caption": "full translation of the text",
-         "headline": "short punchy Arabic news headline"}
-        The headline: 8 to 15 words, newsroom style, captures the key fact (and the
-        market impact if any), no emojis, no hashtags, no quotation marks, no source name.
+        Return ONLY one valid JSON object, with double quotes around every key and string.
+        Do not use Markdown fences, comments, or text before/after the JSON.
+        Required format:
+        {"caption": "full translation of the text", "headline": "short Arabic news headline"}
+        The headline should be 8 to 15 Arabic words, newsroom style, capture the key fact
+        and market impact if any, with no emojis, hashtags, quotation marks, or source name.
         """
         t = time.time()
         log("Traduction en arabe (Cloudflare -> Hugging Face -> Groq, tous comptes)…")
@@ -1324,17 +1340,45 @@ class Extract_post:
             {"role": "system", "content": prompt},
             {"role": "user", "content": f"SOURCE TEXT TO TRANSLATE:\n{text}"},
         ]
-        raw = llm_chat(messages, temperature=0.0, max_tokens=2500)
-        if raw:
+
+        # Important : si un fournisseur renvoie du JSON invalide, essayer le fournisseur
+        # suivant au lieu de s'arrêter après la première réponse non vide.
+        providers = (
+            ("Cloudflare", _llm_cloudflare),
+            ("Hugging Face", _llm_hf),
+            ("Groq", _llm_groq),
+        )
+        for provider_name, provider_fn in providers:
+            try:
+                raw = provider_fn(messages, temperature=0.0, max_tokens=2500)
+            except Exception as e:
+                log(f"Traduction {provider_name} : {type(e).__name__} {str(e)[:180]}", level="WARN")
+                continue
+
+            if not raw or not str(raw).strip():
+                log(f"Traduction {provider_name} : réponse vide, fournisseur suivant.", level="WARN")
+                continue
+
             try:
                 data = self._extract_json(raw)
-                if isinstance(data, dict) and str(data.get("caption") or "").strip():
-                    log(f"Traduction reçue en {time.time() - t:.1f}s", level="OK")
-                    return data
-                log(f"Traduction inexploitable : {str(data)[:150]}", level="WARN")
+                caption = str(data.get("caption") or "").strip()
+                headline = str(data.get("headline") or "").strip()
+                if not caption:
+                    raise ValueError("champ 'caption' absent ou vide")
+                if not headline:
+                    # Une légende valide reste exploitable; le titre sera généré à partir de celle-ci.
+                    headline = caption[:100].strip()
+                    data["headline"] = headline
+                data["caption"] = caption
+                log(f"Traduction reçue via {provider_name} en {time.time() - t:.1f}s", level="OK")
+                return data
             except Exception as e:
-                log(f"Traduction : JSON illisible ({e})", level="WARN")
-        log("Traduction ÉCHOUÉE : aucun LLM n'a répondu correctement.", level="ERROR")
+                # Journaliser un extrait limité, sans afficher d'identifiants API.
+                excerpt = re.sub(r"\s+", " ", str(raw))[:350]
+                log(f"Traduction {provider_name} : JSON invalide ({e}); extrait={excerpt!r}", level="WARN")
+                log(f"Nouvel essai avec le fournisseur suivant ({provider_name} a échoué).", level="WARN")
+
+        log("Traduction ÉCHOUÉE : aucun fournisseur n'a renvoyé un JSON exploitable.", level="ERROR")
         return None
 
 
