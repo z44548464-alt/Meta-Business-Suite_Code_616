@@ -1,6 +1,6 @@
 import sys
 import faulthandler
-SCRIPT_VERSION = "2026-10-26-multi-comptes"
+SCRIPT_VERSION = "2026-10-26-money-impact-strict-llm"
 print(f"▶ Python démarré (version {SCRIPT_VERSION}), chargement des modules…", flush=True)
 faulthandler.enable()
 faulthandler.dump_traceback_later(90, repeat=True, file=sys.stderr)
@@ -39,15 +39,18 @@ print("▶ Modules chargés.", flush=True)
 # ======================================================================
 # CONFIGURATION
 # ======================================================================
-
 TRUSTED_WEB_SOURCES = {
-    "CNBC Finance": "https://www.cnbc.com/id/10000664/device/rss/rss.html",
-    "Bloomberg Markets": "https://feeds.bloomberg.com/markets/news.rss",
-    "MarketWatch": "https://feeds.content.dowjones.io/public/rss/mw_topstories",
-    "Federal Reserve Official": "https://www.federalreserve.gov/feeds/press_all.xml",
-    "ECB Official": "https://www.ecb.europa.eu/rss/press.html",
+    "FXStreet": "https://www.fxstreet.com/rss/news",
+    "InvestingLive Macro": "https://investinglive.com/rss/news",
     "ActionForex Fundamental": "https://www.actionforex.com/category/fundamental-analysis/feed/",
 }
+
+# Une actualité doit être directement liée à la finance de marché ou avoir un impact
+# financier concret. La simple mention d'argent ne suffit pas.
+ALLOWED_NEWS_CATEGORIES = (
+    "Forex", "Gold", "Indices", "Crypto", "Central banks",
+    "Economic news", "Stocks", "Oil", "Bonds", "Market impact",
+)
 
 # ---------------------------------------------------------------------
 # COMPTES MULTIPLES : même nom de secret + suffixe 1, 2, 3, 4, 5
@@ -106,7 +109,6 @@ GROQ_MODELS = _csv_env("GROQ_MODELS", (
     "qwen/qwen3-32b",
     "openai/gpt-oss-120b",
     "openai/gpt-oss-20b",
-    
 ))
 # Images
 CF_IMAGE_MODELS = _csv_env("CF_IMAGE_MODELS", (
@@ -134,9 +136,9 @@ IMG_W, IMG_H = 1024, 1280
 OUT_W, OUT_H = 1080, 1350
 
 IMAGE_CANDIDATES = int(os.getenv("IMAGE_CANDIDATES", "2"))
-MAX_POSTS_PER_RUN = int(os.getenv("MAX_POSTS_PER_RUN", "100"))
-MAX_ATTEMPTS_PER_RUN = int(os.getenv("MAX_ATTEMPTS_PER_RUN", "120"))
-MAX_NEWS_AGE_HOURS = int(os.getenv("MAX_NEWS_AGE_HOURS", "72"))
+MAX_POSTS_PER_RUN = int(os.getenv("MAX_POSTS_PER_RUN", "1"))
+MAX_ATTEMPTS_PER_RUN = int(os.getenv("MAX_ATTEMPTS_PER_RUN", "3"))
+MAX_NEWS_AGE_HOURS = int(os.getenv("MAX_NEWS_AGE_HOURS", "24"))
 IG_CAPTION_LIMIT = 2200
 
 BRAND_NAME = ("Money", ".impact")
@@ -153,11 +155,11 @@ def _find_logo():
     env = os.getenv("LOGO_PATH", "")
     if env:
         return Path(env)
-    for name in ("logo_money_impact.png", "logo_money_impact.jpg", "logo_money_impact.jpeg"):
+    for name in ("logo.png", "logo.jpg", "logo.jpeg"):
         p = BASE_DIR / "imgs" / name
         if p.is_file():
             return p
-    return BASE_DIR / "imgs" / "logo_money_impact.png"
+    return BASE_DIR / "imgs" / "logo.png"
 
 
 LOGO_PATH = _find_logo()
@@ -510,24 +512,17 @@ class TextPost:
         positive = pos.group(1).strip().strip('"').strip("[]")
         return positive, neg.group(1).strip()
 
-    @staticmethod
-    def _fallback_scene(news):
-        low = (news or "").lower()
-        for keywords, scene in FALLBACK_SCENES:
-            if any(k in low for k in keywords):
-                return scene
-        return DEFAULT_SCENE
-
     def _build_prompt(self, news):
         t = time.time()
         text = self.donne_moi_prompt_images(news).content
         log(f"LLM : réponse en {time.time() - t:.1f}s ({len(text or '')} caractères)")
+        if not text or not text.strip():
+            log("Aucune API LLM n'a fourni le prompt d'image : arrêt obligatoire.", level="ERROR")
+            terminer(1, "ÉCHEC (LLM indisponible pour le prompt image)")
         positive, _ = self._parse_prompts(text)
         if not positive or len(positive.split()) < 6:
-            positive = self._fallback_scene(news)
-            log("LLM : prompt inexploitable -> scène de secours (mots-clés) utilisée.", level="WARN")
-        else:
-            log("LLM : prompt photo reçu.", level="OK")
+            raise RuntimeError("Le LLM a répondu, mais son prompt d'image est invalide : aucun prompt de secours autorisé.")
+        log("LLM : prompt photo reçu et validé.", level="OK")
         positive = " ".join(positive.split()[:70])
         return f"{positive}, {STYLE_SUFFIX}"
 
@@ -1048,9 +1043,8 @@ class TextPost:
         log(f"Image 3/5 : génération de {max(1, IMAGE_CANDIDATES)} candidat(s)…")
         img = self._best_image(prompt)
         if img is None:
-            log("Aucun générateur d'image disponible (tous les comptes Cloudflare et "
-                "Hugging Face ont échoué) -> fond graphique de secours.", level="WARN")
-            img = self._image_fallback_design()
+            log("Aucune image réellement générée par API : publication interdite et workflow arrêté.", level="ERROR")
+            terminer(1, "ÉCHEC (aucune image générée par API)")
 
         log("Image 4/5 : recadrage 4:5, netteté, couleurs, vignette, grain…")
         img = ImageOps.fit(img, (OUT_W, OUT_H), Image.LANCZOS, centering=(0.5, 0.4))
@@ -1289,6 +1283,7 @@ class Extract_post:
                         "title": self.clean_html(title),
                         "date": publication_text,
                         "continue": clean_text,
+                        "link": link,
                         "datetime": publication_datetime,
                     })
                 log(f"[{source_name}] {ajoutes} article(s) retenu(s) sur {len(feed.entries)}",
@@ -1301,6 +1296,74 @@ class Extract_post:
 
         articles.sort(key=lambda item: item["datetime"], reverse=True)
         return articles
+
+    def get_article_content(self, news):
+        """Récupère le corps de l'article lorsque le site l'autorise; sinon retourne l'extrait RSS."""
+        rss_text = (news.get("continue") or "").strip()
+        link = (news.get("link") or "").strip()
+        if not link.startswith(("http://", "https://")):
+            return rss_text
+        headers = {"User-Agent": "Mozilla/5.0 (compatible; MoneyImpactBot/1.0)",
+                   "Accept": "text/html,application/xhtml+xml"}
+        try:
+            response = requests.get(link, headers=headers, timeout=18)
+            response.raise_for_status()
+            soup = BeautifulSoup(response.text, "html.parser")
+            for element in soup(["script", "style", "nav", "footer", "header", "aside", "form"]):
+                element.decompose()
+            article = soup.find("article") or soup.find(attrs={"itemprop": "articleBody"}) or soup.find("main")
+            if article:
+                body = re.sub(r"\s+", " ", article.get_text(" ", strip=True)).strip()
+                if len(body) >= 300:
+                    log(f"Corps de l'article récupéré ({len(body)} caractères).", level="OK")
+                    return body[:12000]
+        except Exception as e:
+            log(f"Lecture du corps de l'article impossible; validation sur l'extrait RSS seulement ({type(e).__name__}).",
+                level="WARN")
+        return rss_text
+
+    def valider_actualite(self, news, article_content):
+        """Décision LLM stricte avant toute traduction, image ou publication."""
+        categories = ", ".join(ALLOWED_NEWS_CATEGORIES)
+        prompt = f"""
+You are the strict editorial gatekeeper for Money.impact, a trading and financial-markets news page.
+Decide whether this article is directly relevant to at least one allowed category: {categories}.
+Accept only concrete market, trading, asset-price, macroeconomic, central-bank, company-stock,
+commodity, bond, crypto or currency news with a clear financial-market connection.
+Reject personal stories, family/property anecdotes, lifestyle, celebrity, general human-interest,
+consumer stories, and articles that merely mention money without meaningful market impact.
+Reject if the provided article text is too thin or does not establish a concrete financial connection.
+Do not infer facts that are not present. The RSS source being financial does NOT automatically qualify an article.
+Return ONLY JSON with this exact shape:
+{{"relevant": true, "category": "one allowed category", "reason": "short reason"}}
+Use relevant=false when uncertain. No markdown.
+"""
+        content = (article_content or "").strip()
+        user = (f"SOURCE: {news.get('source','')}\nTITLE: {news.get('title','')}\n"
+                f"DATE: {news.get('date','')}\nURL: {news.get('link','')}\n"
+                f"RSS EXCERPT: {news.get('continue','')}\nARTICLE TEXT: {content[:12000]}")
+        messages = [{"role": "system", "content": prompt}, {"role": "user", "content": user}]
+        raw = llm_chat(messages, temperature=0.0, max_tokens=350)
+        if not raw:
+            log("Aucune API LLM ne répond pendant la validation éditoriale : arrêt du workflow.", level="ERROR")
+            terminer(1, "ÉCHEC (LLM indisponible pour valider les actualités)")
+        try:
+            data = self._extract_json(raw)
+            relevant = data.get("relevant")
+            category = str(data.get("category") or "").strip()
+            reason = str(data.get("reason") or "aucune justification fournie").strip()
+            if not isinstance(relevant, bool):
+                raise ValueError("champ relevant absent ou non booléen")
+            if relevant and category not in ALLOWED_NEWS_CATEGORIES:
+                raise ValueError(f"catégorie non autorisée: {category!r}")
+            log(f"Validation éditoriale : {'ACCEPTÉE' if relevant else 'REJETÉE'} | "
+                f"catégorie={category or 'aucune'} | raison={reason[:180]}",
+                level="OK" if relevant else "WARN")
+            return relevant, category, reason
+        except Exception as e:
+            log(f"Réponse LLM de validation inexploitable ({type(e).__name__}: {e}) : article rejeté par sécurité.",
+                level="WARN")
+            return False, "", "validation LLM inexploitable"
 
     @staticmethod
     def _extract_json(text):
@@ -1634,8 +1697,18 @@ def main():
         log(f"Titre  : {title}")
         log(f"Texte  : {len(content)} caractères")
 
-        text_original = f"{title}\n{content}\n\nsource: {src}, date: {date}"
+        article_content = extract_post.get_article_content(news)
+        editorial_ok, editorial_category, editorial_reason = extract_post.valider_actualite(news, article_content)
+        if not editorial_ok:
+            STATS["echecs"].append((title, f"actualité hors spécialité/rejetée : {editorial_reason}"))
+            continue
+
+        text_original = (f"{title}\n{content}\n\nCorps de l'article : {article_content}"
+                        f"\nsource: {src}, date: {date}, catégorie: {editorial_category}")
         text_translated = extract_post.tradication_of_text(text_original)
+        if not isinstance(text_translated, dict):
+            log("Aucune traduction LLM exploitable : arrêt du workflow, aucune publication sans traduction.", level="ERROR")
+            terminer(1, "ÉCHEC (LLM indisponible pour la traduction)")
 
         if not isinstance(text_translated, dict):
             STATS["echecs"].append((title, "traduction échouée"))
