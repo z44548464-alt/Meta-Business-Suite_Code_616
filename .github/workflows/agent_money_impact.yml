@@ -2,7 +2,7 @@ name: Agent Facebook Instagram (money impact)
 
 on:
   schedule:
-    - cron: "0 */3 * * *"     # toutes les 3 heures (heure UTC)
+    - cron: "0 * * * *"     # toutes les 3 heures (heure UTC)
   workflow_dispatch:           # lancement manuel depuis l'onglet Actions
 
 permissions:
