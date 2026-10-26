@@ -1,6 +1,6 @@
 import sys
 import faulthandler
-SCRIPT_VERSION = "2026-10-24-cloudflare-logo"
+SCRIPT_VERSION = "2026-10-24-code616-it"
 print(f"▶ Python démarré (version {SCRIPT_VERSION}), chargement des modules…", flush=True)
 faulthandler.enable()
 # Si le script reste figé, affiche la pile d'appel toutes les 90 s (montre OÙ il bloque)
@@ -44,12 +44,28 @@ print("▶ Modules chargés.", flush=True)
 # CONFIGURATION
 # ======================================================================
 TRUSTED_WEB_SOURCES = {
-    "FXStreet": "https://www.fxstreet.com/rss/news",
-    "InvestingLive Macro": "https://investinglive.com/rss/news",
-    "ActionForex Fundamental": "https://www.actionforex.com/category/fundamental-analysis/feed/",
+    # --- Intelligence artificielle ---
+    "TechCrunch AI": "https://techcrunch.com/category/artificial-intelligence/feed/",
+    "VentureBeat AI": "https://venturebeat.com/category/ai/feed/",
+    "Hugging Face Blog": "https://huggingface.co/blog/feed.xml",
+    "OpenAI News": "https://openai.com/news/rss.xml",
+    # --- Langages et versions (Python, PHP, JavaScript, Go, Rust...) ---
+    "Python Insider": "https://feeds.feedburner.com/PythonInsider",
+    "PHP.net News": "https://www.php.net/feed.atom",
+    "Node.js Blog": "https://nodejs.org/en/feed/blog.xml",
+    "Go Blog": "https://go.dev/blog/feed.atom",
+    "Rust Blog": "https://blog.rust-lang.org/feed.xml",
+    # --- Développement, outils, infrastructure ---
+    "GitHub Blog": "https://github.blog/feed/",
+    "InfoQ": "https://feed.infoq.com/",
+    "Ars Technica IT": "https://feeds.arstechnica.com/arstechnica/technology-lab",
+    # --- Cybersécurité et failles ---
+    "The Hacker News": "https://feeds.feedburner.com/TheHackersNews",
+    "BleepingComputer": "https://www.bleepingcomputer.com/feed/",
 }
 
 # Modifiables par variables d'environnement (sans toucher au code)
+# Conseil : GROQ_MODEL=llama-3.3-70b-versatile (limites plus confortables que qwen)
 GROQ_MODEL = os.getenv("GROQ_MODEL", "qwen/qwen3.8-27b")
 # Générateurs d'image, essayés dans cet ordre : Cloudflare -> Hugging Face -> Pollinations
 CF_IMAGE_MODEL = os.getenv("CF_IMAGE_MODEL", "@cf/black-forest-labs/flux-1-schnell")
@@ -65,14 +81,23 @@ IMAGE_CANDIDATES = int(os.getenv("IMAGE_CANDIDATES", "2"))
 
 # Contrôle de publication
 MAX_POSTS_PER_RUN = int(os.getenv("MAX_POSTS_PER_RUN", "1"))
-MAX_ATTEMPTS_PER_RUN = int(os.getenv("MAX_ATTEMPTS_PER_RUN", "3"))
+MAX_ATTEMPTS_PER_RUN = int(os.getenv("MAX_ATTEMPTS_PER_RUN", "1"))
 MAX_NEWS_AGE_HOURS = int(os.getenv("MAX_NEWS_AGE_HOURS", "24"))
 IG_CAPTION_LIMIT = 2200
+# 1 = si aucune image IA n'est générée, ne rien publier (réessai au prochain run) ;
+# 0 = publier quand même sur le fond graphique de secours
+REQUIRE_REAL_IMAGE = os.getenv("REQUIRE_REAL_IMAGE", "1") == "1"
+
+# Limites de tokens Groq (évite le 429 « Request too large » sur les petits quotas OTPM)
+TRANSLATION_MAX_TOKENS_MAIN = int(os.getenv("TRANSLATION_MAX_TOKENS_MAIN", "900"))
+TRANSLATION_MAX_TOKENS_FALLBACK = int(os.getenv("TRANSLATION_MAX_TOKENS_FALLBACK", "1500"))
+IMAGE_PROMPT_MAX_TOKENS = int(os.getenv("IMAGE_PROMPT_MAX_TOKENS", "400"))
+TRANSLATION_INPUT_MAX_CHARS = int(os.getenv("TRANSLATION_INPUT_MAX_CHARS", "1500"))
 
 # Identité de la page
-BRAND_NAME = ("Money", ".impact")
-BRAND_HANDLE = "@money.impact.today"
-BRAND_ACCENT = (255, 196, 0)
+BRAND_NAME = ("code", "6.16")
+BRAND_HANDLE = "@code616"
+BRAND_ACCENT = (0, 224, 150)
 # Police arabe grasse. Idéal : Cairo-Bold.ttf ou Tajawal-Bold.ttf dans le dossier ./fonts/
 AR_FONT_ENV = os.getenv("AR_FONT_PATH", "")
 
@@ -85,48 +110,55 @@ def _find_logo():
     env = os.getenv("LOGO_PATH", "")
     if env:
         return Path(env)
-    for name in ("logo.png", "logo.jpg", "logo.jpeg"):
+    for name in ("logo_code_616.png", "logo_code_616.jpg", "logo_code_616.jpeg"):
         p = BASE_DIR / "imgs" / name
         if p.is_file():
             return p
-    return BASE_DIR / "imgs" / "logo.png"
+    return BASE_DIR / "imgs" / "logo_code_616.jpg"
 
 
 LOGO_PATH = _find_logo()
 # Mettre LOGO_BACKDROP=1 si ton logo est sombre (ajoute un fond foncé derrière)
 LOGO_BACKDROP = os.getenv("LOGO_BACKDROP", "0") == "1"
 
-# Scènes de secours si le LLM échoue (mots-clés -> scène photo précise)
+# Scènes de secours si le LLM échoue (mots-clés -> scène photo précise).
+# Le texte est comparé en minuscules, ponctuation remplacée par des espaces (" ai " fonctionne).
 FALLBACK_SCENES = [
-    (("gold", "xau", "bullion"),
-     "Stack of gold bars on dark polished surface inside a bank vault, blurred safety deposit boxes behind"),
-    (("oil", "crude", "wti", "brent", "opec"),
-     "Oil refinery towers at dusk with glowing flare stacks, blurred pipelines and storage tanks in background"),
-    (("bitcoin", "crypto", "btc", "ethereum"),
-     "Single physical gold bitcoin coin standing on dark reflective glass, blurred server racks behind"),
-    (("dollar", "usd", "fed ", "fomc", "powell", "treasury", "yield"),
-     "Stack of US hundred-dollar bills on dark marble desk, blurred columns of a federal building behind"),
-    (("euro", "eur", "ecb", "lagarde"),
-     "Euro banknotes fanned out on dark stone surface, blurred European central bank facade behind"),
-    (("yen", "jpy", "boj"),
-     "Japanese yen banknotes and coins on dark lacquered surface, blurred Tokyo skyline at dusk behind"),
-    (("pound", "gbp", "boe", "sterling"),
-     "British pound notes on dark oak-free slate surface, blurred London financial district behind"),
-    (("stock", "nasdaq", "s&p", "dow", "equities", "wall street"),
-     "New York Stock Exchange facade with large columns and flags, dramatic evening light, blurred street below"),
+    (("security", "vulnerab", "ransomware", "malware", "breach", "hack", "cve", "phishing",
+      "exploit", "botnet", "cyber", "zero-day", "zero day"),
+     "Closed brass padlock resting on a dark circuit board, blurred server racks with cyan LEDs behind"),
+    (("openai", "gpt", "llm", "chatgpt", "gemini", "claude", "anthropic", "neural", "nvidia",
+      "gpu", " ai ", "artificial intelligence", "machine learning", "deepseek", "mistral",
+      "hugging face", "copilot"),
+     "Single high-end GPU graphics card on dark reflective surface with cyan edge light, blurred server racks behind"),
+    (("python", "php", "javascript", "typescript", "node.js", "nodejs", "rust", "golang", " go ",
+      "java ", "kotlin", "swift", "c++", "ruby", "compiler", "framework", "library", "npm",
+      "bug", "developer", "programming", "code", "api", "software", "github", "open source",
+      "open-source"),
+     "Mechanical keyboard with soft cyan backlight on a dark desk, blurred glowing monitors far behind"),
+    (("cloud", "aws", "azure", "kubernetes", "docker", "server", "data center", "datacenter",
+      "outage", "linux"),
+     "Long corridor of server racks with blue and cyan LEDs, shallow depth of field, cold light"),
+    (("chip", "semiconductor", "processor", "cpu", "quantum", "intel", "amd", "arm "),
+     "Macro shot of a silicon processor chip on a motherboard, cyan reflections, blurred circuit traces behind"),
+    (("android", "ios", "iphone", "smartphone", "mobile", "app store", "play store"),
+     "Plain black smartphone lying on a dark matte surface with cyan edge light, blurred bokeh behind"),
+    (("network", "internet", "5g", "fiber", "router", "wifi", "wi-fi", "dns"),
+     "Bundle of glowing fiber-optic cables plugged into a dark network switch, cyan light, blurred rack behind"),
+    (("robot", "humanoid", "drone"),
+     "Close-up of a metallic robotic arm joint with cyan rim light, blurred dark factory behind"),
 ]
 DEFAULT_SCENE = (
-    "Stack of gold bars on dark marble surface, blurred bank vault door in background"
+    "Close-up of a glowing processor chip on a dark circuit board, cyan rim light, blurred server racks behind"
 )
 
 STYLE_SUFFIX = (
-    "warm cinematic side lighting, shot on Canon EOS R5, 85mm f/1.4 lens, "
+    "cool cinematic side lighting, shot on Canon EOS R5, 85mm f/1.4 lens, "
     "shallow depth of field, creamy bokeh, tack-sharp focus on the hero subject, "
-    "editorial photography, professional color grading in deep navy blue and warm gold, "
+    "editorial technology photography, professional color grading in deep navy blue, near-black and electric cyan, "
     "photorealistic, ultra detailed, 8k, hero subject in the upper 60% of the frame, lower 40% of the frame dark, smooth and uncluttered, "
     "no text, no letters, no logos, no people"
 )
-
 
 # ======================================================================
 # LOGS : affichage en temps réel, étape par étape (visible dans GitHub Actions)
@@ -227,6 +259,7 @@ class TextPost:
             groq_api_key=os.getenv("TOKEN_AI_DESCRYB_IMG", ""),
             timeout=60,
             max_retries=1,
+            max_tokens=IMAGE_PROMPT_MAX_TOKENS,
         )
 
     # ------------------------------------------------------------------
@@ -234,39 +267,40 @@ class TextPost:
     # ------------------------------------------------------------------
     def donne_moi_prompt_images(self, news):
         system_prompt = (
-            "You are an award-winning Reuters financial photojournalist and editorial "
+            "You are an award-winning technology photojournalist and editorial "
             "art director. You write vivid, specific, physically realistic photo "
-            "descriptions. You NEVER use vague terms like 'trading screens' or "
-            "'financial charts'. You always name exact objects, materials, lighting "
+            "descriptions. You NEVER use vague terms like 'digital world' or "
+            "'futuristic network'. You always name exact physical objects, materials, lighting "
             "and depth of field. You forbid abstract designs, 3D renders, neon, "
-            "wireframes and futuristic shapes."
+            "wireframes, holograms and futuristic shapes."
         )
 
         user_prompt = f"""
-        FINANCIAL NEWS:
+        IT / TECH NEWS (AI, programming languages, software releases, bugs, security, hardware, cloud):
         "{(news or '')[:800]}"
 
         Identify the MAIN SUBJECT of this news and write ONE photorealistic editorial
         photo description that represents it visually.
 
         Subject mapping examples:
-        - bond yields / Treasuries -> stack of Treasury bonds on a desk
-        - gold -> gold bars in a vault
-        - oil -> refinery at dusk or oil barrels
-        - central bank -> central bank building facade
-        - US dollar -> dollar banknotes
-        - stock selloff / rally -> stock exchange facade
-        - crypto -> physical coin on reflective surface
+        - AI model / LLM / chatbot / AI company -> a single GPU graphics card or AI accelerator chip on a dark surface
+        - new version or bug of a programming language (Python, PHP, JavaScript, Rust...) -> mechanical keyboard or laptop on a dark desk, blurred glow behind
+        - cybersecurity / vulnerability / data breach -> padlock on a circuit board
+        - cloud / data center / outage / Linux / servers -> corridor of server racks with blue LEDs
+        - semiconductor / CPU / hardware -> macro shot of a processor chip
+        - network / internet / telecom -> fiber-optic cables in a network switch
+        - mobile / Android / iOS -> plain smartphone on a dark surface
+        - robotics -> metallic robotic arm joint
 
         Rules:
         1. The FIRST WORDS must name the exact physical hero subject.
         2. Hero subject sits in the UPPER 60% of the frame, sharp focus, slightly off-center.
-        3. Background: relevant but blurred (bokeh). Specific lighting (e.g. golden
-           hour side-light, tungsten vault light, cold blue dawn light).
+        3. Background: relevant but blurred (bokeh). Specific lighting (e.g. cyan rim
+           light, cold blue LED glow, soft desk-lamp side-light).
         4. The lower 40% of the frame must be dark, smooth and uncluttered (a headline will be printed there).
-        5. Palette: deep navy blue and warm gold.
-        6. FORBIDDEN: people, faces, hands, text, letters, numbers, logos, watermarks,
-           abstract shapes, 3D renders, neon, computer screens with charts.
+        5. Palette: deep navy blue, near-black and electric cyan.
+        6. FORBIDDEN: people, faces, hands, readable text, letters, numbers, logos, watermarks,
+           abstract shapes, 3D renders, neon signs, holograms, computer screens with readable code.
         7. Max 60 words. End with: photorealistic, 85mm lens, sharp focus.
 
         OUTPUT ONLY this format:
@@ -275,7 +309,7 @@ class TextPost:
 
         NEGATIVE PROMPT:
         people, faces, hands, text, letters, numbers, logos, watermark, abstract,
-        3d render, neon, cartoon, illustration, painting, blurry, low quality
+        3d render, neon, hologram, cartoon, illustration, painting, blurry, low quality
         """
 
         try:
@@ -303,7 +337,7 @@ class TextPost:
 
     @staticmethod
     def _fallback_scene(news):
-        low = (news or "").lower()
+        low = " " + re.sub(r"[^a-z0-9+#. ]", " ", (news or "").lower()) + " "
         for keywords, scene in FALLBACK_SCENES:
             if any(k in low for k in keywords):
                 return scene
@@ -362,8 +396,17 @@ class TextPost:
                     level="WARN")
                 self._dead.add("cloudflare")
                 return None
-            r.raise_for_status()
+            if r.status_code == 400:
+                log(f"Cloudflare : HTTP 400 -> {r.text[:400]!r} | nouvel essai avec un prompt court",
+                    level="WARN")
+                body["prompt"] = prompt.split(", " + STYLE_SUFFIX)[0][:600]
+                r = requests.post(url, headers=headers, json=body, timeout=120)
+            if not r.ok:
+                log(f"Cloudflare : HTTP {r.status_code} -> {r.text[:400]!r}", level="WARN")
+                return None
             data = r.json()
+            if not data.get("success", True):
+                log(f"Cloudflare : success=false -> {str(data.get('errors'))[:300]}", level="WARN")
             b64 = (data.get("result") or {}).get("image")
             if not b64:
                 log(f"Cloudflare : réponse sans image : {str(data)[:300]}", level="WARN")
@@ -439,6 +482,8 @@ class TextPost:
             r = requests.get(url, timeout=180)
             log(f"Pollinations : HTTP {r.status_code} | {len(r.content) // 1024} Ko "
                 f"| {time.time() - t:.1f}s")
+            if r.status_code >= 400:
+                log(f"Pollinations : réponse -> {r.text[:200]!r}", level="WARN")
             r.raise_for_status()
             img = Image.open(io.BytesIO(r.content)).convert("RGB")
             # Retire un éventuel bandeau/filigrane en bas
@@ -477,7 +522,7 @@ class TextPost:
                    fill=tuple(int(top[i] + (bot[i] - top[i]) * t) for i in range(3)))
         glow = Image.new("RGB", (w, h), (0, 0, 0))
         ImageDraw.Draw(glow).ellipse([w * 0.15, h * 0.05, w * 0.85, h * 0.55],
-                                     fill=(120, 85, 10))
+                                     fill=(0, 85, 110))
         glow = glow.filter(ImageFilter.GaussianBlur(120))
         return ImageChops.add(img, glow)
 
@@ -741,15 +786,15 @@ class TextPost:
 
     @staticmethod
     def _load_logo(w, h):
-        """Charge imgs/logo.png (PNG transparent conseillé). None si absent."""
+        """Charge imgs/logo_code_616.png (PNG transparent conseillé). None si absent."""
         try:
             if not LOGO_PATH.is_file():
                 log(f"Logo introuvable ({LOGO_PATH}) : logo texte utilisé à la place.")
                 return None
             logo = Image.open(LOGO_PATH).convert("RGBA")
-            ratio = min(int(w * 0.24) / logo.width, int(h * 0.11) / logo.height)
-            size = (max(1, int(logo.width * ratio)), max(1, int(logo.height * ratio)))
-            return logo.resize(size, Image.LANCZOS)
+            ratio = min(int(w * 0.24) / logo_code_616.width, int(h * 0.11) / logo_code_616.height)
+            size = (max(1, int(logo_code_616.width * ratio)), max(1, int(logo_code_616.height * ratio)))
+            return logo_code_616.resize(size, Image.LANCZOS)
         except Exception as e:
             log(f"Logo illisible : {e}")
             return None
@@ -780,12 +825,12 @@ class TextPost:
         part_a, part_b = BRAND_NAME
 
         if logo is not None:
-            logo_box = [lx, ly, lx + logo.width, ly + logo.height]
+            logo_box = [lx, ly, lx + logo_code_616.width, ly + logo_code_616.height]
         else:  # secours : logo en texte
             f_logo = self._load_font(int(w * 0.046))
             wa = probe.textlength(part_a, font=f_logo)
             wb = probe.textlength(part_b, font=f_logo)
-            logo_bb = f_logo.getbbox(part_a + part_b)
+            logo_bb = f_logo_code_616.getbbox(part_a + part_b)
             pad_x, pad_y = int(w * 0.022), int(w * 0.013)
             logo_box = [lx, ly, lx + wa + wb + 2 * pad_x, ly + logo_bb[3] + 2 * pad_y]
 
@@ -800,7 +845,7 @@ class TextPost:
             )
             top = bottom - len(lines) * line_h
 
-            # Étiquette = nom de la page (Money.impact)
+            # Étiquette = nom de la page (code6.16)
             f_tag = self._load_font(int(w * 0.038))
             ta = probe.textlength(part_a, font=f_tag)
             tb_w = probe.textlength(part_b, font=f_tag)
@@ -818,8 +863,8 @@ class TextPost:
         soft = Image.new("RGBA", (w, h), (0, 0, 0, 0))
         sd = ImageDraw.Draw(soft)
         if logo is not None:
-            shadow = Image.new("RGBA", logo.size, (0, 0, 0, 0))
-            shadow.putalpha(logo.getchannel("A").point(lambda a: int(a * 0.75)))
+            shadow = Image.new("RGBA", logo_code_616.size, (0, 0, 0, 0))
+            shadow.putalpha(logo_code_616.getchannel("A").point(lambda a: int(a * 0.75)))
             soft.alpha_composite(shadow, (lx + 3, ly + 4))
         if title_data:
             font, lines, line_h, top = title_data[:4]
@@ -860,7 +905,7 @@ class TextPost:
             draw.text((tag_box[0] + tp_x, tag_box[1] + tp_y), part_a, font=f_tag,
                       fill=(5, 12, 30, 255))
             draw.text((tag_box[0] + tp_x + ta, tag_box[1] + tp_y), part_b, font=f_tag,
-                      fill=(214, 148, 0, 255))
+                      fill=(0, 150, 105, 255))
             for i, line in enumerate(lines):
                 self._draw_rtl_line(draw, w - margin, top + i * line_h, line, font,
                                     (255, 255, 255, 255))
@@ -882,6 +927,10 @@ class TextPost:
         log(f"Image 3/5 : génération de {max(1, IMAGE_CANDIDATES)} candidat(s)…")
         img = self._best_image(prompt)
         if img is None:
+            if REQUIRE_REAL_IMAGE:
+                raise RuntimeError("Aucune image IA générée (Cloudflare, Hugging Face et "
+                                   "Pollinations ont échoué) : publication annulée, "
+                                   "voir les lignes Cloudflare/HF/Pollinations ci-dessus.")
             log("Aucun générateur d'image disponible (Cloudflare, Hugging Face et "
                 "Pollinations ont échoué) -> fond graphique de secours.", level="WARN")
             img = self._image_fallback_design()
@@ -939,7 +988,7 @@ class TextPost:
                               secure=True)
             log("Instagram 1/4 : envoi de l'image sur Cloudinary…")
             upload = cloudinary.uploader.upload(
-                str(chemin), resource_type="image", folder="actualites_financieres"
+                str(chemin), resource_type="image", folder="code616_news"
             )
             image_url = upload.get("secure_url")
             if not (image_url and image_url.startswith("https://")):
@@ -1041,6 +1090,10 @@ class TextPost:
 # ======================================================================
 # EXTRACTION DES NEWS + TRADUCTION
 # ======================================================================
+GROQ_FALLBACKS = ("llama-3.3-70b-versatile", "openai/gpt-oss-120b", "qwen/qwen3-32b",
+                  "llama-3.1-8b-instant")
+
+
 class Extract_post:
     def __init__(self):
         self.model_groq_name = GROQ_MODEL
@@ -1153,53 +1206,65 @@ class Extract_post:
 
     def tradication_of_text(self, text):
         prompt = """
-        You are a professional Arabic translator specializing in financial news.
-        Translate into natural Modern Standard Arabic. Preserve financial meaning and facts.
+        You are a professional Arabic translator and tech journalist covering all of IT:
+        artificial intelligence, programming languages (Python, PHP, JavaScript, Go, Rust...),
+        software releases and bugs, open source, cloud, hardware and cybersecurity.
+        Translate into natural Modern Standard Arabic. Preserve technical meaning and facts.
+        Keep product names, company names, programming languages, library and repository names,
+        version numbers (e.g. Python 3.14), CVE identifiers and code terms in their original Latin spelling.
+        Keep the translation under 900 Arabic characters (summarize lightly if the source is long).
         Return ONLY a valid JSON object with two fields:
         {"caption": "full translation of the text",
          "headline": "short punchy Arabic news headline"}
-        The headline: 8 to 15 words, newsroom style, captures the key fact (and the
-        market impact if any), no emojis, no hashtags, no quotation marks, no source name.
+        The headline: 8 to 15 words, newsroom style, captures the key fact (and why it matters
+        for developers or users), no emojis, no hashtags, no quotation marks, no source name.
         """
         t = time.time()
-        log(f"Traduction en arabe (Groq, modèle {self.model_groq_name})…")
+        text = (text or "")[:TRANSLATION_INPUT_MAX_CHARS]   # limite l'entrée -> sortie plus courte
         messages = [
             {"role": "system", "content": prompt},
             {"role": "user", "content": f"SOURCE TEXT TO TRANSLATE:\n{text}"},
         ]
+        models = [self.model_groq_name] + [m for m in GROQ_FALLBACKS if m != self.model_groq_name]
         last_error = None
-        for mode_json in (True, False):   # 1) mode JSON strict, 2) texte libre puis extraction
-            try:
-                kwargs = {"response_format": {"type": "json_object"}} if mode_json else {}
-                response = self.client.chat.completions.create(
-                    model=self.model_groq_name,
-                    messages=messages,
-                    temperature=0.0,
-                    **kwargs,
-                )
-                data = self._extract_json(response.choices[0].message.content)
-                if isinstance(data, dict) and str(data.get("caption") or "").strip():
-                    log(f"Traduction reçue en {time.time() - t:.1f}s", level="OK")
-                    return data
-                last_error = f"réponse sans 'caption' : {str(data)[:150]}"
-                log(f"Traduction inexploitable ({last_error})", level="WARN")
-            except Exception as e:
-                last_error = f"{type(e).__name__} : {str(e)[:300]}"
-                log(f"Traduction essai {'JSON' if mode_json else 'texte'} échoué ({last_error})",
-                    level="WARN")
-        log(f"Traduction ÉCHOUÉE : {last_error}", level="ERROR")
-        if last_error and "model" in last_error.lower() and (
-                "not" in last_error.lower() or "exist" in last_error.lower()):
-            log("   -> le modèle Groq n'existe pas / n'est plus disponible : "
-                "change la variable GROQ_MODEL.", level="WARN")
+
+        for model in models:
+            max_tokens = (TRANSLATION_MAX_TOKENS_MAIN if model == self.model_groq_name
+                          else TRANSLATION_MAX_TOKENS_FALLBACK)
+            for mode_json in (True, False):
+                try:
+                    log(f"Traduction en arabe (Groq, modèle {model}, "
+                        f"{'JSON' if mode_json else 'texte'})…")
+                    kwargs = {"response_format": {"type": "json_object"}} if mode_json else {}
+                    response = self.client.chat.completions.create(
+                        model=model,
+                        messages=messages,
+                        temperature=0.0,
+                        max_tokens=max_tokens,
+                        **kwargs,
+                    )
+                    data = self._extract_json(response.choices[0].message.content)
+                    if isinstance(data, dict) and str(data.get("caption") or "").strip():
+                        log(f"Traduction reçue en {time.time() - t:.1f}s ({model})", level="OK")
+                        return data
+                    last_error = f"réponse sans 'caption' : {str(data)[:150]}"
+                    log(f"Traduction inexploitable ({last_error})", level="WARN")
+                except Exception as e:
+                    last_error = f"{type(e).__name__} : {str(e)[:300]}"
+                    log(f"Traduction {model} ({'JSON' if mode_json else 'texte'}) échouée : "
+                        f"{last_error}", level="WARN")
+                    low = last_error.lower()
+                    # Limite de débit / modèle inexistant : inutile de réessayer ce modèle
+                    if ("429" in last_error or "ratelimit" in low or "model_not_found" in low
+                            or "does not exist" in low or "decommissioned" in low):
+                        break
+        log(f"Traduction ÉCHOUÉE sur tous les modèles : {last_error}", level="ERROR")
         return None
 
 
 # ======================================================================
 # MAIN
 # ======================================================================
-GROQ_FALLBACKS = ("llama-3.3-70b-versatile", "openai/gpt-oss-120b", "qwen/qwen3-32b",
-                  "llama-3.1-8b-instant")
 TOTAL_STEPS = 6
 
 
