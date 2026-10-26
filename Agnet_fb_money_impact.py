@@ -1,12 +1,13 @@
 import sys
 import faulthandler
-SCRIPT_VERSION = "2026-10-26-money-impact-strict-llm"
+SCRIPT_VERSION = "2026-10-26-money-impact-strict-llm-fix2"
 print(f"▶ Python démarré (version {SCRIPT_VERSION}), chargement des modules…", flush=True)
 faulthandler.enable()
 faulthandler.dump_traceback_later(90, repeat=True, file=sys.stderr)
 
 import os
 import io
+import ast
 import base64
 import traceback
 import json
@@ -54,12 +55,12 @@ ALLOWED_NEWS_CATEGORIES = (
 
 # ---------------------------------------------------------------------
 # COMPTES MULTIPLES : même nom de secret + suffixe 1, 2, 3, 4, 5
-#   Cloudflare : CF_ACCOUNT_ID / CF_API_TOKEN, puis CF_ACCOUNT_ID1 / CF_API_TOKEN1, ...2, ...3
+#   Cloudflare : CF_ACCOUNT_ID / CF_API_TOKEN, puis CF_ACCOUNT_ID1 / CF_API_TOKEN1, ...
 #   Hugging Face : HF_TOKEN, HF_TOKEN1, HF_TOKEN2, HF_TOKEN3
-#   Groq : TOKEN_AI_DESCRYB_IMG, TOKEN_AI_DESCRYB_IMG1, ...2, ...3
+#   Groq : TOKEN_AI_DESCRYB_IMG, TOKEN_AI_DESCRYB_IMG1, ...
 # Si un compte est épuisé / refusé, le script passe automatiquement au suivant.
 # ---------------------------------------------------------------------
-KEY_SUFFIXES = ("", "1", "2", "3", "4", "5","6","7","8","9","10")
+KEY_SUFFIXES = ("", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10")
 
 
 def _csv_env(name, default):
@@ -321,6 +322,10 @@ def _llm_cloudflare(messages, temperature, max_tokens):
                 out = res.get("response")
                 if not out and res.get("choices"):
                     out = res["choices"][0].get("message", {}).get("content")
+                # CORRECTIF : Cloudflare renvoie parfois un JSON déjà parsé (dict/list).
+                # str(dict) donnerait du pseudo-JSON Python invalide ('True', apostrophes).
+                if isinstance(out, (dict, list)):
+                    out = json.dumps(out, ensure_ascii=False)
                 if out and str(out).strip():
                     log(f"LLM : Cloudflare compte {label} | {model}", level="OK")
                     return str(out)
@@ -1350,12 +1355,22 @@ Use relevant=false when uncertain. No markdown.
         try:
             data = self._extract_json(raw)
             relevant = data.get("relevant")
+            # CORRECTIF : tolère "true"/"false" renvoyés sous forme de chaîne.
+            if isinstance(relevant, str):
+                low = relevant.strip().lower()
+                if low in ("true", "false"):
+                    relevant = (low == "true")
             category = str(data.get("category") or "").strip()
             reason = str(data.get("reason") or "aucune justification fournie").strip()
             if not isinstance(relevant, bool):
                 raise ValueError("champ relevant absent ou non booléen")
             if relevant and category not in ALLOWED_NEWS_CATEGORIES:
-                raise ValueError(f"catégorie non autorisée: {category!r}")
+                # tolérance sur la casse (ex. "forex" -> "Forex")
+                match = next((c for c in ALLOWED_NEWS_CATEGORIES
+                              if c.lower() == category.lower()), None)
+                if match is None:
+                    raise ValueError(f"catégorie non autorisée: {category!r}")
+                category = match
             log(f"Validation éditoriale : {'ACCEPTÉE' if relevant else 'REJETÉE'} | "
                 f"catégorie={category or 'aucune'} | raison={reason[:180]}",
                 level="OK" if relevant else "WARN")
@@ -1363,6 +1378,7 @@ Use relevant=false when uncertain. No markdown.
         except Exception as e:
             log(f"Réponse LLM de validation inexploitable ({type(e).__name__}: {e}) : article rejeté par sécurité.",
                 level="WARN")
+            log(f"Réponse brute du LLM : {str(raw)[:300]!r}", level="WARN")
             return False, "", "validation LLM inexploitable"
 
     @staticmethod
@@ -1388,6 +1404,17 @@ Use relevant=false when uncertain. No markdown.
                     return data
             except json.JSONDecodeError:
                 continue
+
+        # CORRECTIF : filet de sécurité pour un dict au format Python
+        # ({'relevant': True, ...}) issu d'un str(dict).
+        start, end = text.find("{"), text.rfind("}")
+        if start != -1 and end > start:
+            try:
+                data = ast.literal_eval(text[start:end + 1])
+                if isinstance(data, dict):
+                    return data
+            except (ValueError, SyntaxError):
+                pass
 
         raise ValueError("Aucun objet JSON valide trouvé dans la réponse du modèle")
 
@@ -1510,8 +1537,9 @@ def diagnostic_environnement():
                 manquants.append(nom)
 
     for label, acc, _ in cf_accounts():
-        log(f"Cloudflare compte {label:<2} présent (CF_ACCOUNT_ID/CF_API_TOKEN"
-            f"{'' if label == '0' else label})", level="OK")
+        suffixe = "" if label == "0" else label
+        log(f"Cloudflare compte {label:<2} présent (CF_ACCOUNT_ID{suffixe}/CF_API_TOKEN{suffixe})",
+            level="OK")
     for label, _ in hf_tokens():
         log(f"Hugging Face jeton {label:<2} présent (HF_TOKEN{'' if label == '0' else label})",
             level="OK")
@@ -1704,15 +1732,12 @@ def main():
             continue
 
         text_original = (f"{title}\n{content}\n\nCorps de l'article : {article_content}"
-                        f"\nsource: {src}, date: {date}, catégorie: {editorial_category}")
+                         f"\nsource: {src}, date: {date}, catégorie: {editorial_category}")
         text_translated = extract_post.tradication_of_text(text_original)
         if not isinstance(text_translated, dict):
             log("Aucune traduction LLM exploitable : arrêt du workflow, aucune publication sans traduction.", level="ERROR")
             terminer(1, "ÉCHEC (LLM indisponible pour la traduction)")
 
-        if not isinstance(text_translated, dict):
-            STATS["echecs"].append((title, "traduction échouée"))
-            continue
         caption = str(text_translated.get("caption") or "").strip()
         if not caption:
             log(f"Traduction sans 'caption' : {str(text_translated)[:200]}", level="ERROR")
