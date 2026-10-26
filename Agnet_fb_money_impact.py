@@ -59,7 +59,7 @@ ALLOWED_NEWS_CATEGORIES = (
 #   Groq : TOKEN_AI_DESCRYB_IMG, TOKEN_AI_DESCRYB_IMG1, ...2, ...3
 # Si un compte est épuisé / refusé, le script passe automatiquement au suivant.
 # ---------------------------------------------------------------------
-KEY_SUFFIXES = ("", "1", "2", "3", "4", "5")
+KEY_SUFFIXES = ("", "1", "2", "3", "4", "5","6","7","8","9","10")
 
 
 def _csv_env(name, default):
