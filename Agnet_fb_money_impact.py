@@ -1,9 +1,8 @@
 import sys
 import faulthandler
-SCRIPT_VERSION = "2026-10-26-cf-hf-groq"
+SCRIPT_VERSION = "2026-10-26-multi-comptes"
 print(f"▶ Python démarré (version {SCRIPT_VERSION}), chargement des modules…", flush=True)
 faulthandler.enable()
-# Si le script reste figé, affiche la pile d'appel toutes les 90 s (montre OÙ il bloque)
 faulthandler.dump_traceback_later(90, repeat=True, file=sys.stderr)
 
 import os
@@ -26,7 +25,6 @@ from PIL import (
     Image, ImageDraw, ImageFont, ImageOps, ImageEnhance,
     ImageFilter, ImageChops, ImageStat, features,
 )
-from groq import Groq
 from huggingface_hub import InferenceClient
 
 try:
@@ -47,46 +45,98 @@ TRUSTED_WEB_SOURCES = {
     "ActionForex Fundamental": "https://www.actionforex.com/category/fundamental-analysis/feed/",
 }
 
-# ---- Modèles (modifiables par variables d'environnement, sans toucher au code) ----
-# LLM (traduction + prompt image) : Cloudflare -> Hugging Face -> Groq
-CF_TEXT_MODELS = ("@cf/meta/llama-3.3-70b-instruct-fp8-fast",
-                  "@cf/mistralai/mistral-small-3.1-24b-instruct")
-HF_TEXT_MODEL = os.getenv("HF_TEXT_MODEL", "Qwen/Qwen2.5-72B-Instruct")
-GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
-# Images : Cloudflare -> Hugging Face -> fond graphique de secours
-CF_IMAGE_MODEL = os.getenv("CF_IMAGE_MODEL", "@cf/black-forest-labs/flux-1-schnell")
-HF_IMAGE_MODEL = os.getenv("HF_IMAGE_MODEL", "black-forest-labs/FLUX.1-schnell")
+# ---------------------------------------------------------------------
+# COMPTES MULTIPLES : même nom de secret + suffixe 1, 2, 3, 4, 5
+#   Cloudflare : CF_ACCOUNT_ID / CF_API_TOKEN, puis CF_ACCOUNT_ID1 / CF_API_TOKEN1, ...2, ...3
+#   Hugging Face : HF_TOKEN, HF_TOKEN1, HF_TOKEN2, HF_TOKEN3
+#   Groq : TOKEN_AI_DESCRYB_IMG, TOKEN_AI_DESCRYB_IMG1, ...2, ...3
+# Si un compte est épuisé / refusé, le script passe automatiquement au suivant.
+# ---------------------------------------------------------------------
+KEY_SUFFIXES = ("", "1", "2", "3", "4", "5")
+
+
+def _csv_env(name, default):
+    v = os.getenv(name, "").strip()
+    return tuple(x.strip() for x in v.split(",") if x.strip()) if v else tuple(default)
+
+
+def cf_accounts():
+    out = []
+    for s in KEY_SUFFIXES:
+        acc, tok = os.getenv("CF_ACCOUNT_ID" + s, ""), os.getenv("CF_API_TOKEN" + s, "")
+        if acc and tok:
+            out.append((s or "0", acc, tok))
+    return out
+
+
+def hf_tokens():
+    return [(s or "0", os.getenv("HF_TOKEN" + s, "")) for s in KEY_SUFFIXES
+            if os.getenv("HF_TOKEN" + s, "")]
+
+
+def groq_keys():
+    return [(s or "0", os.getenv("TOKEN_AI_DESCRYB_IMG" + s, "")) for s in KEY_SUFFIXES
+            if os.getenv("TOKEN_AI_DESCRYB_IMG" + s, "")]
+
+
+# ---- Modèles (modifiables par variable d'environnement, séparés par des virgules) ----
+# Cloudflare LLM
+CF_TEXT_MODELS = _csv_env("CF_TEXT_MODELS", (
+    "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+    "@cf/mistralai/mistral-small-3.1-24b-instruct",
+    "@cf/meta/llama-3.1-8b-instruct",
+))
+# Hugging Face LLM : modèles équivalents, essayés dans l'ordre
+HF_TEXT_MODELS = _csv_env("HF_TEXT_MODELS", (
+    "Qwen/Qwen2.5-72B-Instruct",
+    "meta-llama/Llama-3.3-70B-Instruct",
+    "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
+    "Qwen/Qwen3-32B",
+))
+# Groq : modèles actuels de la plateforme (si tous sont refusés, le script
+# interroge /models et utilise ceux que ta clé peut réellement employer)
+GROQ_MODELS = _csv_env("GROQ_MODELS", (
+    "llama-3.3-70b-versatile",
+    "llama-3.1-8b-instant",
+    "meta-llama/llama-4-scout-17b-16e-instruct",
+    "qwen/qwen3-32b",
+    "openai/gpt-oss-120b",
+    "openai/gpt-oss-20b",
+))
+# Images
+CF_IMAGE_MODELS = _csv_env("CF_IMAGE_MODELS", (
+    "@cf/black-forest-labs/flux-1-schnell",
+    "@cf/bytedance/stable-diffusion-xl-lightning",
+    "@cf/stabilityai/stable-diffusion-xl-base-1.0",
+))
+HF_IMAGE_MODELS = _csv_env("HF_IMAGE_MODELS", (
+    "black-forest-labs/FLUX.1-schnell",
+    "stabilityai/stable-diffusion-3.5-large-turbo",
+    "black-forest-labs/FLUX.1-dev",
+    "stabilityai/stable-diffusion-xl-base-1.0",
+))
 GRAPH_URL = "https://graph.facebook.com/" + os.getenv("GRAPH_VERSION", "v26.0")
 
-# Pour publier sur la 2e page, mets META_SUFFIX=_MONEY_IMPAC dans le workflow :
-# le script lira alors PAGE_ID_MONEY_IMPAC, PAGE_ACCESS_TOKEN_MONEY_IMPAC et
-# INSTAGRAM_BUSINESS_ID_MONEY_IMPAC. Vide = première page (PAGE_ID, etc.).
+# Pour publier sur la 2e page, mets META_SUFFIX=_MONEY_IMPAC dans le workflow.
 META_SUFFIX = os.getenv("META_SUFFIX", "")
 
 
 def menv(name):
-    """Lit un secret Meta en tenant compte du suffixe de page."""
     return os.getenv(name + META_SUFFIX, "")
 
 
-# Génération directement en portrait -> aucun recadrage destructif
-IMG_W, IMG_H = 1024, 1280      # multiples de 16 (requis par FLUX)
-OUT_W, OUT_H = 1080, 1350      # sortie finale 4:5 (Facebook / Instagram)
+IMG_W, IMG_H = 1024, 1280
+OUT_W, OUT_H = 1080, 1350
 
-# Nombre de candidats générés ; le meilleur est sélectionné automatiquement
 IMAGE_CANDIDATES = int(os.getenv("IMAGE_CANDIDATES", "2"))
-
-# Contrôle de publication
 MAX_POSTS_PER_RUN = int(os.getenv("MAX_POSTS_PER_RUN", "1"))
 MAX_ATTEMPTS_PER_RUN = int(os.getenv("MAX_ATTEMPTS_PER_RUN", "3"))
 MAX_NEWS_AGE_HOURS = int(os.getenv("MAX_NEWS_AGE_HOURS", "24"))
 IG_CAPTION_LIMIT = 2200
 
-# Identité de la page
 BRAND_NAME = ("Money", ".impact")
 BRAND_HANDLE = "@money.impact.today"
 BRAND_ACCENT = (255, 196, 0)
-# Police arabe grasse. Idéal : Cairo-Bold.ttf ou Tajawal-Bold.ttf dans le dossier ./fonts/
 AR_FONT_ENV = os.getenv("AR_FONT_PATH", "")
 
 BASE_DIR = Path(__file__).resolve().parent if "__file__" in globals() else Path.cwd()
@@ -94,7 +144,6 @@ OUTPUT_DIR = BASE_DIR / "output"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
-# Logo de la page (PNG transparent conseillé), affiché en haut à gauche
 def _find_logo():
     env = os.getenv("LOGO_PATH", "")
     if env:
@@ -107,10 +156,8 @@ def _find_logo():
 
 
 LOGO_PATH = _find_logo()
-# Mettre LOGO_BACKDROP=1 si ton logo est sombre (ajoute un fond foncé derrière)
 LOGO_BACKDROP = os.getenv("LOGO_BACKDROP", "0") == "1"
 
-# Scènes de secours si le LLM échoue (mots-clés -> scène photo précise)
 FALLBACK_SCENES = [
     (("gold", "xau", "bullion"),
      "Stack of gold bars on dark polished surface inside a bank vault, blurred safety deposit boxes behind"),
@@ -143,7 +190,7 @@ STYLE_SUFFIX = (
 
 
 # ======================================================================
-# LOGS : affichage en temps réel, étape par étape (visible dans GitHub Actions)
+# LOGS
 # ======================================================================
 try:
     sys.stdout.reconfigure(line_buffering=True, encoding="utf-8", errors="replace")
@@ -153,14 +200,14 @@ except Exception:
 
 IS_GHA = os.getenv("GITHUB_ACTIONS", "").lower() == "true"
 T0 = time.time()
-SECRET_ENV_NAMES = (
-    "TOKEN_AI_DESCRYB_IMG", "HF_TOKEN", "CF_API_TOKEN", "CF_ACCOUNT_ID",
-    "CLOUDINARY_API_KEY", "CLOUDINARY_API_SECRET",
-    "PAGE_ACCESS_TOKEN", "PAGE_ACCESS_TOKEN_MONEY_IMPAC",
+SECRET_ENV_NAMES = tuple(
+    [n + s for n in ("TOKEN_AI_DESCRYB_IMG", "HF_TOKEN", "CF_API_TOKEN", "CF_ACCOUNT_ID")
+     for s in KEY_SUFFIXES]
+    + ["CLOUDINARY_API_KEY", "CLOUDINARY_API_SECRET",
+       "PAGE_ACCESS_TOKEN", "PAGE_ACCESS_TOKEN_MONEY_IMPAC"]
 )
 _ICONS = {"INFO": "  ", "STEP": "➡️ ", "OK": "✅", "WARN": "⚠️ ", "ERROR": "❌"}
 
-# Compteurs pour le résumé final
 STATS = {
     "flux_ok": 0, "flux_ko": 0, "news_total": 0, "deja": 0, "anciennes": 0,
     "candidates": 0, "tentatives": 0, "publies": 0, "echecs": [],
@@ -168,7 +215,6 @@ STATS = {
 
 
 def _redact(text):
-    """Masque les secrets : un token ne doit JAMAIS apparaître dans les logs."""
     s = str(text)
     for name in SECRET_ENV_NAMES:
         v = os.getenv(name, "")
@@ -178,10 +224,9 @@ def _redact(text):
 
 
 def log(*args, level="INFO"):
-    """Une ligne de log horodatée, affichée immédiatement (flush)."""
     msg = _redact(" ".join(str(a) for a in args))
     print(f"[{time.time() - T0:6.1f}s] {_ICONS.get(level, '  ')} {msg}", flush=True)
-    if IS_GHA and level == "ERROR":  # apparaît aussi dans les annotations du run
+    if IS_GHA and level == "ERROR":
         print("::error::" + msg.replace("\r", " ").replace("\n", " ")[:300], flush=True)
 
 
@@ -193,7 +238,6 @@ def banner(num, total, title):
 
 
 def step_summary(markdown):
-    """Ajoute du texte à la page 'Summary' du run GitHub Actions."""
     path = os.getenv("GITHUB_STEP_SUMMARY")
     if not path:
         return
@@ -205,7 +249,6 @@ def step_summary(markdown):
 
 
 def explain_graph_error(data):
-    """Transforme une erreur de l'API Meta en message clair + piste de solution."""
     err = data.get("error", data) if isinstance(data, dict) else {}
     if not isinstance(err, dict):
         err = {}
@@ -229,75 +272,159 @@ def explain_graph_error(data):
 
 
 # ======================================================================
-# LLM : Cloudflare -> Hugging Face -> Groq (bascule automatique)
+# SERVICES DÉSACTIVÉS (partagé LLM + images) : "cf:1", "hf:2", "groq:0"...
+# Un compte épuisé pour le LLM l'est aussi pour les images (quota commun).
 # ======================================================================
-_LLM_DEAD = set()   # services désactivés pour le reste de l'exécution (token refusé...)
+_DEAD = set()
+_CACHE = {}
 
 
-def llm_chat(messages, temperature=0.2, max_tokens=1800):
-    """Renvoie le texte du premier service LLM qui répond, sinon None."""
-    # --- 1) Cloudflare Workers AI ---
-    acc, cf_tok = os.getenv("CF_ACCOUNT_ID", ""), os.getenv("CF_API_TOKEN", "")
-    if acc and cf_tok and "cf" not in _LLM_DEAD:
+def _clean_llm(text):
+    return re.sub(r"<think>.*?</think>", "", text or "", flags=re.S | re.I).strip()
+
+
+# ----------------------------- Cloudflare -----------------------------
+def _quota_text(txt):
+    t = (txt or "").lower()
+    return any(k in t for k in ("4006", "daily free allocation", "neurons", "quota"))
+
+
+def _llm_cloudflare(messages, temperature, max_tokens):
+    for label, acc, tok in cf_accounts():
+        dk = f"cf:{label}"
+        if dk in _DEAD:
+            continue
         for model in CF_TEXT_MODELS:
             try:
                 r = requests.post(
                     f"https://api.cloudflare.com/client/v4/accounts/{acc}/ai/run/{model}",
-                    headers={"Authorization": f"Bearer {cf_tok}"},
+                    headers={"Authorization": f"Bearer {tok}"}, timeout=90,
                     json={"messages": messages, "temperature": temperature,
-                          "max_tokens": max_tokens},
-                    timeout=90,
-                )
+                          "max_tokens": max_tokens})
                 if r.status_code in (401, 403):
-                    log("Cloudflare LLM : accès refusé (vérifie CF_API_TOKEN / permission "
-                        "Workers AI) -> ignoré.", level="WARN")
-                    _LLM_DEAD.add("cf")
+                    log(f"Cloudflare compte {label} : accès refusé -> compte ignoré.", level="WARN")
+                    _DEAD.add(dk)
                     break
-                if r.status_code == 429:
-                    log("Cloudflare LLM : quota atteint -> ignoré.", level="WARN")
-                    _LLM_DEAD.add("cf")
+                if r.status_code == 429 or (r.status_code >= 400 and _quota_text(r.text)):
+                    log(f"Cloudflare compte {label} : quota atteint -> compte suivant.", level="WARN")
+                    _DEAD.add(dk)
                     break
                 r.raise_for_status()
-                out = (r.json().get("result") or {}).get("response")
+                res = r.json().get("result") or {}
+                out = res.get("response")
+                if not out and res.get("choices"):
+                    out = res["choices"][0].get("message", {}).get("content")
                 if out and str(out).strip():
-                    log(f"LLM : Cloudflare {model}", level="OK")
+                    log(f"LLM : Cloudflare compte {label} | {model}", level="OK")
                     return str(out)
-                log(f"LLM Cloudflare {model} : réponse vide", level="WARN")
+                log(f"Cloudflare {label} {model} : réponse vide", level="WARN")
             except Exception as e:
-                log(f"LLM Cloudflare {model} : {type(e).__name__} {str(e)[:150]}", level="WARN")
+                log(f"Cloudflare {label} {model} : {type(e).__name__} {str(e)[:120]}", level="WARN")
+    return None
 
-    # --- 2) Hugging Face ---
-    hf = os.getenv("HF_TOKEN", "")
-    if hf and "hf" not in _LLM_DEAD:
-        try:
-            res = InferenceClient(api_key=hf).chat_completion(
-                model=HF_TEXT_MODEL, messages=messages,
-                temperature=max(temperature, 0.01), max_tokens=max_tokens,
-            )
-            out = res.choices[0].message.content
-            if out and out.strip():
-                log(f"LLM : Hugging Face {HF_TEXT_MODEL}", level="OK")
-                return out
-        except Exception as e:
-            log(f"LLM Hugging Face : {type(e).__name__} {str(e)[:150]}", level="WARN")
-            if "402" in str(e) or "401" in str(e):
-                _LLM_DEAD.add("hf")
 
-    # --- 3) Groq (dernier recours) ---
-    groq_key = os.getenv("TOKEN_AI_DESCRYB_IMG", "")
-    if groq_key and "groq" not in _LLM_DEAD:
+# --------------------------- Hugging Face ----------------------------
+def _llm_hf(messages, temperature, max_tokens):
+    for label, token in hf_tokens():
+        dk = f"hf:{label}"
+        if dk in _DEAD:
+            continue
+        client = InferenceClient(api_key=token)
+        for model in HF_TEXT_MODELS:
+            try:
+                res = client.chat_completion(
+                    model=model, messages=messages,
+                    temperature=max(temperature, 0.01), max_tokens=max_tokens)
+                out = res.choices[0].message.content
+                if out and out.strip():
+                    log(f"LLM : Hugging Face compte {label} | {model}", level="OK")
+                    return out
+            except Exception as e:
+                s = str(e)
+                log(f"HF compte {label} {model} : {type(e).__name__} {s[:110]}", level="WARN")
+                if "402" in s or "Payment Required" in s:
+                    log(f"HF compte {label} : crédits épuisés -> compte suivant.", level="WARN")
+                    _DEAD.add(dk)
+                    break
+                if "401" in s or "403" in s:
+                    log(f"HF compte {label} : token refusé -> compte suivant.", level="WARN")
+                    _DEAD.add(dk)
+                    break
+                # autre erreur (modèle indisponible...) : on tente le modèle équivalent suivant
+    return None
+
+
+# ------------------------------- Groq --------------------------------
+def _groq_models(key):
+    """Modèles réellement accessibles avec cette clé (appel /models)."""
+    ck = "groq_models:" + key[-6:]
+    if ck not in _CACHE:
+        r = requests.get("https://api.groq.com/openai/v1/models",
+                         headers={"Authorization": f"Bearer {key}"}, timeout=20)
+        r.raise_for_status()
+        ids = [m["id"] for m in r.json().get("data", []) if m.get("active", True)]
+        skip = ("whisper", "guard", "tts", "orpheus", "playai", "embed", "safeguard")
+        ids = [i for i in ids if not any(s in i.lower() for s in skip)]
+        pref = ("llama-3.3", "llama-4", "gpt-oss-120b", "qwen", "gpt-oss", "llama-3.1")
+        ids.sort(key=lambda i: next((n for n, p in enumerate(pref) if p in i.lower()), 99))
+        _CACHE[ck] = ids
+        log(f"Groq : modèles disponibles pour cette clé -> {', '.join(ids[:8])}")
+    return _CACHE[ck]
+
+
+def _llm_groq(messages, temperature, max_tokens):
+    for label, key in groq_keys():
+        dk = f"groq:{label}"
+        if dk in _DEAD:
+            continue
+        queue, seen, auto_done = list(GROQ_MODELS), set(), False
+        while queue:
+            model = queue.pop(0)
+            if model in seen:
+                continue
+            seen.add(model)
+            mt = max_tokens + (1500 if any(k in model for k in ("gpt-oss", "qwen3")) else 0)
+            try:
+                r = requests.post(
+                    "https://api.groq.com/openai/v1/chat/completions",
+                    headers={"Authorization": f"Bearer {key}"}, timeout=90,
+                    json={"model": model, "messages": messages,
+                          "temperature": temperature, "max_tokens": mt})
+                if r.status_code == 401:
+                    log(f"Groq clé {label} : refusée -> clé ignorée.", level="WARN")
+                    _DEAD.add(dk)
+                    break
+                if r.status_code == 404 or (r.status_code == 400 and "model" in r.text.lower()):
+                    log(f"Groq clé {label} : modèle {model} indisponible.", level="WARN")
+                    if not queue and not auto_done:   # tous refusés : on demande la liste réelle
+                        auto_done = True
+                        try:
+                            queue = [m for m in _groq_models(key) if m not in seen][:5]
+                        except Exception as e:
+                            log(f"Groq /models : {str(e)[:100]}", level="WARN")
+                    continue
+                if r.status_code == 429:
+                    log(f"Groq clé {label} {model} : limite atteinte -> modèle suivant.", level="WARN")
+                    continue
+                r.raise_for_status()
+                out = _clean_llm(r.json()["choices"][0]["message"]["content"])
+                if out:
+                    log(f"LLM : Groq clé {label} | {model}", level="OK")
+                    return out
+            except Exception as e:
+                log(f"Groq clé {label} {model} : {type(e).__name__} {str(e)[:110]}", level="WARN")
+    return None
+
+
+def llm_chat(messages, temperature=0.2, max_tokens=1800):
+    """Cloudflare (tous les comptes) -> Hugging Face (tous les tokens) -> Groq (toutes les clés)."""
+    for fn in (_llm_cloudflare, _llm_hf, _llm_groq):
         try:
-            res = Groq(api_key=groq_key, timeout=60, max_retries=1).chat.completions.create(
-                model=GROQ_MODEL, messages=messages, temperature=temperature,
-            )
-            out = res.choices[0].message.content
-            if out and out.strip():
-                log(f"LLM : Groq {GROQ_MODEL}", level="OK")
-                return out
+            out = fn(messages, temperature, max_tokens)
+            if out and str(out).strip():
+                return _clean_llm(out)
         except Exception as e:
-            log(f"LLM Groq : {type(e).__name__} {str(e)[:150]}", level="WARN")
-            if "401" in str(e) or "invalid" in str(e).lower():
-                _LLM_DEAD.add("groq")
+            log(f"LLM {fn.__name__} : {type(e).__name__} {str(e)[:150]}", level="WARN")
     return None
 
 
@@ -305,10 +432,6 @@ def llm_chat(messages, temperature=0.2, max_tokens=1800):
 # GÉNÉRATION DE POST (image + publication)
 # ======================================================================
 class TextPost:
-    # Services d'image désactivés pour le reste de l'exécution
-    # (crédits épuisés, token refusé...) : évite de perdre du temps à chaque image.
-    _dead = set()
-
     def __init__(self):
         pass
 
@@ -361,7 +484,7 @@ class TextPost:
         3d render, neon, cartoon, illustration, painting, blurry, low quality
         """
 
-        class _Reponse:   # même interface qu'avant (.content)
+        class _Reponse:
             content = ""
 
         r = _Reponse()
@@ -400,114 +523,116 @@ class TextPost:
             log("LLM : prompt inexploitable -> scène de secours (mots-clés) utilisée.", level="WARN")
         else:
             log("LLM : prompt photo reçu.", level="OK")
-        # FLUX ignore le negative prompt : les interdits sont dans le positif
         positive = " ".join(positive.split()[:70])
         return f"{positive}, {STYLE_SUFFIX}"
 
     # ------------------------------------------------------------------
-    # 2) Génération d'image : Cloudflare -> Hugging Face -> fond de secours
+    # 2) Génération d'image : Cloudflare (comptes x modèles) -> HF (tokens x modèles) -> fond
     # ------------------------------------------------------------------
     def _image_cloudflare(self, prompt, seed=None):
-        """Cloudflare Workers AI (FLUX.1 schnell) : 10 000 neurons gratuits par jour."""
-        account = os.getenv("CF_ACCOUNT_ID", "")
-        token = os.getenv("CF_API_TOKEN", "")
-        if not (account and token):
-            if "cloudflare_absent" not in self._dead:
-                log("CF_ACCOUNT_ID / CF_API_TOKEN absents -> Cloudflare ignoré.", level="WARN")
-                self._dead.add("cloudflare_absent")
-            return None
-        if "cloudflare" in self._dead:
+        accounts = cf_accounts()
+        if not accounts:
+            if "cf_absent" not in _DEAD:
+                log("Aucun compte Cloudflare configuré -> Cloudflare ignoré.", level="WARN")
+                _DEAD.add("cf_absent")
             return None
 
-        url = (f"https://api.cloudflare.com/client/v4/accounts/{account}"
-               f"/ai/run/{CF_IMAGE_MODEL}")
-        headers = {"Authorization": f"Bearer {token}"}
-        body = {"prompt": prompt[:2000], "steps": 6}   # schnell : 8 steps maximum
-        if seed is not None:
-            body["seed"] = int(seed) % 2_000_000_000
-
-        t = time.time()
-        try:
-            log(f"Cloudflare : {CF_IMAGE_MODEL} (steps={body['steps']})…")
-            r = requests.post(url, headers=headers, json=body, timeout=120)
-            if r.status_code == 400 and "seed" in body:   # seed refusé : on réessaie sans
-                body.pop("seed")
-                r = requests.post(url, headers=headers, json=body, timeout=120)
-            if r.status_code in (401, 403):
-                log(f"Cloudflare : accès refusé (HTTP {r.status_code}) -> vérifie CF_API_TOKEN "
-                    "(permissions Workers AI) et CF_ACCOUNT_ID. Service ignoré.", level="ERROR")
-                self._dead.add("cloudflare")
-                return None
-            if r.status_code == 429:
-                log("Cloudflare : limite atteinte (quota du jour ?) -> service ignoré.",
-                    level="WARN")
-                self._dead.add("cloudflare")
-                return None
-            r.raise_for_status()
-            data = r.json()
-            b64 = (data.get("result") or {}).get("image")
-            if not b64:
-                log(f"Cloudflare : réponse sans image : {str(data)[:300]}", level="WARN")
-                return None
-            img = Image.open(io.BytesIO(base64.b64decode(b64))).convert("RGB")
-            log(f"Cloudflare OK en {time.time() - t:.1f}s -> image {img.size[0]}x{img.size[1]}",
-                level="OK")
-            return img
-        except Exception as e:
-            log(f"Cloudflare indisponible ({type(e).__name__}) : {str(e)[:300]}", level="WARN")
-            return None
+        for label, account, token in accounts:
+            dk = f"cf:{label}"
+            if dk in _DEAD:
+                continue
+            headers = {"Authorization": f"Bearer {token}"}
+            for model in CF_IMAGE_MODELS:
+                url = f"https://api.cloudflare.com/client/v4/accounts/{account}/ai/run/{model}"
+                if "flux" in model:
+                    body = {"prompt": prompt[:2000], "steps": 6}
+                else:   # Stable Diffusion XL : taille explicite, retour binaire
+                    body = {"prompt": prompt[:2000], "width": 1024, "height": 1280,
+                            "num_steps": 8 if "lightning" in model else 20}
+                if seed is not None:
+                    body["seed"] = int(seed) % 2_000_000_000
+                t = time.time()
+                try:
+                    log(f"Cloudflare compte {label} : {model}…")
+                    r = requests.post(url, headers=headers, json=body, timeout=120)
+                    if r.status_code == 400 and "seed" in body and not _quota_text(r.text):
+                        body.pop("seed")
+                        r = requests.post(url, headers=headers, json=body, timeout=120)
+                    if r.status_code in (401, 403):
+                        log(f"Cloudflare compte {label} : accès refusé (HTTP {r.status_code}) "
+                            "-> compte suivant.", level="WARN")
+                        _DEAD.add(dk)
+                        break
+                    if r.status_code == 429 or (r.status_code >= 400 and _quota_text(r.text)):
+                        log(f"Cloudflare compte {label} : quota atteint -> compte suivant.",
+                            level="WARN")
+                        _DEAD.add(dk)
+                        break
+                    r.raise_for_status()
+                    if r.headers.get("content-type", "").startswith("image/"):
+                        raw = r.content
+                    else:
+                        b64 = (r.json().get("result") or {}).get("image")
+                        if not b64:
+                            log(f"Cloudflare {model} : réponse sans image.", level="WARN")
+                            continue
+                        raw = base64.b64decode(b64)
+                    img = Image.open(io.BytesIO(raw)).convert("RGB")
+                    log(f"Cloudflare compte {label} OK ({model}) en {time.time() - t:.1f}s -> "
+                        f"{img.size[0]}x{img.size[1]}", level="OK")
+                    return img
+                except Exception as e:
+                    log(f"Cloudflare {label} {model} : {type(e).__name__} {str(e)[:200]}",
+                        level="WARN")
+        return None
 
     def _image_hf(self, prompt, seed=None):
-        token = os.getenv("HF_TOKEN", "")
-        if not token:
-            log("HF_TOKEN absent -> Hugging Face ignoré.", level="WARN")
+        tokens = hf_tokens()
+        if not tokens:
+            if "hf_absent" not in _DEAD:
+                log("Aucun HF_TOKEN configuré -> Hugging Face ignoré.", level="WARN")
+                _DEAD.add("hf_absent")
             return None
-        if "hf" in self._dead:
-            return None
 
-        model = HF_IMAGE_MODEL
-        is_schnell = "schnell" in model.lower()
-        # schnell : distillé pour 1-4 steps, ignore la guidance
-        # dev : 28-35 steps, guidance ~3.5
-        params = {"width": IMG_W, "height": IMG_H,
-                  "num_inference_steps": 4 if is_schnell else 30}
-        if not is_schnell:
-            params["guidance_scale"] = 3.5
-        if seed is not None:
-            params["seed"] = seed
-
-        client = InferenceClient(api_key=token)
-
-        # Dégradation progressive des paramètres si l'API en refuse certains
-        attempts = [
-            params,
-            {k: v for k, v in params.items() if k != "seed"},
-            {"width": IMG_W, "height": IMG_H},
-            {},
-        ]
-        for i, p in enumerate(attempts):
-            t = time.time()
-            try:
-                log(f"HF essai {i + 1}/{len(attempts)} : {model} | {p}")
-                image = client.text_to_image(prompt, model=model, **p)
-                log(f"HF OK en {time.time() - t:.1f}s -> image {image.size[0]}x{image.size[1]}",
-                    level="OK")
-                return image.convert("RGB")
-            except Exception as e:
-                log(f"HF essai {i + 1} échoué en {time.time() - t:.1f}s "
-                    f"({type(e).__name__}) : {str(e)[:300]}", level="WARN")
-                if "402" in str(e) or "Payment Required" in str(e):
-                    log("HF : crédits épuisés -> service ignoré pour cette exécution.",
-                        level="WARN")
-                    self._dead.add("hf")
-                    return None
-                if "401" in str(e) or "403" in str(e):
-                    log("HF : token refusé -> service ignoré pour cette exécution.",
-                        level="WARN")
-                    self._dead.add("hf")
-                    return None
-                time.sleep(2)
-        log("HF : tous les essais ont échoué.", level="WARN")
+        for label, token in tokens:
+            dk = f"hf:{label}"
+            if dk in _DEAD:
+                continue
+            client = InferenceClient(api_key=token)
+            for model in HF_IMAGE_MODELS:
+                is_fast = "schnell" in model.lower() or "turbo" in model.lower()
+                params = {"width": IMG_W, "height": IMG_H,
+                          "num_inference_steps": 4 if is_fast else 30}
+                if not is_fast:
+                    params["guidance_scale"] = 3.5
+                if seed is not None:
+                    params["seed"] = seed
+                attempts = [params, {"width": IMG_W, "height": IMG_H}]
+                for i, p in enumerate(attempts):
+                    t = time.time()
+                    try:
+                        log(f"HF compte {label} : {model} (essai {i + 1}/{len(attempts)})")
+                        image = client.text_to_image(prompt, model=model, **p)
+                        log(f"HF compte {label} OK ({model}) en {time.time() - t:.1f}s -> "
+                            f"{image.size[0]}x{image.size[1]}", level="OK")
+                        return image.convert("RGB")
+                    except Exception as e:
+                        s = str(e)
+                        log(f"HF {label} {model} essai {i + 1} : {type(e).__name__} {s[:160]}",
+                            level="WARN")
+                        if "402" in s or "Payment Required" in s:
+                            log(f"HF compte {label} : crédits épuisés -> compte suivant.",
+                                level="WARN")
+                            _DEAD.add(dk)
+                            break
+                        if "401" in s or "403" in s:
+                            log(f"HF compte {label} : token refusé -> compte suivant.",
+                                level="WARN")
+                            _DEAD.add(dk)
+                            break
+                        time.sleep(1)
+                if dk in _DEAD:
+                    break
         return None
 
     def _generate_one(self, prompt, seed):
@@ -524,7 +649,6 @@ class TextPost:
 
     @staticmethod
     def _image_fallback_design():
-        """Dernier recours : fond graphique bleu nuit et or (le titre arabe est ajouté dessus)."""
         w, h = IMG_W, IMG_H
         img = Image.new("RGB", (w, h))
         d = ImageDraw.Draw(img)
@@ -544,7 +668,6 @@ class TextPost:
     # ------------------------------------------------------------------
     @staticmethod
     def _score_image(img):
-        """Score = netteté + contraste, pénalise images trop sombres/claires."""
         small = img.resize((512, int(512 * img.height / img.width)))
         gray = small.convert("L")
         edges = ImageStat.Stat(gray.filter(ImageFilter.FIND_EDGES))
@@ -572,6 +695,8 @@ class TextPost:
                 candidates.append((score, img))
             else:
                 log(f"Candidat {i + 1}/{n} : aucune image exploitable.", level="WARN")
+                if i == 0:   # aucun service ne répond : inutile de réessayer
+                    break
         if not candidates:
             return None
         best = max(candidates, key=lambda c: c[0])
@@ -579,7 +704,7 @@ class TextPost:
         return best[1]
 
     # ------------------------------------------------------------------
-    # 4) Post-traitement (netteté, couleur, vignette, grain)
+    # 4) Post-traitement
     # ------------------------------------------------------------------
     @staticmethod
     def _enhance_image(img):
@@ -589,12 +714,10 @@ class TextPost:
         img = ImageEnhance.Sharpness(img).enhance(1.15)
 
         w, h = img.size
-        # Vignette douce
         mask = Image.radial_gradient("L").resize((w, h), Image.LANCZOS)
         mask = mask.point(lambda p: int(max(0, p - 90) * 0.55))
         img = Image.composite(Image.new("RGB", (w, h), (3, 8, 22)), img, mask)
 
-        # Grain très léger : casse l'aspect "lisse" typique des images IA
         noise = Image.effect_noise((w, h), 14).convert("RGB")
         img = Image.blend(img, ImageChops.soft_light(img, noise), 0.30)
         return img
@@ -615,15 +738,8 @@ class TextPost:
             return ImageFont.load_default()
 
     # ------------------------------------------------------------------
-    # Titre arabe + branding style "chaîne d'info" (comme Al Arabiya)
+    # Titre arabe + branding
     # ------------------------------------------------------------------
-    # L'affichage de l'arabe dépend de la version de Pillow (Raqm ou non). Au premier
-    # appel, le script teste le rendu réel et choisit un mode qui fonctionne :
-    #   "raqm"   : texte brut, Raqm/HarfBuzz fait le shaping + le sens RTL
-    #   "bidi"   : arabic_reshaper + python-bidi, moteur BASIC
-    #   "manual" : arabic_reshaper + inversion des lettres, moteur BASIC
-    # Dans tous les cas, l'ordre des mots est géré ici (un mot = un dessin), donc
-    # il ne peut plus être inversé par le moteur de texte.
     _ar_mode = None
     _AR_RE = re.compile(r"[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]")
     _NUM_RE = re.compile(r"([0-9\u0660-\u0669][0-9\u0660-\u0669.,%]*)")
@@ -668,20 +784,17 @@ class TextPost:
 
     @classmethod
     def _ar_word_visual(cls, word, mode):
-        """Un mot arabe -> chaîne à dessiner (gauche vers droite)."""
         if mode == "raqm" or not ARABIC_OK:
             return word
         shaped = arabic_reshaper.reshape(word)
         if mode == "bidi":
             return get_display(shaped, base_dir="R")
-        # "manual" : lettres inversées, les chiffres gardent leur ordre
         parts = cls._NUM_RE.split(shaped)
         pieces = [p if i % 2 else p[::-1] for i, p in enumerate(parts)]
         return "".join(reversed(pieces))
 
     @classmethod
     def _ar_selftest(cls, mode):
-        """Dessine 'اب' : l'alef (grande barre) doit être à DROITE du bêh."""
         font = cls._open_ar_font(100, mode)
         kw = {"direction": "rtl", "language": "ar"} if mode == "raqm" else {}
         img = Image.new("L", (400, 260), 0)
@@ -730,7 +843,6 @@ class TextPost:
 
     @classmethod
     def _ar_runs(cls, text):
-        """Découpe en blocs : mots arabes seuls, mots latins/nombres regroupés (ordre LTR)."""
         runs = []
         for tok in text.split():
             is_ar = bool(cls._AR_RE.search(tok))
@@ -758,7 +870,6 @@ class TextPost:
         return total + space * max(0, len(runs) - 1)
 
     def _draw_rtl_line(self, draw, right_x, y, text, font, fill):
-        """Dessine une ligne arabe alignée à droite : 1er mot à droite, suivants vers la gauche."""
         space = draw.textlength(" ", font=font)
         x = right_x
         for run, is_ar in self._ar_runs(text):
@@ -782,7 +893,6 @@ class TextPost:
         return lines
 
     def _fit_headline(self, draw, text, max_w, max_h, w):
-        """Réduit la taille de police jusqu'à ce que le titre tienne (max 4 lignes)."""
         size, min_size, max_lines = int(w * 0.078), int(w * 0.05), 4
         while True:
             font = self._load_arabic_font(size)
@@ -799,7 +909,6 @@ class TextPost:
 
     @staticmethod
     def _load_logo(w, h):
-        """Charge imgs/logo.png (PNG transparent conseillé). None si absent."""
         try:
             if not LOGO_PATH.is_file():
                 log(f"Logo introuvable ({LOGO_PATH}) : logo texte utilisé à la place.")
@@ -819,7 +928,6 @@ class TextPost:
         has_title = bool(headline and headline.strip())
         logo = self._load_logo(w, h)
 
-        # ---- 1) Dégradés (bas fort pour le titre, haut léger pour le logo) ----
         grad = Image.new("RGBA", (w, h), (0, 0, 0, 0))
         gd = ImageDraw.Draw(grad)
         bottom_h = int(h * (0.50 if has_title else 0.28))
@@ -833,13 +941,12 @@ class TextPost:
         img = Image.alpha_composite(img, grad)
         probe = ImageDraw.Draw(img)
 
-        # ---- 2) Géométrie ----
         lx, ly = int(w * 0.04), int(h * 0.03)
         part_a, part_b = BRAND_NAME
 
         if logo is not None:
             logo_box = [lx, ly, lx + logo.width, ly + logo.height]
-        else:  # secours : logo en texte
+        else:
             f_logo = self._load_font(int(w * 0.046))
             wa = probe.textlength(part_a, font=f_logo)
             wb = probe.textlength(part_b, font=f_logo)
@@ -858,7 +965,6 @@ class TextPost:
             )
             top = bottom - len(lines) * line_h
 
-            # Étiquette = nom de la page (Money.impact)
             f_tag = self._load_font(int(w * 0.038))
             ta = probe.textlength(part_a, font=f_tag)
             tb_w = probe.textlength(part_b, font=f_tag)
@@ -872,7 +978,6 @@ class TextPost:
             tag_box = [tag_right - box_w, top - gap - box_h, tag_right, top - gap]
             title_data = (font, lines, line_h, top, f_tag, ta, tag_box, tp_x, tp_y, bar_w)
 
-        # ---- 3) Ombres floutées ----
         soft = Image.new("RGBA", (w, h), (0, 0, 0, 0))
         sd = ImageDraw.Draw(soft)
         if logo is not None:
@@ -887,7 +992,6 @@ class TextPost:
         soft = soft.filter(ImageFilter.GaussianBlur(5))
         img = Image.alpha_composite(img, soft)
 
-        # ---- 4) Fond translucide net (logo texte ou fond du logo image) ----
         crisp = Image.new("RGBA", (w, h), (0, 0, 0, 0))
         cd = ImageDraw.Draw(crisp)
         if logo is None:
@@ -898,7 +1002,6 @@ class TextPost:
                          fill=(4, 10, 28, 190), outline=(255, 255, 255, 220), width=2)
         img = Image.alpha_composite(img, crisp)
 
-        # ---- 5) Éléments opaques ----
         if logo is not None:
             img.alpha_composite(logo, (lx, ly))
         draw = ImageDraw.Draw(img)
@@ -940,8 +1043,8 @@ class TextPost:
         log(f"Image 3/5 : génération de {max(1, IMAGE_CANDIDATES)} candidat(s)…")
         img = self._best_image(prompt)
         if img is None:
-            log("Aucun générateur d'image disponible (Cloudflare et Hugging Face ont "
-                "échoué) -> fond graphique de secours.", level="WARN")
+            log("Aucun générateur d'image disponible (tous les comptes Cloudflare et "
+                "Hugging Face ont échoué) -> fond graphique de secours.", level="WARN")
             img = self._image_fallback_design()
 
         log("Image 4/5 : recadrage 4:5, netteté, couleurs, vignette, grain…")
@@ -1123,7 +1226,6 @@ class Extract_post:
         articles = []
         seen_links = set()
         headers = {
-            # Beaucoup de sites bloquent le User-Agent par défaut de feedparser/GitHub
             "User-Agent": ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
                            "(KHTML, like Gecko) Chrome/124.0 Safari/537.36"),
             "Accept": "application/rss+xml, application/xml, text/xml, */*",
@@ -1197,7 +1299,6 @@ class Extract_post:
 
     @staticmethod
     def _extract_json(text):
-        """Extrait l'objet JSON d'une réponse LLM (gère <think>…</think> et ```json)."""
         text = re.sub(r"<think>.*?</think>", "", text or "", flags=re.S | re.I).strip()
         try:
             return json.loads(text)
@@ -1218,7 +1319,7 @@ class Extract_post:
         market impact if any), no emojis, no hashtags, no quotation marks, no source name.
         """
         t = time.time()
-        log("Traduction en arabe (Cloudflare -> Hugging Face -> Groq)…")
+        log("Traduction en arabe (Cloudflare -> Hugging Face -> Groq, tous comptes)…")
         messages = [
             {"role": "system", "content": prompt},
             {"role": "user", "content": f"SOURCE TEXT TO TRANSLATE:\n{text}"},
@@ -1264,24 +1365,22 @@ def charger_historique(fichier_json):
 
 
 def diagnostic_environnement():
-    """Affiche la config + la présence des secrets (jamais leur valeur). Renvoie les manquants."""
     log(f"Python {sys.version.split()[0]} | Pillow {PIL.__version__} | "
         f"GitHub Actions : {'oui' if IS_GHA else 'non'}")
     log(f"Script : {Path(__file__).name} | version {SCRIPT_VERSION}")
     log(f"Heure UTC : {datetime.now(timezone.utc):%Y-%m-%d %H:%M:%S}")
-    log(f"Réglages : LLM CF={CF_TEXT_MODELS[0]} | LLM HF={HF_TEXT_MODEL} | Groq={GROQ_MODEL} | "
-        f"image CF={CF_IMAGE_MODEL} | image HF={HF_IMAGE_MODEL} | candidats={IMAGE_CANDIDATES} | "
-        f"max posts={MAX_POSTS_PER_RUN} | max tentatives={MAX_ATTEMPTS_PER_RUN} | "
-        f"âge max={MAX_NEWS_AGE_HOURS}h | Graph={GRAPH_URL.rsplit('/', 1)[-1]} | "
-        f"page={META_SUFFIX or 'principale'}")
+    log(f"Comptes : Cloudflare={len(cf_accounts())} | Hugging Face={len(hf_tokens())} | "
+        f"Groq={len(groq_keys())}")
+    log(f"Modèles LLM : CF={CF_TEXT_MODELS[0]}+{len(CF_TEXT_MODELS) - 1} | "
+        f"HF={HF_TEXT_MODELS[0]}+{len(HF_TEXT_MODELS) - 1} | Groq={GROQ_MODELS[0]}+{len(GROQ_MODELS) - 1}")
+    log(f"Modèles image : CF={CF_IMAGE_MODELS[0]}+{len(CF_IMAGE_MODELS) - 1} | "
+        f"HF={HF_IMAGE_MODELS[0]}+{len(HF_IMAGE_MODELS) - 1}")
+    log(f"Réglages : candidats={IMAGE_CANDIDATES} | max posts={MAX_POSTS_PER_RUN} | "
+        f"max tentatives={MAX_ATTEMPTS_PER_RUN} | âge max={MAX_NEWS_AGE_HOURS}h | "
+        f"Graph={GRAPH_URL.rsplit('/', 1)[-1]} | page={META_SUFFIX or 'principale'}")
 
     s = META_SUFFIX
-    # (nom, obligatoire, rôle)
     variables = [
-        ("CF_ACCOUNT_ID", False, "Cloudflare Workers AI (LLM + images FLUX)"),
-        ("CF_API_TOKEN", False, "Cloudflare Workers AI (LLM + images FLUX)"),
-        ("HF_TOKEN", False, "Hugging Face (LLM + images) -> secours"),
-        ("TOKEN_AI_DESCRYB_IMG", False, "Groq (LLM) -> dernier secours"),
         ("PAGE_ACCESS_TOKEN" + s, True, "token Meta (Facebook + Instagram)"),
         ("PAGE_ID" + s, False, "ID de la page Facebook -> sinon Facebook ignoré"),
         ("INSTAGRAM_BUSINESS_ID" + s, False, "ID Instagram -> sinon Instagram ignoré"),
@@ -1298,9 +1397,17 @@ def diagnostic_environnement():
             if obligatoire:
                 manquants.append(nom)
 
-    # Il faut au moins un service LLM
-    cf_ok = bool(os.getenv("CF_ACCOUNT_ID") and os.getenv("CF_API_TOKEN"))
-    if not (cf_ok or os.getenv("HF_TOKEN") or os.getenv("TOKEN_AI_DESCRYB_IMG")):
+    for label, acc, _ in cf_accounts():
+        log(f"Cloudflare compte {label:<2} présent (CF_ACCOUNT_ID/CF_API_TOKEN"
+            f"{'' if label == '0' else label})", level="OK")
+    for label, _ in hf_tokens():
+        log(f"Hugging Face jeton {label:<2} présent (HF_TOKEN{'' if label == '0' else label})",
+            level="OK")
+    for label, _ in groq_keys():
+        log(f"Groq clé {label:<2} présente (TOKEN_AI_DESCRYB_IMG{'' if label == '0' else label})",
+            level="OK")
+
+    if not (cf_accounts() or hf_tokens() or groq_keys()):
         log("Aucun service LLM configuré (Cloudflare, Hugging Face ou Groq).", level="ERROR")
         manquants.append("CF_ACCOUNT_ID+CF_API_TOKEN ou HF_TOKEN ou TOKEN_AI_DESCRYB_IMG")
     if IS_GHA:
@@ -1318,7 +1425,6 @@ def diagnostic_environnement():
 
 
 def verifier_meta():
-    """Teste les tokens Meta AVANT de générer des images. Renvoie (facebook_ok, instagram_ok)."""
     token = menv("PAGE_ACCESS_TOKEN")
     page_id, ig_id = menv("PAGE_ID"), menv("INSTAGRAM_BUSINESS_ID")
     fb_ok = ig_ok = False
@@ -1384,6 +1490,8 @@ def terminer(code, statut):
         level="OK" if STATS["publies"] else "WARN")
     for titre, raison in STATS["echecs"]:
         log(f"   échec : {titre[:70]} -> {raison}", level="ERROR")
+    if _DEAD:
+        log("Comptes désactivés pendant ce run : " + ", ".join(sorted(_DEAD)))
     log(f"Durée totale : {time.time() - T0:.0f}s | Résultat : {statut} (code de sortie {code})",
         level="OK" if code == 0 else "ERROR")
     ecrire_resume(statut)
@@ -1392,11 +1500,9 @@ def terminer(code, statut):
 
 def main():
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    # Un historique séparé par page évite de mélanger les publications
     nom_hist = "historique_posts.json" if not META_SUFFIX else f"historique_posts{META_SUFFIX.lower()}.json"
     fichier_json = os.path.join(base_dir, nom_hist)
 
-    # ---------------- ÉTAPE 1 : environnement ----------------
     banner(1, TOTAL_STEPS, "Configuration et environnement")
     manquants = diagnostic_environnement()
     if manquants:
@@ -1405,10 +1511,9 @@ def main():
         STATS["echecs"].append(("Démarrage", "secrets manquants : " + ", ".join(manquants)))
         terminer(1, "ÉCHEC (configuration)")
 
-    # ---------------- ÉTAPE 2 : accès aux services ----------------
     banner(2, TOTAL_STEPS, "Vérification des accès (LLM, Facebook, Instagram)")
-    if llm_chat([{"role": "user", "content": "ok"}], max_tokens=5) is None:
-        log("Aucun service LLM ne répond (Cloudflare, Hugging Face, Groq) : arrêt.",
+    if llm_chat([{"role": "user", "content": "Reply with the word: ok"}], max_tokens=40) is None:
+        log("Aucun service LLM ne répond (tous comptes Cloudflare, Hugging Face, Groq) : arrêt.",
             level="ERROR")
         STATS["echecs"].append(("LLM", "aucun service LLM disponible"))
         terminer(1, "ÉCHEC (LLM)")
@@ -1422,7 +1527,6 @@ def main():
     extract_post = Extract_post()
     text_post = TextPost()
 
-    # ---------------- ÉTAPE 3 : flux RSS ----------------
     banner(3, TOTAL_STEPS, "Lecture des flux RSS")
     all_news = extract_post.fetch_all_news()
     STATS["news_total"] = len(all_news)
@@ -1432,7 +1536,6 @@ def main():
         STATS["echecs"].append(("Flux RSS", "aucune news récupérée"))
         terminer(1, "ÉCHEC (aucune news)")
 
-    # ---------------- ÉTAPE 4 : sélection ----------------
     banner(4, TOTAL_STEPS, "Sélection des news à publier")
     historique = charger_historique(fichier_json)
     now = datetime.now(timezone.utc)
@@ -1465,7 +1568,6 @@ def main():
                 "augmente MAX_NEWS_AGE_HOURS si tu veux les publier.", level="WARN")
         terminer(0, "RIEN À PUBLIER")
 
-    # ---------------- ÉTAPE 5 : publication ----------------
     banner(5, TOTAL_STEPS, "Traduction, image et publication")
     for k, (news, post_id) in enumerate(candidates, 1):
         if STATS["publies"] >= MAX_POSTS_PER_RUN:
@@ -1495,7 +1597,7 @@ def main():
             STATS["echecs"].append((title, "traduction vide"))
             continue
         headline = str(text_translated.get("headline") or "").strip()
-        if not headline:  # secours : début de la légende
+        if not headline:
             headline = " ".join(caption.split()[:14])
             log("Pas de titre court renvoyé : début de la légende utilisé.", level="WARN")
         log(f"Titre arabe : {headline}")
@@ -1516,7 +1618,6 @@ def main():
             STATS["echecs"].append((title, raison))
             log(f"NON PUBLIÉ : {raison}", level="ERROR")
 
-    # ---------------- ÉTAPE 6 : résumé ----------------
     if STATS["publies"] > 0:
         terminer(0, "SUCCÈS")
     terminer(1, "ÉCHEC (rien n'a été publié)")
