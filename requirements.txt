@@ -1,0 +1,15 @@
+requests
+nltk
+matplotlib
+wordcloud
+Pillow
+cloudinary
+arabic-reshaper
+python-bidi
+huggingface_hub
+accelerate
+langchain_groq
+feedparser
+bs4
+arabic-reshaper
+python-bidi
