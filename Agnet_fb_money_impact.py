@@ -102,6 +102,7 @@ GROQ_MODELS = _csv_env("GROQ_MODELS", (
     "qwen/qwen3-32b",
     "openai/gpt-oss-120b",
     "openai/gpt-oss-20b",
+    
 ))
 # Images
 CF_IMAGE_MODELS = _csv_env("CF_IMAGE_MODELS", (
@@ -129,9 +130,9 @@ IMG_W, IMG_H = 1024, 1280
 OUT_W, OUT_H = 1080, 1350
 
 IMAGE_CANDIDATES = int(os.getenv("IMAGE_CANDIDATES", "2"))
-MAX_POSTS_PER_RUN = int(os.getenv("MAX_POSTS_PER_RUN", "1"))
-MAX_ATTEMPTS_PER_RUN = int(os.getenv("MAX_ATTEMPTS_PER_RUN", "3"))
-MAX_NEWS_AGE_HOURS = int(os.getenv("MAX_NEWS_AGE_HOURS", "24"))
+MAX_POSTS_PER_RUN = int(os.getenv("MAX_POSTS_PER_RUN", "100"))
+MAX_ATTEMPTS_PER_RUN = int(os.getenv("MAX_ATTEMPTS_PER_RUN", "120"))
+MAX_NEWS_AGE_HOURS = int(os.getenv("MAX_NEWS_AGE_HOURS", "72"))
 IG_CAPTION_LIMIT = 2200
 
 BRAND_NAME = ("Money", ".impact")
@@ -148,11 +149,11 @@ def _find_logo():
     env = os.getenv("LOGO_PATH", "")
     if env:
         return Path(env)
-    for name in ("logo.png", "logo.jpg", "logo.jpeg"):
+    for name in ("logo_money_impact.png", "logo_money_impact.jpg", "logo_money_impact.jpeg"):
         p = BASE_DIR / "imgs" / name
         if p.is_file():
             return p
-    return BASE_DIR / "imgs" / "logo.png"
+    return BASE_DIR / "imgs" / "logo_money_impact.png"
 
 
 LOGO_PATH = _find_logo()
