@@ -1,3 +1,4 @@
+
 name: Agent Facebook Instagram (money impact)
 
 on:
@@ -98,26 +99,99 @@ jobs:
 
       - name: Sauvegarder l'historique
         if: always()
+        shell: bash
         run: |
-          if [ ! -f historique_posts.json ]; then
-            echo "{}" > historique_posts.json
-          fi
+          set -euo pipefail
+
+          FILE="historique_posts.json"
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add historique_posts.json
-          if git diff --cached --quiet; then
-            echo "Aucun changement dans l'historique."
-            exit 0
+
+          if [ ! -f "$FILE" ]; then
+            printf '{}\n' > "$FILE"
           fi
-          git commit -m "Update publication history [skip ci]"
+
           for i in 1 2 3 4 5; do
-            if git pull --rebase --autostash origin main && git push origin HEAD:main; then
-              echo "Historique poussé."
+            echo "Tentative $i/5 : récupération de origin/main..."
+
+            git fetch origin main
+
+            REMOTE_FILE="$(mktemp)"
+
+            if git show "origin/main:$FILE" > "$REMOTE_FILE" 2>/dev/null; then
+              :
+            else
+              printf '{}\n' > "$REMOTE_FILE"
+            fi
+
+            python - "$FILE" "$REMOTE_FILE" <<'PY'
+          import json
+          import os
+          import sys
+          import tempfile
+
+          local_path, remote_path = sys.argv[1:3]
+
+          def load_json(path, label):
+              try:
+                  with open(path, "r", encoding="utf-8") as f:
+                      data = json.load(f)
+              except (OSError, json.JSONDecodeError) as exc:
+                  raise SystemExit(f"ERREUR : {label} JSON illisible : {exc}")
+
+              if not isinstance(data, dict):
+                  raise SystemExit(f"ERREUR : {label} doit être un objet JSON.")
+
+              return data
+
+          local_data = load_json(local_path, "Historique local")
+          remote_data = load_json(remote_path, "Historique distant")
+
+          # Conserve les entrées distantes et ajoute/met à jour les entrées locales.
+          merged = dict(remote_data)
+          merged.update(local_data)
+
+          directory = os.path.dirname(os.path.abspath(local_path))
+          fd, temp_path = tempfile.mkstemp(
+              prefix="historique_",
+              suffix=".json",
+              dir=directory
+          )
+
+          try:
+              with os.fdopen(fd, "w", encoding="utf-8") as f:
+                  json.dump(merged, f, ensure_ascii=False, indent=4)
+                  f.write("\n")
+              os.replace(temp_path, local_path)
+          finally:
+              if os.path.exists(temp_path):
+                  os.remove(temp_path)
+
+          print(f"Fusion terminée : {len(merged)} entrées.")
+          PY
+
+            rm -f "$REMOTE_FILE"
+
+            # Aligne HEAD sur main sans rebase ; conserve le fichier fusionné.
+            git reset --mixed origin/main
+            git add -- "$FILE"
+
+            if git diff --cached --quiet; then
+              echo "Aucun changement dans l'historique."
               exit 0
             fi
-            echo "Tentative $i échouée, nouvel essai..."
-            git rebase --abort 2>/dev/null || true
+
+            git commit -m "Update publication history [skip ci]"
+
+            if git push origin HEAD:main; then
+              echo "Historique poussé avec succès."
+              exit 0
+            fi
+
+            echo "Push refusé ; nouvelle tentative dans 5 secondes..."
             sleep 5
           done
+
           echo "Échec du push après 5 tentatives."
           exit 1
