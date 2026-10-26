@@ -39,9 +39,13 @@ print("▶ Modules chargés.", flush=True)
 # ======================================================================
 # CONFIGURATION
 # ======================================================================
+
 TRUSTED_WEB_SOURCES = {
-    "FXStreet": "https://www.fxstreet.com/rss/news",
-    "InvestingLive Macro": "https://investinglive.com/rss/news",
+    "CNBC Finance": "https://www.cnbc.com/id/10000664/device/rss/rss.html",
+    "Bloomberg Markets": "https://feeds.bloomberg.com/markets/news.rss",
+    "MarketWatch": "https://feeds.content.dowjones.io/public/rss/mw_topstories",
+    "Federal Reserve Official": "https://www.federalreserve.gov/feeds/press_all.xml",
+    "ECB Official": "https://www.ecb.europa.eu/rss/press.html",
     "ActionForex Fundamental": "https://www.actionforex.com/category/fundamental-analysis/feed/",
 }
 
