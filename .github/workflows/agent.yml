@@ -54,7 +54,7 @@ jobs:
           python -m py_compile Agent_fb_IN_Code_616.py && echo "Syntaxe OK"
 
       - name: Lancer l'agent
-        timeout-minutes: 10
+        timeout-minutes: 160
         run: |
           set -o pipefail
           python -u Agent_fb_IN_Code_616.py 2>&1 | tee agent.log
