@@ -1,6 +1,6 @@
 import sys
 import faulthandler
-SCRIPT_VERSION = "2026-10-26-robust-translation"
+SCRIPT_VERSION = "2026-10-26-quality-guard"
 print(f"▶ Python démarré (version {SCRIPT_VERSION}), chargement des modules…", flush=True)
 faulthandler.enable()
 # Si le script reste figé, affiche la pile d'appel toutes les 90 s (montre OÙ il bloque)
@@ -53,10 +53,16 @@ TRUSTED_WEB_SOURCES = {
 # Modifiables par variables d'environnement (sans toucher au code)
 GROQ_MODEL = os.getenv("GROQ_MODEL", "qwen/qwen3.8-27b")                 # traduction
 GROQ_PROMPT_MODEL = os.getenv("GROQ_PROMPT_MODEL", "llama-3.3-70b-versatile")  # prompt d'image
+# Modèle de vision (contrôle qualité des images). Désactivé automatiquement s'il n'existe pas.
+GROQ_VISION_MODEL = os.getenv("GROQ_VISION_MODEL", "meta-llama/llama-4-scout-17b-16e-instruct")
+# Mettre VISION_CHECK=0 pour désactiver le contrôle par LLM de vision
+VISION_CHECK = os.getenv("VISION_CHECK", "1") == "1"
+# Liste des modèles réellement disponibles sur le compte Groq (remplie au démarrage)
+GROQ_AVAILABLE = []
+
 # Générateurs d'image essayés dans l'ordre : Cloudflare -> Gemini -> Together -> HF -> Pollinations
-CF_IMAGE_MODELS = os.getenv(
-    "CF_IMAGE_MODELS",
-    "@cf/black-forest-labs/flux-1-schnell,@cf/leonardo/lucid-origin")
+# lucid-origin consomme plus de neurons : par défaut on garde seulement flux-1-schnell
+CF_IMAGE_MODELS = os.getenv("CF_IMAGE_MODELS", "@cf/black-forest-labs/flux-1-schnell")
 HF_IMAGE_MODEL = os.getenv("HF_IMAGE_MODEL", "black-forest-labs/FLUX.1-schnell")
 GEMINI_IMAGE_MODEL = os.getenv("GEMINI_IMAGE_MODEL", "gemini-2.5-flash-image")
 TOGETHER_IMAGE_MODEL = os.getenv("TOGETHER_IMAGE_MODEL", "black-forest-labs/FLUX.1-schnell")
@@ -66,8 +72,11 @@ GRAPH_URL = "https://graph.facebook.com/" + os.getenv("GRAPH_VERSION", "v26.0")
 IMG_W, IMG_H = 1024, 1280      # multiples de 16 (requis par FLUX)
 OUT_W, OUT_H = 1080, 1350      # sortie finale 4:5 (Facebook / Instagram)
 
+# Largeur minimale acceptée pour une image générée (rejette les images basse résolution)
+MIN_IMG_W = int(os.getenv("MIN_IMG_W", "900"))
+
 # Nombre de candidats générés ; le meilleur est sélectionné automatiquement
-IMAGE_CANDIDATES = int(os.getenv("IMAGE_CANDIDATES", "1"))
+IMAGE_CANDIDATES = int(os.getenv("IMAGE_CANDIDATES", "2"))
 
 # Contrôle de publication
 MAX_POSTS_PER_RUN = int(os.getenv("MAX_POSTS_PER_RUN", "1"))
@@ -105,6 +114,7 @@ LOGO_PATH = _find_logo()
 LOGO_BACKDROP = os.getenv("LOGO_BACKDROP", "0") == "1"
 
 # Scènes de secours si le LLM échoue (mots-clés -> scène photo précise)
+# L'ordre compte : les cas spécifiques (Europe, euro) passent AVANT la bourse générique.
 FALLBACK_SCENES = [
     (("gold", "xau", "bullion"),
      "Stack of gold bars on dark polished surface inside a bank vault, blurred safety deposit boxes behind"),
@@ -112,15 +122,17 @@ FALLBACK_SCENES = [
      "Oil refinery towers at dusk with glowing flare stacks, blurred pipelines and storage tanks in background"),
     (("bitcoin", "crypto", "btc", "ethereum"),
      "Single physical gold bitcoin coin standing on dark reflective glass, blurred server racks behind"),
-    (("dollar", "usd", "fed ", "fomc", "powell", "treasury", "yield"),
-     "Stack of US hundred-dollar bills on dark marble desk, blurred columns of a federal building behind"),
-    (("euro", "eur", "ecb", "lagarde"),
+    (("euro", "eur", "ecb", "lagarde", "europe", "france", "german", "eurozone", "bund"),
      "Euro banknotes fanned out on dark stone surface, blurred European central bank facade behind"),
     (("yen", "jpy", "boj"),
      "Japanese yen banknotes and coins on dark lacquered surface, blurred Tokyo skyline at dusk behind"),
     (("pound", "gbp", "boe", "sterling"),
      "British pound notes on dark slate surface, blurred London financial district behind"),
-    (("stock", "nasdaq", "s&p", "dow", "equities", "wall street", "shares", "europe"),
+    (("aussie", "aud", "rba", "australia"),
+     "Australian dollar banknotes on dark slate surface, blurred harbour skyline at dusk behind"),
+    (("dollar", "usd", "fed ", "fomc", "powell", "treasury", "yield"),
+     "Stack of US hundred-dollar bills on dark marble desk, blurred columns of a federal building behind"),
+    (("stock", "nasdaq", "s&p", "dow", "equities", "wall street", "shares"),
      "New York Stock Exchange facade with large columns and flags, dramatic evening light, blurred street below"),
 ]
 DEFAULT_SCENE = (
@@ -162,7 +174,7 @@ STATS = {
 
 
 class NoImageError(RuntimeError):
-    """Aucun générateur d'image n'a répondu : on n'a pas publié de post."""
+    """Aucun générateur d'image n'a répondu (ou image refusée) : on n'a pas publié de post."""
 
 
 def _redact(text):
@@ -231,16 +243,19 @@ def explain_graph_error(data):
 # ======================================================================
 class TextPost:
     # service -> timestamp de réactivation. Un service n'est désactivé que
-    # temporairement (quota) ou longtemps (clé/crédits refusés).
+    # temporairement (limite de débit), jusqu'à minuit UTC (quota journalier)
+    # ou longtemps (clé/crédits refusés).
     _dead = {}
 
     def __init__(self):
+        # GROQ_PROMPT_MODEL peut avoir été remplacé par resoudre_modele_groq()
         self.llm = ChatGroq(
             model_name=GROQ_PROMPT_MODEL,
             temperature=0.4,
             groq_api_key=os.getenv("TOKEN_AI_DESCRYB_IMG", ""),
             timeout=60,
             max_retries=1,
+            max_tokens=2048,      # marge pour les modèles qui raisonnent avant de répondre
         )
 
     # ------------------------------------------------------------------
@@ -352,7 +367,7 @@ class TextPost:
     @classmethod
     def _kill(cls, name, seconds, why):
         cls._dead[name] = time.time() + seconds
-        log(f"{name} : désactivé {seconds // 60} min ({why})", level="WARN")
+        log(f"{name} : désactivé {int(seconds // 60)} min ({why})", level="WARN")
 
     @staticmethod
     def _img_from_response(r):
@@ -392,7 +407,13 @@ class TextPost:
                     self._kill(name, 86400, f"HTTP {r.status_code} : clé/crédits")
                     return None
                 if r.status_code == 429:
-                    self._kill(name, 900, "quota/limite atteinte")
+                    if "daily free allocation" in r.text or "neurons" in r.text:
+                        # Quota journalier Cloudflare : il se réinitialise à 00:00 UTC
+                        n = datetime.now(timezone.utc)
+                        secs = 86400 - (n.hour * 3600 + n.minute * 60 + n.second) + 60
+                        self._kill(name, secs, "quota quotidien épuisé (reset 00:00 UTC)")
+                    else:
+                        self._kill(name, 900, "limite de débit")
                     return None
                 body = kw.get("json")
                 if r.status_code == 400 and isinstance(body, dict) and "seed" in body:
@@ -417,8 +438,7 @@ class TextPost:
                 body["steps"] = 8
             else:
                 body.update({"width": IMG_W, "height": IMG_H})
-            if seed is not None:
-                body["seed"] = int(seed) % 2_000_000_000
+            # NB : le paramètre "seed" est refusé par l'API Cloudflare (HTTP 400) : non envoyé.
             img = self._post_image(
                 f"Cloudflare[{model.split('/')[-1]}]",
                 f"https://api.cloudflare.com/client/v4/accounts/{account}/ai/run/{model}",
@@ -472,7 +492,7 @@ class TextPost:
                 self._kill("HuggingFace", 86400, "crédits/clé")
             return None
 
-    # ---- Pollinations (clé optionnelle)
+    # ---- Pollinations (clé optionnelle) : dernier recours, qualité variable
     def _image_pollinations(self, prompt, seed=None):
         if self._is_dead("Pollinations"):
             return None
@@ -504,9 +524,15 @@ class TextPost:
                     ("Pollinations", self._image_pollinations))
         for nom, fonction in services:
             img = fonction(prompt, seed)
-            if img is not None:
-                return img, nom
-            log(f"{nom} : pas d'image, service suivant…", level="WARN")
+            if img is None:
+                log(f"{nom} : pas d'image, service suivant…", level="WARN")
+                continue
+            # Qualité minimale : une image trop petite est refusée ici, et le service suivant est essayé
+            if img.size[0] < MIN_IMG_W:
+                log(f"{nom} : image trop petite ({img.size[0]}x{img.size[1]}, minimum "
+                    f"{MIN_IMG_W} px de large) -> rejetée, service suivant…", level="WARN")
+                continue
+            return img, nom
         return None, None
 
     @staticmethod
@@ -527,7 +553,7 @@ class TextPost:
         return ImageChops.add(img, glow)
 
     # ------------------------------------------------------------------
-    # 3) Sélection du meilleur candidat
+    # 3) Sélection du meilleur candidat + contrôle qualité par LLM de vision
     # ------------------------------------------------------------------
     @staticmethod
     def _score_image(img):
@@ -545,6 +571,36 @@ class TextPost:
             penalty = (mean - 200) * 1.5
         return sharp * 1.0 + contrast * 0.6 - penalty
 
+    @staticmethod
+    def _vision_ok(img):
+        """Un LLM de vision note l'image. Renvoie (ok, détail).
+        Si le modèle est absent ou en erreur, l'image est acceptée (le contrôle est un bonus)."""
+        if not VISION_CHECK or not GROQ_VISION_MODEL or GROQ_VISION_MODEL not in GROQ_AVAILABLE:
+            return True, "contrôle vision désactivé"
+        try:
+            buf = io.BytesIO()
+            img.resize((512, int(512 * img.height / img.width))).save(buf, "JPEG", quality=80)
+            b64 = base64.b64encode(buf.getvalue()).decode()
+            question = (
+                "Rate this image as a photo for a financial news post. Reply ONLY with JSON: "
+                '{"quality": <1-10>, "has_text": <true|false>, "has_people": <true|false>, '
+                '"has_deformed_objects": <true|false>}'
+            )
+            client = Groq(api_key=os.getenv("TOKEN_AI_DESCRYB_IMG", ""), timeout=40, max_retries=1)
+            r = client.chat.completions.create(
+                model=GROQ_VISION_MODEL, temperature=0, max_tokens=200,
+                messages=[{"role": "user", "content": [
+                    {"type": "text", "text": question},
+                    {"type": "image_url", "image_url": {"url": "data:image/jpeg;base64," + b64}},
+                ]}])
+            raw = r.choices[0].message.content or ""
+            d = json.loads(re.search(r"\{.*\}", raw, re.S).group(0))
+            ok = (float(d.get("quality", 0)) >= 7 and not d.get("has_text")
+                  and not d.get("has_people") and not d.get("has_deformed_objects"))
+            return ok, str(d)
+        except Exception as e:
+            return True, f"contrôle vision ignoré ({type(e).__name__}: {str(e)[:120]})"
+
     def _best_image(self, prompt):
         candidates = []
         n = max(1, IMAGE_CANDIDATES)
@@ -552,14 +608,21 @@ class TextPost:
             log(f"Candidat {i + 1}/{n} : génération…")
             seed = int(time.time() * 1000) % 2_000_000_000 + i * 7919
             img, source = self._generate_one(prompt, seed)
-            if img is not None and img.size[0] >= 512:
-                score = self._score_image(img)
-                log(f"Candidat {i + 1}/{n} : {source} | {img.size[0]}x{img.size[1]} | "
-                    f"score {score:.1f}", level="OK")
-                candidates.append((score, img))
-            else:
+            if img is None:
                 log(f"Candidat {i + 1}/{n} : aucune image exploitable.", level="WARN")
                 break   # tous les services ont échoué : inutile de réessayer tout de suite
+            score = self._score_image(img)
+            log(f"Candidat {i + 1}/{n} : {source} | {img.size[0]}x{img.size[1]} | "
+                f"score {score:.1f}", level="OK")
+            ok, detail = self._vision_ok(img)
+            log(f"Contrôle vision : {'ACCEPTÉE' if ok else 'REJETÉE'} | {detail}",
+                level="OK" if ok else "WARN")
+            if not ok:
+                continue          # image refusée : on régénère le candidat suivant
+            candidates.append((score, img))
+            if not VISION_CHECK or GROQ_VISION_MODEL not in GROQ_AVAILABLE:
+                continue
+            break                 # image validée par la vision : inutile d'en générer d'autres
         if not candidates:
             return None
         best = max(candidates, key=lambda c: c[0])
@@ -929,11 +992,11 @@ class TextPost:
         prompt = self._build_prompt(news_original)
         log(f"Image 2/5 : prompt final ({len(prompt.split())} mots) :")
         log("      " + prompt)
-        log(f"Image 3/5 : génération de {max(1, IMAGE_CANDIDATES)} candidat(s)…")
+        log(f"Image 3/5 : génération de {max(1, IMAGE_CANDIDATES)} candidat(s) max…")
         img = self._best_image(prompt)
         if img is None:
             # Pas d'image de mauvaise qualité : le post est annulé et sera retenté au prochain run
-            raise NoImageError("Aucun générateur d'image n'a répondu : post annulé "
+            raise NoImageError("Aucune image de qualité suffisante : post annulé "
                                "(sera retenté au prochain run)")
 
         log("Image 4/5 : recadrage 4:5, netteté, couleurs, vignette, grain…")
@@ -1242,11 +1305,13 @@ class Extract_post:
             "You are a professional Arabic translator specializing in financial news.\n"
             "Translate into natural Modern Standard Arabic. Preserve the financial meaning, "
             "figures and facts.\n"
+            "Be FAITHFUL to the source text: use only information that is present in it. "
+            "Never add, invent or borrow facts from other news.\n"
             "Answer in EXACTLY this plain-text format (keep the two English labels), "
             "and write nothing else:\n\n"
             "HEADLINE: <short punchy Arabic news headline, 8 to 15 words, newsroom style, "
-            "key fact and market impact if any, no emojis, no hashtags, no quotation marks, "
-            "no source name>\n"
+            "key fact and market impact if any, based ONLY on the source text, no emojis, "
+            "no hashtags, no quotation marks, no source name>\n"
             "CAPTION: <full Arabic translation of the text>"
         )
         messages = [
@@ -1254,9 +1319,11 @@ class Extract_post:
             {"role": "user", "content": f"SOURCE TEXT TO TRANSLATE:\n{text}"},
         ]
 
-        # Modèle principal, puis modèles de secours si la réponse est inexploitable
-        modeles = [self.model_groq_name] + [m for m in GROQ_FALLBACKS
-                                            if m != self.model_groq_name]
+        # Modèle principal, puis modèles de secours (uniquement ceux disponibles sur le compte)
+        modeles = [self.model_groq_name] + [
+            m for m in GROQ_FALLBACKS
+            if m != self.model_groq_name and (not GROQ_AVAILABLE or m in GROQ_AVAILABLE)
+        ]
         t = time.time()
         last_error = None
         for model in modeles[:3]:
@@ -1320,8 +1387,9 @@ def diagnostic_environnement():
     log(f"Script : {Path(__file__).name} | version {SCRIPT_VERSION}")
     log(f"Heure UTC : {datetime.now(timezone.utc):%Y-%m-%d %H:%M:%S}")
     log(f"Réglages : Groq traduction={GROQ_MODEL} | Groq prompt={GROQ_PROMPT_MODEL} | "
+        f"vision={GROQ_VISION_MODEL if VISION_CHECK else 'désactivée'} | "
         f"image CF={CF_IMAGE_MODELS} | image HF={HF_IMAGE_MODEL} | "
-        f"candidats={IMAGE_CANDIDATES} | max posts={MAX_POSTS_PER_RUN} | "
+        f"candidats={IMAGE_CANDIDATES} | largeur min={MIN_IMG_W}px | max posts={MAX_POSTS_PER_RUN} | "
         f"max tentatives={MAX_ATTEMPTS_PER_RUN} | âge max={MAX_NEWS_AGE_HOURS}h | "
         f"Graph={GRAPH_URL.rsplit('/', 1)[-1]}")
 
@@ -1368,8 +1436,11 @@ def diagnostic_environnement():
 
 
 def resoudre_modele_groq():
-    """Vérifie que le modèle Groq existe ; sinon bascule sur un modèle disponible."""
-    global GROQ_MODEL
+    """Vérifie les modèles Groq et bascule automatiquement sur des modèles disponibles :
+    - modèle de traduction (GROQ_MODEL)
+    - modèle de prompt d'image (GROQ_PROMPT_MODEL)
+    - modèle de vision (GROQ_VISION_MODEL, optionnel)"""
+    global GROQ_MODEL, GROQ_PROMPT_MODEL, GROQ_VISION_MODEL, GROQ_AVAILABLE
     try:
         client = Groq(api_key=os.getenv("TOKEN_AI_DESCRYB_IMG", ""), timeout=30, max_retries=1)
         ids = sorted(m.id for m in client.models.list().data)
@@ -1377,22 +1448,53 @@ def resoudre_modele_groq():
         log(f"Groq inaccessible ({type(e).__name__}) : {str(e)[:300]}", level="ERROR")
         log("   -> clé TOKEN_AI_DESCRYB_IMG invalide, ou réseau bloqué.", level="WARN")
         return False
-    log(f"Groq : clé valide, {len(ids)} modèles disponibles", level="OK")
-    if GROQ_PROMPT_MODEL not in ids:
-        log(f"Groq : modèle de prompt '{GROQ_PROMPT_MODEL}' absent -> scènes de secours possibles. "
-            "Change GROQ_PROMPT_MODEL.", level="WARN")
-    if GROQ_MODEL in ids:
-        log(f"Groq : modèle '{GROQ_MODEL}' disponible", level="OK")
-        return True
-    log(f"Le modèle Groq '{GROQ_MODEL}' N'EXISTE PAS.", level="ERROR")
-    log("   Modèles disponibles : " + ", ".join(ids))
-    for cand in GROQ_FALLBACKS:
-        if cand in ids:
-            GROQ_MODEL = cand
-            log(f"   -> bascule automatique sur '{cand}' (fixe GROQ_MODEL pour le garder)",
-                level="WARN")
-            return True
-    return False
+    GROQ_AVAILABLE = ids
+    log(f"Groq : clé valide, {len(ids)} modèles : {', '.join(ids)}", level="OK")
+
+    # --- modèle de traduction
+    translation_ok = GROQ_MODEL in ids
+    if translation_ok:
+        log(f"Groq : modèle de traduction '{GROQ_MODEL}' disponible", level="OK")
+    else:
+        log(f"Le modèle de traduction '{GROQ_MODEL}' N'EXISTE PAS.", level="ERROR")
+        for cand in GROQ_FALLBACKS:
+            if cand in ids:
+                GROQ_MODEL = cand
+                log(f"   -> bascule automatique sur '{cand}' (fixe GROQ_MODEL pour le garder)",
+                    level="WARN")
+                translation_ok = True
+                break
+
+    # --- modèle de prompt d'image : jamais bloquant, bascule sur un modèle existant
+    if GROQ_PROMPT_MODEL in ids:
+        log(f"Groq : modèle de prompt d'image '{GROQ_PROMPT_MODEL}' disponible", level="OK")
+    else:
+        old = GROQ_PROMPT_MODEL
+        for cand in (GROQ_MODEL, "openai/gpt-oss-120b", "qwen/qwen3-32b", "llama-3.1-8b-instant"):
+            if cand in ids:
+                GROQ_PROMPT_MODEL = cand
+                log(f"Groq : '{old}' absent -> prompts d'image avec '{cand}' "
+                    "(fixe GROQ_PROMPT_MODEL pour le garder)", level="WARN")
+                break
+        else:
+            log(f"Groq : '{old}' absent et aucun remplaçant -> scènes de secours.", level="WARN")
+
+    # --- modèle de vision : optionnel
+    if VISION_CHECK:
+        if GROQ_VISION_MODEL in ids:
+            log(f"Groq : modèle de vision '{GROQ_VISION_MODEL}' disponible "
+                "(contrôle qualité des images actif)", level="OK")
+        else:
+            auto = next((i for i in ids if any(k in i.lower()
+                                               for k in ("scout", "maverick", "vision"))), None)
+            if auto:
+                log(f"Groq : vision '{GROQ_VISION_MODEL}' absent -> utilisation de '{auto}'",
+                    level="WARN")
+                GROQ_VISION_MODEL = auto
+            else:
+                log("Groq : aucun modèle de vision disponible -> contrôle qualité par vision "
+                    "désactivé (le filtre de taille minimale reste actif).", level="WARN")
+    return translation_ok
 
 
 def verifier_meta():
@@ -1494,7 +1596,7 @@ def main():
         terminer(1, "ÉCHEC (Meta)")
 
     extract_post = Extract_post()
-    text_post = TextPost()
+    text_post = TextPost()   # créé APRÈS resoudre_modele_groq() : utilise le bon modèle de prompt
 
     # ---------------- ÉTAPE 3 : flux RSS ----------------
     banner(3, TOTAL_STEPS, "Lecture des flux RSS")
@@ -1590,7 +1692,7 @@ def main():
             STATS["echecs"].append((title, raison))
             log(f"NON PUBLIÉ : {raison}", level="ERROR")
             if resultat.get("no_image"):
-                log("Tous les générateurs d'image sont indisponibles : arrêt du run "
+                log("Aucune image de qualité disponible : arrêt du run "
                     "(les news restantes seront retentées au prochain run).", level="WARN")
                 break
 
