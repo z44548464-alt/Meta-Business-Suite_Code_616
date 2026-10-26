@@ -451,7 +451,7 @@ class TextPost:
     # ------------------------------------------------------------------
     # 1) Prompt d'image
     # ------------------------------------------------------------------
-        def donne_moi_prompt_images(self, news, attempt=0, order=None):
+    def donne_moi_prompt_images(self, news, attempt=0, order=None):
         system_prompt = (
             "You are an award-winning Reuters financial photojournalist and editorial "
             "art director. You write vivid, specific, physically realistic photo "
@@ -512,12 +512,11 @@ class TextPost:
             temperature=temp, order=order,
         ) or ""
         return r
-
-    _LABEL_POS = re.compile(
-        r"(?:positive\s*prompt|prompt\s*positif|positive)\s*(?:\([^)]*\))?\s*[:：\-–]\s*", re.I)
-    _LABEL_NEG = re.compile(
-        r"\n?\s*(?:negative\s*prompt|prompt\s*n[ée]gatif|negative)\s*(?:\([^)]*\))?\s*[:：\-–]", re.I)
-    _REFUSAL = re.compile(r"\b(i can(?:'|no)t|i'm sorry|i am sorry|as an ai)\b", re.I)
+        _LABEL_POS = re.compile(
+            r"(?:positive\s*prompt|prompt\s*positif|positive)\s*(?:\([^)]*\))?\s*[:：\-–]\s*", re.I)
+        _LABEL_NEG = re.compile(
+            r"\n?\s*(?:negative\s*prompt|prompt\s*n[ée]gatif|negative)\s*(?:\([^)]*\))?\s*[:：\-–]", re.I)
+        _REFUSAL = re.compile(r"\b(i can(?:'|no)t|i'm sorry|i am sorry|as an ai)\b", re.I)
 
     @classmethod
     def _parse_prompts(cls, text):
