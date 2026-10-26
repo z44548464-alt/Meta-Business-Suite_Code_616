@@ -2,7 +2,7 @@ name: Agent Facebook Instagram (money impact)
 
 on:
   schedule:
-    - cron: "0 * * * *"      # toutes les 3 heures (heure UTC)
+    - cron: "0 */3 * * *"     # toutes les 3 heures (heure UTC)
   workflow_dispatch:           # lancement manuel depuis l'onglet Actions
 
 permissions:
@@ -32,11 +32,12 @@ jobs:
           python-version: "3.11"
           cache: pip
 
-      - name: Installer les dépendances système (Raqm)
+      - name: Installer les dépendances système (Raqm + polices arabes)
         timeout-minutes: 5
         run: |
+          sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-            libraqm0 libfribidi0 libharfbuzz0b fonts-dejavu-core
+            libraqm0 libfribidi0 libharfbuzz0b fonts-dejavu-core fonts-noto-core
 
       - name: Installer les dépendances Python
         timeout-minutes: 8
@@ -69,6 +70,9 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
           CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          TOGETHER_API_KEY: ${{ secrets.TOGETHER_API_KEY }}
+          POLLINATIONS_API_KEY: ${{ secrets.POLLINATIONS_API_KEY }}
 
       - name: Garder le log complet
         if: always()
