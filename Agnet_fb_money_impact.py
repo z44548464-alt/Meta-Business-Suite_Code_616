@@ -1,1715 +1,966 @@
-import sys
-import faulthandler
-SCRIPT_VERSION = "2026-10-26-quality-guard"
-print(f"▶ Python démarré (version {SCRIPT_VERSION}), chargement des modules…", flush=True)
-faulthandler.enable()
-# Si le script reste figé, affiche la pile d'appel toutes les 90 s (montre OÙ il bloque)
-faulthandler.dump_traceback_later(90, repeat=True, file=sys.stderr)
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Money.impact : publication automatique d'actualités financières (Facebook + Instagram)
 
-import os
-import io
-import glob
+Principes de cette version (sense-guard) :
+  1. Le LLM ne dessine pas "librement" : il EXTRAIT le sens de la news (sujet, pays,
+     direction, objet visuel concret) en JSON. Le prompt d'image est construit ensuite
+     par le code à partir de ces champs.
+  2. Chaque image (IA ou photo) est vérifiée par un LLM de vision : l'image doit
+     illustrer clairement CETTE news, sans texte, sans déformation.
+  3. Chaîne 100 % gratuite avec secours : Cloudflare FLUX -> Gemini Image -> Pexels
+     -> Pixabay -> carte Pillow (titre arabe de la news, ne dépend d'aucun service).
+  4. Tous les LLM ont un secours : Groq (modèle détecté automatiquement) -> Gemini
+     -> Cloudflare Workers AI.
+"""
 import base64
-import traceback
+import hashlib
+import io
 import json
+import os
 import re
+import sys
 import time
-import urllib.parse
-from pathlib import Path
-from datetime import datetime, timezone
+import datetime as dt
 
 import requests
 import feedparser
-import cloudinary
-import cloudinary.uploader
-from bs4 import BeautifulSoup
-import PIL
-from PIL import (
-    Image, ImageDraw, ImageFont, ImageOps, ImageEnhance,
-    ImageFilter, ImageChops, ImageStat, features,
-)
-from groq import Groq
-from langchain_groq import ChatGroq
-from huggingface_hub import InferenceClient
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
-try:
-    import arabic_reshaper
-    from bidi.algorithm import get_display
-    ARABIC_OK = True
-except ImportError:
-    ARABIC_OK = False
-    print("ATTENTION : pip install arabic-reshaper python-bidi (sinon l'arabe sera mal affiché)")
-print("▶ Modules chargés.", flush=True)
+VERSION = "2026-10-26-sense-guard"
+T0 = time.time()
 
-# ======================================================================
-# CONFIGURATION
-# ======================================================================
-TRUSTED_WEB_SOURCES = {
-    "FXStreet": "https://www.fxstreet.com/rss/news",
-    "InvestingLive Macro": "https://investinglive.com/rss/news",
-    "ActionForex Fundamental": "https://www.actionforex.com/category/fundamental-analysis/feed/",
+
+# ════════════════════════════════════════════════════════════════════
+# Outils : logs, variables d'environnement, état
+# ════════════════════════════════════════════════════════════════════
+def log(msg, icon="  "):
+    print(f"[{time.time() - T0:6.1f}s] {icon} {msg}", flush=True)
+
+
+def ok(msg):
+    log(msg, "✅")
+
+
+def warn(msg):
+    log(msg, "⚠️ ")
+
+
+def err(msg):
+    log(msg, "❌")
+
+
+def info_log(msg):
+    log(msg, "➡️ ")
+
+
+def env(name, default=""):
+    v = os.environ.get(name)
+    return v.strip() if v and v.strip() else default
+
+
+def env_int(name, default):
+    try:
+        return int(env(name, str(default)))
+    except ValueError:
+        return default
+
+
+def banner(title):
+    print("═" * 68, flush=True)
+    print(f" {title}", flush=True)
+    print("═" * 68, flush=True)
+
+
+# --- Secrets ---
+GROQ_KEY = env("TOKEN_AI_DESCRYB_IMG") or env("GROQ_API_KEY")
+META_TOKEN = env("PAGE_ACCESS_TOKEN")
+PAGE_ID = env("PAGE_ID")
+IG_ID = env("INSTAGRAM_BUSINESS_ID")
+CF_ACCOUNT = env("CF_ACCOUNT_ID")
+CF_TOKEN = env("CF_API_TOKEN")
+GEMINI_KEY = env("GEMINI_API_KEY")
+PEXELS_KEY = env("PEXELS_API_KEY")
+PIXABAY_KEY = env("PIXABAY_API_KEY")
+CLD_NAME = env("CLOUDINARY_CLOUD_NAME")
+CLD_KEY = env("CLOUDINARY_API_KEY")
+CLD_SECRET = env("CLOUDINARY_API_SECRET")
+
+# --- Réglages ---
+GRAPH = env("GRAPH_VERSION", "v26.0")
+MAX_POSTS = env_int("MAX_POSTS", 1)
+MAX_ATTEMPTS = env_int("MAX_ATTEMPTS", 3)
+MAX_AGE_H = env_int("MAX_AGE_HOURS", 72)
+MIN_IMG_W = env_int("MIN_IMG_W", 900)
+IMAGE_CANDIDATES = env_int("IMAGE_CANDIDATES", 2)  # essais max par générateur IA
+PHOTO_TRIES = env_int("PHOTO_TRIES", 4)  # photos testées par banque d'images
+OUT_W, OUT_H = 1080, 1350
+MIN_RELEVANCE = env_int("MIN_RELEVANCE", 8)  # sens : note mini /10
+MIN_QUALITY = env_int("MIN_QUALITY", 7)
+VISION_CHECK = env("VISION_CHECK", "1") == "1"
+# 1 = si aucun LLM de vision ne répond, on n'accepte PAS l'image (on passe à la carte)
+VISION_REQUIRED = env("VISION_REQUIRED", "1") == "1"
+IMAGE_ORDER = [s.strip() for s in env("IMAGE_ORDER", "cloudflare,gemini,pexels,pixabay").split(",") if s.strip()]
+STATE_FILE = env("STATE_FILE", "published_news.json")
+BRAND = env("BRAND_NAME", "Money.impact")
+
+GROQ_BASE = "https://api.groq.com/openai/v1"
+GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta/models"
+CF_BASE = f"https://api.cloudflare.com/client/v4/accounts/{CF_ACCOUNT}/ai/run"
+CF_IMAGE_MODEL = env("CF_IMAGE_MODEL", "@cf/black-forest-labs/flux-1-schnell")
+CF_TEXT_MODEL = env("CF_TEXT_MODEL", "@cf/meta/llama-3.3-70b-instruct-fp8-fast")
+GEMINI_TEXT_MODEL = env("GEMINI_TEXT_MODEL", "gemini-2.5-flash")
+GEMINI_IMAGE_MODEL = env("GEMINI_IMAGE_MODEL", "gemini-2.5-flash-image")
+
+GROQ_TEXT_PREF = [m for m in [
+    env("GROQ_MODEL"), env("GROQ_PROMPT_MODEL"), "openai/gpt-oss-120b",
+    "llama-3.3-70b-versatile", "qwen/qwen3-32b", "llama-3.1-8b-instant"] if m]
+GROQ_VISION_PREF = [m for m in [
+    env("GROQ_VISION_MODEL"), "meta-llama/llama-4-scout-17b-16e-instruct",
+    "meta-llama/llama-4-maverick-17b-128e-instruct"] if m]
+
+DEFAULT_FEEDS = [
+    ("ActionForex Fundamental", "https://www.actionforex.com/category/action-insight/feed/"),
+    ("FXStreet", "https://www.fxstreet.com/rss/news"),
+    ("ForexLive", "https://www.forexlive.com/feed/"),
+]
+
+
+def parse_feeds():
+    raw = env("FEEDS")
+    if not raw:
+        return DEFAULT_FEEDS
+    out = []
+    for part in raw.split(","):
+        if "|" in part:
+            n, u = part.split("|", 1)
+            out.append((n.strip(), u.strip()))
+    return out or DEFAULT_FEEDS
+
+
+# ════════════════════════════════════════════════════════════════════
+# Désactivation temporaire des services en échec
+# ════════════════════════════════════════════════════════════════════
+DISABLED = {}
+
+
+def is_disabled(name):
+    return DISABLED.get(name, 0) > time.time()
+
+
+def disable(name, minutes, why):
+    DISABLED[name] = time.time() + minutes * 60
+    warn(f"{name} : désactivé {minutes} min ({why})")
+
+
+def minutes_to_midnight_utc():
+    now = dt.datetime.now(dt.timezone.utc)
+    nxt = (now + dt.timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+    return int((nxt - now).total_seconds() // 60) + 1
+
+
+# ════════════════════════════════════════════════════════════════════
+# JSON : extraction tolérante
+# ════════════════════════════════════════════════════════════════════
+def parse_json(txt):
+    txt = re.sub(r"<think>.*?</think>", "", txt or "", flags=re.S).strip()
+    txt = re.sub(r"^```(?:json)?|```$", "", txt, flags=re.M).strip()
+    m = re.search(r"\{.*\}", txt, re.S)
+    if not m:
+        raise ValueError("pas de JSON dans la réponse")
+    return json.loads(m.group(0))
+
+
+# ════════════════════════════════════════════════════════════════════
+# LLM : Groq -> Gemini -> Cloudflare (texte) | Groq vision -> Gemini (vision)
+# ════════════════════════════════════════════════════════════════════
+GROQ_AVAILABLE = None
+
+
+def groq_models():
+    global GROQ_AVAILABLE
+    if GROQ_AVAILABLE is not None:
+        return GROQ_AVAILABLE
+    GROQ_AVAILABLE = set()
+    if not GROQ_KEY:
+        return GROQ_AVAILABLE
+    try:
+        r = requests.get(f"{GROQ_BASE}/models", headers={"Authorization": f"Bearer {GROQ_KEY}"}, timeout=20)
+        if r.ok:
+            GROQ_AVAILABLE = {m["id"] for m in r.json().get("data", [])}
+            log(f"Groq : {len(GROQ_AVAILABLE)} modèles disponibles sur le compte")
+        else:
+            warn(f"Groq /models : HTTP {r.status_code}")
+    except Exception as e:  # noqa: BLE001
+        warn(f"Groq /models : {type(e).__name__}")
+    return GROQ_AVAILABLE
+
+
+def groq_pick(pref, vision=False):
+    """Modèles à essayer, dans l'ordre, filtrés par ce qui existe réellement."""
+    avail = groq_models()
+    if not avail:
+        return list(pref)
+    chosen = [m for m in pref if m in avail]
+    if vision:
+        chosen += [m for m in sorted(avail) if ("llama-4" in m or "vision" in m) and m not in chosen]
+    else:
+        chosen += [m for m in sorted(avail)
+                   if not any(x in m for x in ("whisper", "guard", "tts", "vision", "llama-4", "orpheus", "embed"))
+                   and m not in chosen][:2]
+    return chosen
+
+
+def groq_chat(model, messages, json_mode=True, max_tokens=2048):
+    body = {"model": model, "messages": messages, "temperature": 0.2, "max_tokens": max_tokens}
+    if json_mode:
+        body["response_format"] = {"type": "json_object"}
+    hdr = {"Authorization": f"Bearer {GROQ_KEY}", "Content-Type": "application/json"}
+    r = requests.post(f"{GROQ_BASE}/chat/completions", headers=hdr, json=body, timeout=60)
+    if r.status_code == 400 and json_mode:
+        body.pop("response_format", None)
+        r = requests.post(f"{GROQ_BASE}/chat/completions", headers=hdr, json=body, timeout=60)
+    if not r.ok:
+        raise RuntimeError(f"Groq {model} HTTP {r.status_code}: {r.text[:160]}")
+    return r.json()["choices"][0]["message"]["content"] or ""
+
+
+def gemini_call(model, parts, system=None, image_out=False, json_mode=False):
+    body = {"contents": [{"parts": parts}]}
+    if system:
+        body["systemInstruction"] = {"parts": [{"text": system}]}
+    gen = {}
+    if json_mode:
+        gen["responseMimeType"] = "application/json"
+    if image_out:
+        gen["responseModalities"] = ["TEXT", "IMAGE"]
+        gen["imageConfig"] = {"aspectRatio": "4:5"}
+    if gen:
+        body["generationConfig"] = gen
+    url = f"{GEMINI_BASE}/{model}:generateContent?key={GEMINI_KEY}"
+    r = requests.post(url, json=body, timeout=120)
+    if r.status_code == 400 and image_out:  # certains comptes refusent imageConfig
+        body["generationConfig"].pop("imageConfig", None)
+        r = requests.post(url, json=body, timeout=120)
+    if not r.ok:
+        raise RuntimeError(f"Gemini {model} HTTP {r.status_code}: {r.text[:160]}")
+    return r.json()
+
+
+def gemini_text(data):
+    out = []
+    for c in data.get("candidates", []):
+        for p in c.get("content", {}).get("parts", []):
+            if "text" in p:
+                out.append(p["text"])
+    return "".join(out)
+
+
+def text_providers(system, user):
+    """Liste de (nom, fonction) pour tâches texte, dans l'ordre de préférence."""
+    provs = []
+    if GROQ_KEY:
+        for m in groq_pick(GROQ_TEXT_PREF)[:3]:
+            provs.append((f"Groq:{m}", lambda m=m: groq_chat(
+                m, [{"role": "system", "content": system}, {"role": "user", "content": user}])))
+    if GEMINI_KEY:
+        provs.append((f"Gemini:{GEMINI_TEXT_MODEL}", lambda: gemini_text(
+            gemini_call(GEMINI_TEXT_MODEL, [{"text": user}], system=system, json_mode=True))))
+    if CF_ACCOUNT and CF_TOKEN and not is_disabled("cloudflare"):
+        def cf_txt():
+            r = requests.post(f"{CF_BASE}/{CF_TEXT_MODEL}", headers={"Authorization": f"Bearer {CF_TOKEN}"},
+                              json={"messages": [{"role": "system", "content": system},
+                                                 {"role": "user", "content": user}], "max_tokens": 1500},
+                              timeout=60)
+            if not r.ok:
+                raise RuntimeError(f"Cloudflare texte HTTP {r.status_code}")
+            return r.json()["result"]["response"]
+        provs.append((f"Cloudflare:{CF_TEXT_MODEL}", cf_txt))
+    return provs
+
+
+def vision_providers(system, user, jpeg):
+    provs = []
+    b64 = base64.b64encode(jpeg).decode()
+    if GROQ_KEY:
+        for m in groq_pick(GROQ_VISION_PREF, vision=True)[:2]:
+            msgs = [{"role": "system", "content": system},
+                    {"role": "user", "content": [
+                        {"type": "text", "text": user},
+                        {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64}"}}]}]
+            provs.append((f"Groq-vision:{m}", lambda m=m, msgs=msgs: groq_chat(m, msgs, max_tokens=600)))
+    if GEMINI_KEY:
+        parts = [{"text": user}, {"inlineData": {"mimeType": "image/jpeg", "data": b64}}]
+        provs.append((f"Gemini-vision:{GEMINI_TEXT_MODEL}", lambda: gemini_text(
+            gemini_call(GEMINI_TEXT_MODEL, parts, system=system, json_mode=True))))
+    return provs
+
+
+# ════════════════════════════════════════════════════════════════════
+# Analyse de la news : extraction du SENS (JSON)
+# ════════════════════════════════════════════════════════════════════
+TOPICS = ["currency", "gold", "oil", "stocks", "crypto", "central_bank", "inflation", "jobs",
+          "trade", "geopolitics", "other"]
+
+ANALYSIS_SYSTEM = (
+    "You are a financial news editor. You receive ONE English market news item. "
+    "Return ONLY a JSON object, no commentary. Stay strictly faithful to the source text: "
+    "never add facts, countries, numbers or names that are not in it. If something is not "
+    "stated, leave it out.")
+
+ANALYSIS_USER = """News title: {title}
+News text: {text}
+
+Return JSON with exactly these keys:
+- "title_ar": short Arabic headline (max 90 characters), faithful to the title
+- "caption_ar": Arabic social post (2 to 4 sentences, max 450 characters), faithful to the text, no invented facts
+- "topic": one of {topics}
+- "region": main country or zone concerned, in English (e.g. "Australia", "Eurozone", "USA", "Global")
+- "direction": one of "up", "down", "neutral", "mixed" (overall market tone of the news)
+- "key_fact": one English sentence stating the core fact of the news
+- "visual_object": ONE concrete physical object that best symbolises the news, in English, 4 to 10 words,
+  tied to the region/asset (e.g. "stacked Australian polymer banknotes", "euro banknotes and coins",
+  "gold bars", "oil pipeline valves at sunset"). No people, no text, no logos, no charts with numbers.
+- "photo_query": 2 to 4 English words to search a stock photo of that object"""
+
+
+def has_arabic(s):
+    return bool(re.search(r"[\u0600-\u06FF]", s or ""))
+
+
+def analyze_news(news):
+    user = ANALYSIS_USER.format(title=news["title"], text=news["text"][:1800], topics=", ".join(TOPICS))
+    for name, fn in text_providers(ANALYSIS_SYSTEM, user):
+        t = time.time()
+        try:
+            data = parse_json(fn())
+            if not has_arabic(data.get("title_ar")) or not has_arabic(data.get("caption_ar")):
+                raise ValueError("texte arabe manquant")
+            if len(str(data.get("visual_object", ""))) < 4:
+                raise ValueError("visual_object manquant")
+            data["topic"] = data.get("topic") if data.get("topic") in TOPICS else "other"
+            data["direction"] = data.get("direction") if data.get("direction") in (
+                "up", "down", "neutral", "mixed") else "neutral"
+            data["region"] = str(data.get("region") or "Global")
+            data["key_fact"] = str(data.get("key_fact") or news["title"])
+            data["photo_query"] = str(data.get("photo_query") or data["visual_object"])[:60]
+            ok(f"Analyse reçue en {time.time() - t:.1f}s ({name})")
+            return data
+        except Exception as e:  # noqa: BLE001
+            warn(f"Analyse {name} : {type(e).__name__} {str(e)[:120]}")
+    return None
+
+
+# Règles de secours (le code décide l'objet si le LLM échoue sur ce champ)
+OBJECT_RULES = [
+    (r"aussie|australia|\baud\b|rba", "stacked Australian polymer banknotes"),
+    (r"kiwi|new zealand|\bnzd\b|rbnz", "New Zealand dollar banknotes"),
+    (r"euro|eurozone|\becb\b|europe", "euro banknotes and coins"),
+    (r"yen|japan|\bboj\b|\bjpy\b", "Japanese yen banknotes"),
+    (r"pound|sterling|\bgbp\b|\bboe\b|\buk\b", "British pound sterling banknotes"),
+    (r"swiss|franc|\bchf\b|\bsnb\b", "Swiss franc banknotes"),
+    (r"canad|loonie|\bcad\b|\bboc\b", "Canadian dollar banknotes"),
+    (r"yuan|china|pboc|\bcny\b", "Chinese yuan banknotes"),
+    (r"gold|xau", "polished gold bars"),
+    (r"oil|crude|brent|\bwti\b|opec", "oil pipeline valves at sunset"),
+    (r"bitcoin|crypto|ethereum", "a physical golden coin on a dark surface"),
+    (r"dollar|\busd\b|\bfed\b|treasury|payroll|nfp", "stacked US dollar bills"),
+]
+MOOD = {
+    "up": "warm golden light, optimistic mood",
+    "down": "cool dim blue light, heavy cautious mood",
+    "neutral": "balanced soft light, calm mood",
+    "mixed": "contrasting warm and cool light, tense mood",
 }
 
-# Modifiables par variables d'environnement (sans toucher au code)
-GROQ_MODEL = os.getenv("GROQ_MODEL", "qwen/qwen3.8-27b")                 # traduction
-GROQ_PROMPT_MODEL = os.getenv("GROQ_PROMPT_MODEL", "llama-3.3-70b-versatile")  # prompt d'image
-# Modèle de vision (contrôle qualité des images). Désactivé automatiquement s'il n'existe pas.
-GROQ_VISION_MODEL = os.getenv("GROQ_VISION_MODEL", "meta-llama/llama-4-scout-17b-16e-instruct")
-# Mettre VISION_CHECK=0 pour désactiver le contrôle par LLM de vision
-VISION_CHECK = os.getenv("VISION_CHECK", "1") == "1"
-# Liste des modèles réellement disponibles sur le compte Groq (remplie au démarrage)
-GROQ_AVAILABLE = []
 
-# Générateurs d'image essayés dans l'ordre : Cloudflare -> Gemini -> Together -> HF -> Pollinations
-# lucid-origin consomme plus de neurons : par défaut on garde seulement flux-1-schnell
-CF_IMAGE_MODELS = os.getenv("CF_IMAGE_MODELS", "@cf/black-forest-labs/flux-1-schnell")
-HF_IMAGE_MODEL = os.getenv("HF_IMAGE_MODEL", "black-forest-labs/FLUX.1-schnell")
-GEMINI_IMAGE_MODEL = os.getenv("GEMINI_IMAGE_MODEL", "gemini-2.5-flash-image")
-TOGETHER_IMAGE_MODEL = os.getenv("TOGETHER_IMAGE_MODEL", "black-forest-labs/FLUX.1-schnell")
-GRAPH_URL = "https://graph.facebook.com/" + os.getenv("GRAPH_VERSION", "v26.0")
-
-# Génération directement en portrait -> aucun recadrage destructif
-IMG_W, IMG_H = 1024, 1280      # multiples de 16 (requis par FLUX)
-OUT_W, OUT_H = 1080, 1350      # sortie finale 4:5 (Facebook / Instagram)
-
-# Largeur minimale acceptée pour une image générée (rejette les images basse résolution)
-MIN_IMG_W = int(os.getenv("MIN_IMG_W", "900"))
-
-# Nombre de candidats générés ; le meilleur est sélectionné automatiquement
-IMAGE_CANDIDATES = int(os.getenv("IMAGE_CANDIDATES", "2"))
-
-# Contrôle de publication
-MAX_POSTS_PER_RUN = int(os.getenv("MAX_POSTS_PER_RUN", "1"))
-# 3 tentatives : si la traduction d'une news échoue, le script essaie la suivante
-MAX_ATTEMPTS_PER_RUN = int(os.getenv("MAX_ATTEMPTS_PER_RUN", "3"))
-MAX_NEWS_AGE_HOURS = int(os.getenv("MAX_NEWS_AGE_HOURS", "72"))
-IG_CAPTION_LIMIT = 2200
-
-# Identité de la page
-BRAND_NAME = ("Money", ".impact")
-BRAND_HANDLE = "@money.impact.today"
-BRAND_ACCENT = (255, 196, 0)
-# Police arabe grasse. Idéal : Cairo-Bold.ttf ou Tajawal-Bold.ttf dans le dossier ./fonts/
-AR_FONT_ENV = os.getenv("AR_FONT_PATH", "")
-
-BASE_DIR = Path(__file__).resolve().parent if "__file__" in globals() else Path.cwd()
-OUTPUT_DIR = BASE_DIR / "output"
-OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+def fallback_object(news):
+    blob = f"{news['title']} {news['text']}".lower()
+    for pat, obj in OBJECT_RULES:
+        if re.search(pat, blob):
+            return obj
+    return "abstract glowing candlestick shapes without numbers"
 
 
-# Logo de la page (PNG transparent conseillé), affiché en haut à gauche
-def _find_logo():
-    env = os.getenv("LOGO_PATH", "")
-    if env:
-        return Path(env)
-    for name in ("logo_money_impact.png", "logo_money_impact.jpg", "logo_money_impact.jpeg"):
-        p = BASE_DIR / "imgs" / name
-        if p.is_file():
-            return p
-    return BASE_DIR / "imgs" / "logo_money_impact.png"
+def build_image_prompt(info):
+    obj = info["visual_object"]
+    return (f"{obj}, placed in the upper part of the frame. {MOOD[info['direction']]}. "
+            "Lower 40% of the frame dark, smooth and uncluttered. "
+            "Photorealistic editorial photography, 85mm lens, shallow depth of field, "
+            "deep navy blue and warm gold colour grading, ultra detailed, sharp focus. "
+            "No text, no letters, no numbers, no logos, no people.")
 
 
-LOGO_PATH = _find_logo()
-# Mettre LOGO_BACKDROP=1 si ton logo est sombre (ajoute un fond foncé derrière)
-LOGO_BACKDROP = os.getenv("LOGO_BACKDROP", "0") == "1"
-
-# Scènes de secours si le LLM échoue (mots-clés -> scène photo précise)
-# L'ordre compte : les cas spécifiques (Europe, euro) passent AVANT la bourse générique.
-FALLBACK_SCENES = [
-    (("gold", "xau", "bullion"),
-     "Stack of gold bars on dark polished surface inside a bank vault, blurred safety deposit boxes behind"),
-    (("oil", "crude", "wti", "brent", "opec"),
-     "Oil refinery towers at dusk with glowing flare stacks, blurred pipelines and storage tanks in background"),
-    (("bitcoin", "crypto", "btc", "ethereum"),
-     "Single physical gold bitcoin coin standing on dark reflective glass, blurred server racks behind"),
-    (("euro", "eur", "ecb", "lagarde", "europe", "france", "german", "eurozone", "bund"),
-     "Euro banknotes fanned out on dark stone surface, blurred European central bank facade behind"),
-    (("yen", "jpy", "boj"),
-     "Japanese yen banknotes and coins on dark lacquered surface, blurred Tokyo skyline at dusk behind"),
-    (("pound", "gbp", "boe", "sterling"),
-     "British pound notes on dark slate surface, blurred London financial district behind"),
-    (("aussie", "aud", "rba", "australia"),
-     "Australian dollar banknotes on dark slate surface, blurred harbour skyline at dusk behind"),
-    (("dollar", "usd", "fed ", "fomc", "powell", "treasury", "yield"),
-     "Stack of US hundred-dollar bills on dark marble desk, blurred columns of a federal building behind"),
-    (("stock", "nasdaq", "s&p", "dow", "equities", "wall street", "shares"),
-     "New York Stock Exchange facade with large columns and flags, dramatic evening light, blurred street below"),
-]
-DEFAULT_SCENE = (
-    "Stack of gold bars on dark marble surface, blurred bank vault door in background"
-)
-
-STYLE_SUFFIX = (
-    "warm cinematic side lighting, shot on Canon EOS R5, 85mm f/1.4 lens, "
-    "shallow depth of field, creamy bokeh, tack-sharp focus on the hero subject, "
-    "editorial photography, professional color grading in deep navy blue and warm gold, "
-    "photorealistic, ultra detailed, 8k, hero subject in the upper 60% of the frame, "
-    "lower 40% of the frame dark, smooth and uncluttered, "
-    "no text, no letters, no logos, no people"
-)
-
-
-# ======================================================================
-# LOGS : affichage en temps réel, étape par étape (visible dans GitHub Actions)
-# ======================================================================
-try:
-    sys.stdout.reconfigure(line_buffering=True, encoding="utf-8", errors="replace")
-    sys.stderr.reconfigure(line_buffering=True, encoding="utf-8", errors="replace")
-except Exception:
+# ════════════════════════════════════════════════════════════════════
+# Images : préparation et contrôle qualité / sens
+# ════════════════════════════════════════════════════════════════════
+class BadImage(Exception):
     pass
 
-IS_GHA = os.getenv("GITHUB_ACTIONS", "").lower() == "true"
-T0 = time.time()
-SECRET_ENV_NAMES = ("TOKEN_AI_DESCRYB_IMG", "HF_TOKEN", "PAGE_ACCESS_TOKEN",
-                    "CLOUDINARY_API_KEY", "CLOUDINARY_API_SECRET",
-                    "CF_API_TOKEN", "CF_ACCOUNT_ID", "GEMINI_API_KEY",
-                    "TOGETHER_API_KEY", "POLLINATIONS_API_KEY")
-_ICONS = {"INFO": "  ", "STEP": "➡️ ", "OK": "✅", "WARN": "⚠️ ", "ERROR": "❌"}
 
-# Compteurs pour le résumé final
-STATS = {
-    "flux_ok": 0, "flux_ko": 0, "news_total": 0, "deja": 0, "anciennes": 0,
-    "candidates": 0, "tentatives": 0, "publies": 0, "echecs": [],
+def open_image(raw):
+    try:
+        img = Image.open(io.BytesIO(raw))
+        img.load()
+        return img.convert("RGB")
+    except Exception as e:  # noqa: BLE001
+        raise BadImage(f"image illisible ({type(e).__name__})")
+
+
+def to_canvas(img):
+    w, h = img.size
+    target = OUT_W / OUT_H
+    if w / h > target:
+        nw = int(h * target)
+        left = (w - nw) // 2
+        img = img.crop((left, 0, left + nw, h))
+    else:
+        nh = int(w / target)
+        top = int((h - nh) * 0.4)
+        img = img.crop((0, top, w, top + nh))
+    img = img.resize((OUT_W, OUT_H), Image.LANCZOS)
+    return img.filter(ImageFilter.UnsharpMask(radius=1.2, percent=60, threshold=3))
+
+
+def to_jpeg(img, quality=92):
+    buf = io.BytesIO()
+    img.save(buf, "JPEG", quality=quality, optimize=True)
+    return buf.getvalue()
+
+
+VISION_SYSTEM = ("You are a strict quality controller for images illustrating financial news. "
+                 "Answer ONLY with a JSON object.")
+VISION_USER = """The image must illustrate this news item:
+Title: {title}
+Core fact: {fact}
+Region: {region}
+
+Return JSON with keys:
+- "relevance": integer 0-10, how clearly the image visually evokes THIS news (right country/asset/theme). Generic or wrong region = low score.
+- "quality": integer 0-10 (sharp, well composed, professional, not blurry, not distorted)
+- "has_text": true if any readable text, letters, numbers or watermark is visible
+- "has_people": true if any person or face is visible
+- "deformed": true if objects or hands look warped, melted or unnatural
+- "reason": short sentence"""
+
+
+def vision_ok(img, info, news, is_ai):
+    """Retourne True/False, ou None si aucun LLM de vision n'a pu répondre."""
+    if not VISION_CHECK:
+        return True
+    small = img.copy()
+    small.thumbnail((768, 768))
+    jpeg = to_jpeg(small, 85)
+    user = VISION_USER.format(title=news["title"], fact=info["key_fact"], region=info["region"])
+    for name, fn in vision_providers(VISION_SYSTEM, user, jpeg):
+        try:
+            d = parse_json(fn())
+            rel, qual = int(d.get("relevance", 0)), int(d.get("quality", 0))
+            bad = []
+            if rel < MIN_RELEVANCE:
+                bad.append(f"sens {rel}/{MIN_RELEVANCE}")
+            if qual < MIN_QUALITY:
+                bad.append(f"qualité {qual}/{MIN_QUALITY}")
+            if d.get("has_text"):
+                bad.append("texte visible")
+            if d.get("deformed"):
+                bad.append("objets déformés")
+            if is_ai and d.get("has_people"):
+                bad.append("personnes")
+            if bad:
+                warn(f"Vision {name} : REJET ({', '.join(bad)}) | {str(d.get('reason', ''))[:100]}")
+                return False
+            ok(f"Vision {name} : OK (sens {rel}/10, qualité {qual}/10)")
+            return True
+        except Exception as e:  # noqa: BLE001
+            warn(f"Vision {name} : {type(e).__name__} {str(e)[:100]}")
+    return None
+
+
+def accept(img_raw_img, info, news, is_ai, label):
+    """Taille + vision. Retourne le jpeg final ou None."""
+    w, h = img_raw_img.size
+    if min(w, h) < MIN_IMG_W:
+        warn(f"{label} : image {w}x{h} trop petite (min {MIN_IMG_W}px) -> rejetée")
+        return None
+    canvas = to_canvas(img_raw_img)
+    verdict = vision_ok(canvas, info, news, is_ai)
+    if verdict is False:
+        return None
+    if verdict is None:
+        if VISION_REQUIRED:
+            warn(f"{label} : aucun LLM de vision disponible, sens non vérifiable -> rejetée")
+            return None
+        warn(f"{label} : vision indisponible, image acceptée (VISION_REQUIRED=0)")
+    return to_jpeg(canvas)
+
+
+# ---- Générateurs IA ----
+def gen_cloudflare(prompt):
+    if not (CF_ACCOUNT and CF_TOKEN):
+        return None
+    if is_disabled("cloudflare"):
+        return None
+    for attempt in (1, 2):
+        info_log(f"Cloudflare[{CF_IMAGE_MODEL.split('/')[-1]}] : essai {attempt}/2…")
+        try:
+            r = requests.post(f"{CF_BASE}/{CF_IMAGE_MODEL}",
+                              headers={"Authorization": f"Bearer {CF_TOKEN}"},
+                              json={"prompt": prompt, "steps": 8}, timeout=120)
+        except Exception as e:  # noqa: BLE001
+            warn(f"Cloudflare : {type(e).__name__}")
+            continue
+        if r.status_code == 429 and "daily free allocation" in r.text:
+            disable("cloudflare", minutes_to_midnight_utc(), "quota quotidien épuisé, reset 00:00 UTC")
+            return None
+        if not r.ok:
+            warn(f"Cloudflare essai {attempt}/2 : HTTP {r.status_code} -> {r.text[:140]}")
+            time.sleep(2)
+            continue
+        ctype = r.headers.get("content-type", "")
+        if "json" in ctype:
+            b64 = (r.json().get("result") or {}).get("image")
+            if b64:
+                return base64.b64decode(b64)
+        elif r.content:
+            return r.content
+    return None
+
+
+def gen_gemini(prompt):
+    if not GEMINI_KEY or is_disabled("gemini"):
+        return None
+    info_log(f"Gemini[{GEMINI_IMAGE_MODEL}] : génération…")
+    try:
+        data = gemini_call(GEMINI_IMAGE_MODEL, [{"text": prompt}], image_out=True)
+    except Exception as e:  # noqa: BLE001
+        msg = str(e)
+        warn(f"Gemini : {msg[:160]}")
+        if "429" in msg or "RESOURCE_EXHAUSTED" in msg:
+            disable("gemini", minutes_to_midnight_utc(), "quota")
+        elif "HTTP 4" in msg:
+            disable("gemini", 240, "refus de l'API (clé/billing)")
+        return None
+    for c in data.get("candidates", []):
+        for p in c.get("content", {}).get("parts", []):
+            inline = p.get("inlineData") or p.get("inline_data")
+            if inline and inline.get("data"):
+                return base64.b64decode(inline["data"])
+    warn("Gemini : réponse sans image")
+    return None
+
+
+# ---- Banques de photos libres ----
+def pexels_urls(query):
+    r = requests.get("https://api.pexels.com/v1/search", headers={"Authorization": PEXELS_KEY},
+                     params={"query": query, "orientation": "portrait", "size": "large", "per_page": 15},
+                     timeout=30)
+    if r.status_code == 429:
+        disable("pexels", 60, "limite de requêtes")
+        return []
+    r.raise_for_status()
+    return [(p["id"], p["src"].get("large2x") or p["src"]["large"]) for p in r.json().get("photos", [])]
+
+
+def pixabay_urls(query):
+    r = requests.get("https://pixabay.com/api/", params={
+        "key": PIXABAY_KEY, "q": query, "image_type": "photo", "orientation": "vertical",
+        "min_width": MIN_IMG_W, "safesearch": "true", "per_page": 15, "order": "popular"}, timeout=30)
+    if r.status_code == 429:
+        disable("pixabay", 60, "limite de requêtes")
+        return []
+    r.raise_for_status()
+    return [(p["id"], p["largeImageURL"]) for p in r.json().get("hits", [])]
+
+
+USED_PHOTOS = set()
+
+
+def photos_from(service, queries, info, news):
+    key = PEXELS_KEY if service == "pexels" else PIXABAY_KEY
+    if not key or is_disabled(service):
+        return None
+    finder = pexels_urls if service == "pexels" else pixabay_urls
+    tested = 0
+    for q in queries:
+        try:
+            urls = finder(q)
+        except Exception as e:  # noqa: BLE001
+            warn(f"{service} : {type(e).__name__} {str(e)[:100]}")
+            return None
+        info_log(f"{service} : {len(urls)} photos pour « {q} »")
+        for pid, url in urls:
+            if (service, pid) in USED_PHOTOS:
+                continue
+            if tested >= PHOTO_TRIES:
+                return None
+            USED_PHOTOS.add((service, pid))
+            tested += 1
+            try:
+                raw = requests.get(url, timeout=60).content
+                jpeg = accept(open_image(raw), info, news, False, f"{service}#{pid}")
+            except Exception as e:  # noqa: BLE001
+                warn(f"{service}#{pid} : {type(e).__name__}")
+                continue
+            if jpeg:
+                return jpeg
+    return None
+
+
+# ---- Carte Pillow (secours garanti, titre arabe de la news) ----
+FONT_CANDIDATES = [
+    "/usr/share/fonts/truetype/noto/NotoNaskhArabic-Bold.ttf",
+    "/usr/share/fonts/truetype/noto/NotoSansArabic-Bold.ttf",
+    "/usr/share/fonts/opentype/noto/NotoSansArabic-Bold.ttf",
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+    "/usr/share/fonts/dejavu/DejaVuSans-Bold.ttf",
+    "DejaVuSans-Bold.ttf",
+]
+
+
+def load_font(size):
+    for p in FONT_CANDIDATES:
+        try:
+            return ImageFont.truetype(p, size)
+        except Exception:  # noqa: BLE001
+            continue
+    warn("Aucune police arabe trouvée : installe fonts-noto-core (voir README)")
+    return ImageFont.load_default()
+
+
+def ar_display(s):
+    try:
+        import arabic_reshaper
+        from bidi.algorithm import get_display
+        return get_display(arabic_reshaper.reshape(s))
+    except Exception:  # noqa: BLE001
+        return s
+
+
+def wrap_ar(draw, text, font, max_w):
+    lines, cur = [], ""
+    for word in text.split():
+        trial = f"{cur} {word}".strip()
+        if draw.textlength(ar_display(trial), font=font) <= max_w or not cur:
+            cur = trial
+        else:
+            lines.append(cur)
+            cur = word
+    if cur:
+        lines.append(cur)
+    return lines
+
+
+def make_card(info):
+    navy_top, navy_bot, gold = (14, 30, 66), (5, 10, 26), (212, 175, 55)
+    img = Image.new("RGB", (OUT_W, OUT_H))
+    d = ImageDraw.Draw(img)
+    for y in range(OUT_H):
+        t = y / OUT_H
+        d.line([(0, y), (OUT_W, y)], fill=tuple(int(navy_top[i] * (1 - t) + navy_bot[i] * t) for i in range(3)))
+    # halo doré décoratif
+    glow = Image.new("RGBA", (OUT_W, OUT_H), (0, 0, 0, 0))
+    gd = ImageDraw.Draw(glow)
+    gd.ellipse([OUT_W // 2 - 320, 150, OUT_W // 2 + 320, 790], fill=(212, 175, 55, 55))
+    glow = glow.filter(ImageFilter.GaussianBlur(70))
+    img = Image.alpha_composite(img.convert("RGBA"), glow).convert("RGB")
+    d = ImageDraw.Draw(img)
+    # symbole de direction
+    cx, cy, s = OUT_W // 2, 470, 170
+    up = [(cx, cy - s), (cx + s, cy + s * 0.7), (cx - s, cy + s * 0.7)]
+    down = [(cx, cy + s), (cx + s, cy - s * 0.7), (cx - s, cy - s * 0.7)]
+    dirn = info.get("direction", "neutral")
+    if dirn == "up":
+        d.polygon(up, fill=gold)
+    elif dirn == "down":
+        d.polygon(down, fill=(200, 80, 80))
+    elif dirn == "mixed":
+        d.polygon([(cx - 150, cy - 40 - 110), (cx - 15, cy + 100), (cx - 285, cy + 100)], fill=gold)
+        d.polygon([(cx + 150, cy + 40 + 110), (cx + 285, cy - 100), (cx + 15, cy - 100)], fill=(200, 80, 80))
+    else:
+        d.rounded_rectangle([cx - 190, cy - 22, cx + 190, cy + 22], radius=22, fill=gold)
+    # titre
+    f_title = load_font(74)
+    margin = 90
+    lines = wrap_ar(d, info["title_ar"], f_title, OUT_W - 2 * margin)[:5]
+    y = 800
+    for ln in lines:
+        txt = ar_display(ln)
+        w = d.textlength(txt, font=f_title)
+        d.text(((OUT_W - w) / 2, y), txt, font=f_title, fill=(255, 255, 255))
+        y += 104
+    # filet doré et marque
+    d.rectangle([OUT_W // 2 - 90, 1215, OUT_W // 2 + 90, 1221], fill=gold)
+    f_brand = load_font(44)
+    w = d.textlength(BRAND, font=f_brand)
+    d.text(((OUT_W - w) / 2, 1250), BRAND, font=f_brand, fill=gold)
+    return to_jpeg(img)
+
+
+# ---- Orchestration des images ----
+def get_image(info, news):
+    info_log("── Génération de l'image ──")
+    prompt = build_image_prompt(info)
+    log(f"Objet visuel : {info['visual_object']} | région : {info['region']} | direction : {info['direction']}")
+    log(f"Prompt IA : {prompt}")
+    for service in IMAGE_ORDER:
+        if service in ("cloudflare", "gemini"):
+            gen = gen_cloudflare if service == "cloudflare" else gen_gemini
+            for k in range(1, IMAGE_CANDIDATES + 1):
+                if is_disabled(service) or (service == "gemini" and not GEMINI_KEY):
+                    break
+                info_log(f"{service} : candidat {k}/{IMAGE_CANDIDATES}")
+                raw = gen(prompt)
+                if not raw:
+                    break
+                try:
+                    jpeg = accept(open_image(raw), info, news, True, service)
+                except BadImage as e:
+                    warn(f"{service} : {e}")
+                    jpeg = None
+                if jpeg:
+                    return jpeg, service
+        elif service in ("pexels", "pixabay"):
+            queries = [info["photo_query"], info["visual_object"]]
+            jpeg = photos_from(service, queries, info, news)
+            if jpeg:
+                return jpeg, service
+        warn(f"{service} : pas d'image validée, service suivant…")
+    warn("Aucune image IA/photo validée : carte Pillow (titre exact de la news)")
+    return make_card(info), "carte-pillow"
+
+
+# ════════════════════════════════════════════════════════════════════
+# Flux d'actualités et état
+# ════════════════════════════════════════════════════════════════════
+def clean_html(s):
+    s = re.sub(r"<[^>]+>", " ", s or "")
+    s = re.sub(r"&nbsp;|&#160;", " ", s)
+    return re.sub(r"\s+", " ", s).strip()
+
+
+def news_id(title, link):
+    return hashlib.sha1(f"{link}|{title}".encode("utf-8")).hexdigest()[:20]
+
+
+def load_state():
+    try:
+        with open(STATE_FILE, "r", encoding="utf-8") as f:
+            return set(json.load(f))
+    except Exception:  # noqa: BLE001
+        return set()
+
+
+def save_state(ids):
+    try:
+        with open(STATE_FILE, "w", encoding="utf-8") as f:
+            json.dump(sorted(ids)[-500:], f)
+    except Exception as e:  # noqa: BLE001
+        warn(f"État non sauvegardé : {e}")
+
+
+def fetch_news():
+    items, ok_n, fail_n = [], 0, 0
+    now = dt.datetime.now(dt.timezone.utc)
+    for name, url in parse_feeds():
+        try:
+            r = requests.get(url, timeout=25, headers={"User-Agent": "Mozilla/5.0 (money-impact-bot)"})
+            r.raise_for_status()
+            feed = feedparser.parse(r.content)
+            if not feed.entries:
+                raise ValueError("flux vide")
+            ok_n += 1
+        except Exception as e:  # noqa: BLE001
+            fail_n += 1
+            warn(f"Flux {name} : {type(e).__name__} {str(e)[:80]}")
+            continue
+        for e in feed.entries:
+            pp = e.get("published_parsed") or e.get("updated_parsed")
+            when = dt.datetime(*pp[:6], tzinfo=dt.timezone.utc) if pp else now
+            title = clean_html(e.get("title", ""))
+            text = clean_html(e.get("summary", "") or e.get("description", ""))
+            if len(title) < 10:
+                continue
+            items.append({"source": name, "title": title, "text": text or title, "link": e.get("link", ""),
+                          "when": when, "id": news_id(title, e.get("link", ""))})
+    items.sort(key=lambda x: x["when"], reverse=True)
+    return items, ok_n, fail_n
+
+
+# ════════════════════════════════════════════════════════════════════
+# Publication
+# ════════════════════════════════════════════════════════════════════
+HASHTAGS = {
+    "currency": "#فوركس #العملات #الدولار", "gold": "#الذهب #المعادن_الثمينة", "oil": "#النفط #الطاقة",
+    "stocks": "#الأسهم #البورصة", "crypto": "#بيتكوين #العملات_الرقمية",
+    "central_bank": "#البنوك_المركزية #أسعار_الفائدة", "inflation": "#التضخم #الاقتصاد",
+    "jobs": "#الوظائف #الاقتصاد", "trade": "#التجارة #الاقتصاد", "geopolitics": "#الاقتصاد_العالمي",
+    "other": "#الاقتصاد #الأسواق",
 }
 
 
-class NoImageError(RuntimeError):
-    """Aucun générateur d'image n'a répondu (ou image refusée) : on n'a pas publié de post."""
+def build_caption(info, news):
+    tags = HASHTAGS.get(info["topic"], HASHTAGS["other"]) + f" #{BRAND.replace('.', '_')}"
+    cap = f"{info['title_ar']}\n\n{info['caption_ar']}\n\n📰 المصدر: {news['source']}\n{tags}"
+    return cap[:2000]
 
 
-def _redact(text):
-    """Masque les secrets : un token ne doit JAMAIS apparaître dans les logs."""
-    s = str(text)
-    for name in SECRET_ENV_NAMES:
-        v = os.getenv(name, "")
-        if v and len(v) >= 6:
-            s = s.replace(v, "***")
-    return re.sub(r"(access_token=)[^&\s\"']+", r"\1***", s)
+def cloudinary_upload(jpeg):
+    if not (CLD_NAME and CLD_KEY and CLD_SECRET):
+        raise RuntimeError("Cloudinary : CLOUDINARY_API_SECRET manquant")
+    ts = str(int(time.time()))
+    sig = hashlib.sha1(f"timestamp={ts}{CLD_SECRET}".encode()).hexdigest()
+    r = requests.post(f"https://api.cloudinary.com/v1_1/{CLD_NAME}/image/upload",
+                      data={"api_key": CLD_KEY, "timestamp": ts, "signature": sig},
+                      files={"file": ("post.jpg", jpeg, "image/jpeg")}, timeout=90)
+    if not r.ok:
+        raise RuntimeError(f"Cloudinary HTTP {r.status_code}: {r.text[:150]}")
+    return r.json()["secure_url"]
 
 
-def log(*args, level="INFO"):
-    """Une ligne de log horodatée, affichée immédiatement (flush)."""
-    msg = _redact(" ".join(str(a) for a in args))
-    print(f"[{time.time() - T0:6.1f}s] {_ICONS.get(level, '  ')} {msg}", flush=True)
-    if IS_GHA and level == "ERROR":  # apparaît aussi dans les annotations du run
-        print("::error::" + msg.replace("\r", " ").replace("\n", " ")[:300], flush=True)
+def publish_facebook(jpeg, caption):
+    r = requests.post(f"https://graph.facebook.com/{GRAPH}/{PAGE_ID}/photos",
+                      data={"caption": caption, "access_token": META_TOKEN},
+                      files={"source": ("post.jpg", jpeg, "image/jpeg")}, timeout=120)
+    if not r.ok:
+        raise RuntimeError(f"Facebook HTTP {r.status_code}: {r.text[:200]}")
+    return r.json().get("post_id") or r.json().get("id")
 
 
-def banner(num, total, title):
-    print("", flush=True)
-    print("═" * 68, flush=True)
-    print(f" ÉTAPE {num}/{total} — {title}", flush=True)
-    print("═" * 68, flush=True)
+def publish_instagram(image_url, caption):
+    base = f"https://graph.facebook.com/{GRAPH}"
+    r = requests.post(f"{base}/{IG_ID}/media", data={
+        "image_url": image_url, "caption": caption, "access_token": META_TOKEN}, timeout=60)
+    if not r.ok:
+        raise RuntimeError(f"Instagram media HTTP {r.status_code}: {r.text[:200]}")
+    cid = r.json()["id"]
+    for _ in range(12):
+        s = requests.get(f"{base}/{cid}", params={"fields": "status_code", "access_token": META_TOKEN}, timeout=30)
+        code = s.json().get("status_code") if s.ok else None
+        if code == "FINISHED":
+            break
+        if code == "ERROR":
+            raise RuntimeError("Instagram : conteneur en erreur")
+        time.sleep(3)
+    p = requests.post(f"{base}/{IG_ID}/media_publish", data={
+        "creation_id": cid, "access_token": META_TOKEN}, timeout=60)
+    if not p.ok:
+        raise RuntimeError(f"Instagram publish HTTP {p.status_code}: {p.text[:200]}")
+    return p.json().get("id")
 
 
-def step_summary(markdown):
-    """Ajoute du texte à la page 'Summary' du run GitHub Actions."""
-    path = os.getenv("GITHUB_STEP_SUMMARY")
-    if not path:
-        return
-    try:
-        with open(path, "a", encoding="utf-8") as f:
-            f.write(markdown + "\n")
-    except Exception:
-        pass
-
-
-def explain_graph_error(data):
-    """Transforme une erreur de l'API Meta en message clair + piste de solution."""
-    err = data.get("error", data) if isinstance(data, dict) else {}
-    if not isinstance(err, dict):
-        err = {}
-    msg = err.get("message") or str(data)[:300]
-    code, sub = err.get("code"), err.get("error_subcode")
-    hints = {
-        190: "Token invalide ou expiré : régénère un token longue durée de la Page.",
-        200: "Permission manquante (pages_manage_posts, pages_read_engagement, "
-             "instagram_content_publish...).",
-        10: "Permission refusée pour cette action.",
-        100: "Paramètre invalide : vérifie PAGE_ID / INSTAGRAM_BUSINESS_ID / URL image "
-             "(ou la version GRAPH_VERSION).",
-        368: "Blocage temporaire anti-spam de Meta : réduis la fréquence.",
-        4: "Limite d'appels API atteinte.", 17: "Limite d'appels API atteinte.",
-        32: "Limite d'appels API atteinte.", 613: "Limite d'appels API atteinte.",
-        9004: "Instagram n'arrive pas à télécharger l'image (URL).",
-        36000: "Image refusée (taille ou ratio non supporté).",
-    }
-    hint = hints.get(code)
-    return f"{msg} (code={code}, subcode={sub})" + (f"  →  {hint}" if hint else "")
-
-
-# ======================================================================
-# GÉNÉRATION DE POST (image + publication)
-# ======================================================================
-class TextPost:
-    # service -> timestamp de réactivation. Un service n'est désactivé que
-    # temporairement (limite de débit), jusqu'à minuit UTC (quota journalier)
-    # ou longtemps (clé/crédits refusés).
-    _dead = {}
-
-    def __init__(self):
-        # GROQ_PROMPT_MODEL peut avoir été remplacé par resoudre_modele_groq()
-        self.llm = ChatGroq(
-            model_name=GROQ_PROMPT_MODEL,
-            temperature=0.4,
-            groq_api_key=os.getenv("TOKEN_AI_DESCRYB_IMG", ""),
-            timeout=60,
-            max_retries=1,
-            max_tokens=2048,      # marge pour les modèles qui raisonnent avant de répondre
-        )
-
-    # ------------------------------------------------------------------
-    # 1) Prompt d'image
-    # ------------------------------------------------------------------
-    def donne_moi_prompt_images(self, news):
-        system_prompt = (
-            "You are an award-winning Reuters financial photojournalist and editorial "
-            "art director. You write vivid, specific, physically realistic photo "
-            "descriptions. You NEVER use vague terms like 'trading screens' or "
-            "'financial charts'. You always name exact objects, materials, lighting "
-            "and depth of field. You forbid abstract designs, 3D renders, neon, "
-            "wireframes and futuristic shapes."
-        )
-
-        user_prompt = f"""
-        FINANCIAL NEWS:
-        "{(news or '')[:800]}"
-
-        Identify the MAIN SUBJECT of this news and write ONE photorealistic editorial
-        photo description that represents it visually.
-
-        Subject mapping examples:
-        - bond yields / Treasuries -> stack of Treasury bonds on a desk
-        - gold -> gold bars in a vault
-        - oil -> refinery at dusk or oil barrels
-        - central bank -> central bank building facade
-        - US dollar -> dollar banknotes
-        - euro / European markets -> euro banknotes and coins, or a European stock exchange facade
-        - stock selloff / rally -> stock exchange facade with columns
-        - tech stocks -> close-up of a silicon microchip on a dark surface
-        - crypto -> physical coin on reflective surface
-        - anything else -> a physical coin stack, banknotes or a bank facade
-
-        Rules:
-        1. The FIRST WORDS must name the exact physical hero subject
-           (a real object or building, never a floor, a room or a concept).
-        2. Hero subject sits in the UPPER 60% of the frame, sharp focus, slightly off-center.
-        3. Background: relevant but blurred (bokeh). Specific lighting (e.g. golden
-           hour side-light, tungsten vault light, cold blue dawn light).
-        4. The lower 40% of the frame must be dark, smooth and uncluttered (a headline will be printed there).
-        5. Palette: deep navy blue and warm gold.
-        6. FORBIDDEN: people, faces, hands, text, letters, numbers, logos, watermarks,
-           abstract shapes, 3D renders, neon, computer screens with charts,
-           churches, pews, religious buildings.
-        7. Max 60 words. End with: photorealistic, 85mm lens, sharp focus.
-
-        OUTPUT ONLY this format:
-        POSITIVE PROMPT:
-        [description]
-
-        NEGATIVE PROMPT:
-        people, faces, hands, text, letters, numbers, logos, watermark, abstract,
-        3d render, neon, cartoon, illustration, painting, blurry, low quality
-        """
-
+def publish_all(jpeg, caption):
+    results = []
+    if PAGE_ID and META_TOKEN:
         try:
-            return self.llm.invoke([
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt},
-            ])
-        except Exception as e:
-            log(f"LLM prompt image : erreur {type(e).__name__} : {str(e)[:300]}", level="ERROR")
-
-            class Fallback:
-                content = ""
-
-            return Fallback()
-
-    @staticmethod
-    def _parse_prompts(text):
-        text = re.sub(r"<think>.*?</think>", "", text or "", flags=re.S | re.I)
-        pos = re.search(r"POSITIVE PROMPT:\s*(.*?)\s*NEGATIVE PROMPT:", text, re.S | re.I)
-        neg = re.search(r"NEGATIVE PROMPT:\s*(.*)", text, re.S | re.I)
-        if not pos or not neg:
-            return None, None
-        positive = pos.group(1).strip().strip('"').strip("[]")
-        return positive, neg.group(1).strip()
-
-    @staticmethod
-    def _fallback_scene(news):
-        low = (news or "").lower()
-        for keywords, scene in FALLBACK_SCENES:
-            if any(k in low for k in keywords):
-                return scene
-        return DEFAULT_SCENE
-
-    def _build_prompt(self, news):
-        t = time.time()
-        text = self.donne_moi_prompt_images(news).content
-        log(f"LLM : réponse en {time.time() - t:.1f}s ({len(text or '')} caractères)")
-        positive, _ = self._parse_prompts(text)
-        if not positive or len(positive.split()) < 6:
-            positive = self._fallback_scene(news)
-            log("LLM : prompt inexploitable -> scène de secours (mots-clés) utilisée.", level="WARN")
-        else:
-            log("LLM : prompt photo reçu.", level="OK")
-        # FLUX ignore le negative prompt : les interdits sont dans le positif
-        positive = " ".join(positive.split()[:70])
-        return f"{positive}, {STYLE_SUFFIX}"
-
-    # ------------------------------------------------------------------
-    # 2) Génération d'image : Cloudflare -> Gemini -> Together -> HF -> Pollinations
-    # ------------------------------------------------------------------
-    @classmethod
-    def _is_dead(cls, name):
-        return cls._dead.get(name, 0) > time.time()
-
-    @classmethod
-    def _kill(cls, name, seconds, why):
-        cls._dead[name] = time.time() + seconds
-        log(f"{name} : désactivé {int(seconds // 60)} min ({why})", level="WARN")
-
-    @staticmethod
-    def _img_from_response(r):
-        """Accepte une réponse image brute OU un JSON contenant une image base64."""
-        if r.headers.get("content-type", "").startswith("image/"):
-            return Image.open(io.BytesIO(r.content)).convert("RGB")
-        data = r.json()
-        b64 = None
-        if isinstance(data, dict):
-            b64 = ((data.get("result") or {}).get("image") or data.get("image")
-                   or ((data.get("data") or [{}])[0]).get("b64_json"))
-            if not b64:                                      # format Gemini
-                for c in data.get("candidates", []) or []:
-                    for p in (c.get("content") or {}).get("parts", []) or []:
-                        b64 = (p.get("inlineData") or p.get("inline_data") or {}).get("data") or b64
-        if not b64:
-            raise ValueError(f"pas d'image dans la réponse : {str(data)[:200]}")
-        return Image.open(io.BytesIO(base64.b64decode(b64))).convert("RGB")
-
-    def _post_image(self, name, url, tries=3, **kw):
-        """POST avec réessais. Désactive le service seulement si l'erreur est définitive."""
-        if self._is_dead(name):
-            return None
-        for i in range(1, tries + 1):
-            t = time.time()
-            try:
-                log(f"{name} : essai {i}/{tries}…")
-                r = requests.post(url, timeout=150, **kw)
-                if r.ok:
-                    img = self._img_from_response(r)
-                    log(f"{name} OK en {time.time() - t:.1f}s -> {img.size[0]}x{img.size[1]}",
-                        level="OK")
-                    return img
-                log(f"{name} essai {i}/{tries} : HTTP {r.status_code} -> {r.text[:300]}",
-                    level="WARN")
-                if r.status_code in (401, 402, 403):
-                    self._kill(name, 86400, f"HTTP {r.status_code} : clé/crédits")
-                    return None
-                if r.status_code == 429:
-                    if "daily free allocation" in r.text or "neurons" in r.text:
-                        # Quota journalier Cloudflare : il se réinitialise à 00:00 UTC
-                        n = datetime.now(timezone.utc)
-                        secs = 86400 - (n.hour * 3600 + n.minute * 60 + n.second) + 60
-                        self._kill(name, secs, "quota quotidien épuisé (reset 00:00 UTC)")
-                    else:
-                        self._kill(name, 900, "limite de débit")
-                    return None
-                body = kw.get("json")
-                if r.status_code == 400 and isinstance(body, dict) and "seed" in body:
-                    body.pop("seed")          # seed refusé : on réessaie sans
-                    continue
-            except Exception as e:
-                log(f"{name} essai {i}/{tries} : {type(e).__name__} {str(e)[:200]}", level="WARN")
-            time.sleep(3 * i)
-        return None
-
-    # ---- Cloudflare : plusieurs modèles essayés dans l'ordre
-    def _image_cloudflare(self, prompt, seed=None):
-        account, token = os.getenv("CF_ACCOUNT_ID", ""), os.getenv("CF_API_TOKEN", "")
-        if not (account and token):
-            if not self._is_dead("Cloudflare_absent"):
-                log("CF_ACCOUNT_ID / CF_API_TOKEN absents -> Cloudflare ignoré.", level="WARN")
-                self._dead["Cloudflare_absent"] = time.time() + 86400
-            return None
-        for model in [m.strip() for m in CF_IMAGE_MODELS.split(",") if m.strip()]:
-            body = {"prompt": prompt[:2000]}
-            if "schnell" in model:
-                body["steps"] = 8
-            else:
-                body.update({"width": IMG_W, "height": IMG_H})
-            # NB : le paramètre "seed" est refusé par l'API Cloudflare (HTTP 400) : non envoyé.
-            img = self._post_image(
-                f"Cloudflare[{model.split('/')[-1]}]",
-                f"https://api.cloudflare.com/client/v4/accounts/{account}/ai/run/{model}",
-                tries=2, headers={"Authorization": f"Bearer {token}"}, json=body)
-            if img is not None:
-                return img
-        return None
-
-    # ---- Google Gemini (image) : clé gratuite sur aistudio.google.com
-    def _image_gemini(self, prompt, seed=None):
-        key = os.getenv("GEMINI_API_KEY", "")
-        if not key:
-            return None
-        return self._post_image(
-            "Gemini",
-            f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_IMAGE_MODEL}:generateContent",
-            tries=2, headers={"x-goog-api-key": key},
-            json={"contents": [{"parts": [{"text": prompt}]}],
-                  "generationConfig": {"responseModalities": ["IMAGE"],
-                                       "imageConfig": {"aspectRatio": "4:5"}}})
-
-    # ---- Together AI (FLUX)
-    def _image_together(self, prompt, seed=None):
-        key = os.getenv("TOGETHER_API_KEY", "")
-        if not key:
-            return None
-        return self._post_image(
-            "Together",
-            "https://api.together.xyz/v1/images/generations",
-            tries=2, headers={"Authorization": f"Bearer {key}"},
-            json={"model": TOGETHER_IMAGE_MODEL, "prompt": prompt,
-                  "width": IMG_W, "height": IMG_H, "steps": 4,
-                  "n": 1, "response_format": "b64_json"})
-
-    # ---- Hugging Face
-    def _image_hf(self, prompt, seed=None):
-        token = os.getenv("HF_TOKEN", "")
-        if not token or self._is_dead("HuggingFace"):
-            return None
-        t = time.time()
-        try:
-            log(f"HuggingFace : {HF_IMAGE_MODEL}…")
-            image = InferenceClient(api_key=token).text_to_image(
-                prompt, model=HF_IMAGE_MODEL, width=IMG_W, height=IMG_H)
-            log(f"HuggingFace OK en {time.time() - t:.1f}s", level="OK")
-            return image.convert("RGB")
-        except Exception as e:
-            msg = str(e)
-            log(f"HuggingFace : {type(e).__name__} {msg[:300]}", level="WARN")
-            if any(c in msg for c in ("402", "Payment", "401", "403")):
-                self._kill("HuggingFace", 86400, "crédits/clé")
-            return None
-
-    # ---- Pollinations (clé optionnelle) : dernier recours, qualité variable
-    def _image_pollinations(self, prompt, seed=None):
-        if self._is_dead("Pollinations"):
-            return None
-        seed = seed if seed is not None else int(time.time())
-        url = ("https://image.pollinations.ai/prompt/" + urllib.parse.quote(prompt)
-               + f"?model=flux&width={IMG_W}&height={IMG_H}&nologo=true&seed={seed}")
-        headers = {}
-        if os.getenv("POLLINATIONS_API_KEY"):
-            headers["Authorization"] = "Bearer " + os.getenv("POLLINATIONS_API_KEY")
-        t = time.time()
-        try:
-            log("Pollinations : requête en cours…")
-            r = requests.get(url, headers=headers, timeout=150)
-            log(f"Pollinations : HTTP {r.status_code} | {time.time() - t:.1f}s")
-            r.raise_for_status()
-            img = Image.open(io.BytesIO(r.content)).convert("RGB")
-            w, h = img.size
-            return img.crop((0, 0, w, int(h * 0.94)))   # retire un éventuel bandeau
-        except Exception as e:
-            log(f"Pollinations : {type(e).__name__} {str(e)[:200]}", level="WARN")
-            self._kill("Pollinations", 900, type(e).__name__)
-            return None
-
-    def _generate_one(self, prompt, seed):
-        services = (("Cloudflare", self._image_cloudflare),
-                    ("Gemini", self._image_gemini),
-                    ("Together", self._image_together),
-                    ("Hugging Face", self._image_hf),
-                    ("Pollinations", self._image_pollinations))
-        for nom, fonction in services:
-            img = fonction(prompt, seed)
-            if img is None:
-                log(f"{nom} : pas d'image, service suivant…", level="WARN")
-                continue
-            # Qualité minimale : une image trop petite est refusée ici, et le service suivant est essayé
-            if img.size[0] < MIN_IMG_W:
-                log(f"{nom} : image trop petite ({img.size[0]}x{img.size[1]}, minimum "
-                    f"{MIN_IMG_W} px de large) -> rejetée, service suivant…", level="WARN")
-                continue
-            return img, nom
-        return None, None
-
-    @staticmethod
-    def _image_fallback_design():
-        """(Non utilisé par défaut) fond graphique bleu nuit et or."""
-        w, h = IMG_W, IMG_H
-        img = Image.new("RGB", (w, h))
-        d = ImageDraw.Draw(img)
-        top, bot = (10, 30, 70), (3, 8, 22)
-        for y in range(h):
-            t = y / h
-            d.line([(0, y), (w, y)],
-                   fill=tuple(int(top[i] + (bot[i] - top[i]) * t) for i in range(3)))
-        glow = Image.new("RGB", (w, h), (0, 0, 0))
-        ImageDraw.Draw(glow).ellipse([w * 0.15, h * 0.05, w * 0.85, h * 0.55],
-                                     fill=(120, 85, 10))
-        glow = glow.filter(ImageFilter.GaussianBlur(120))
-        return ImageChops.add(img, glow)
-
-    # ------------------------------------------------------------------
-    # 3) Sélection du meilleur candidat + contrôle qualité par LLM de vision
-    # ------------------------------------------------------------------
-    @staticmethod
-    def _score_image(img):
-        """Score = netteté + contraste, pénalise images trop sombres/claires."""
-        small = img.resize((512, int(512 * img.height / img.width)))
-        gray = small.convert("L")
-        edges = ImageStat.Stat(gray.filter(ImageFilter.FIND_EDGES))
-        sharp = edges.var[0] ** 0.5
-        contrast = ImageStat.Stat(gray).stddev[0]
-        mean = ImageStat.Stat(gray).mean[0]
-        penalty = 0
-        if mean < 45:
-            penalty = (45 - mean) * 1.5
-        elif mean > 200:
-            penalty = (mean - 200) * 1.5
-        return sharp * 1.0 + contrast * 0.6 - penalty
-
-    @staticmethod
-    def _vision_ok(img):
-        """Un LLM de vision note l'image. Renvoie (ok, détail).
-        Si le modèle est absent ou en erreur, l'image est acceptée (le contrôle est un bonus)."""
-        if not VISION_CHECK or not GROQ_VISION_MODEL or GROQ_VISION_MODEL not in GROQ_AVAILABLE:
-            return True, "contrôle vision désactivé"
-        try:
-            buf = io.BytesIO()
-            img.resize((512, int(512 * img.height / img.width))).save(buf, "JPEG", quality=80)
-            b64 = base64.b64encode(buf.getvalue()).decode()
-            question = (
-                "Rate this image as a photo for a financial news post. Reply ONLY with JSON: "
-                '{"quality": <1-10>, "has_text": <true|false>, "has_people": <true|false>, '
-                '"has_deformed_objects": <true|false>}'
-            )
-            client = Groq(api_key=os.getenv("TOKEN_AI_DESCRYB_IMG", ""), timeout=40, max_retries=1)
-            r = client.chat.completions.create(
-                model=GROQ_VISION_MODEL, temperature=0, max_tokens=200,
-                messages=[{"role": "user", "content": [
-                    {"type": "text", "text": question},
-                    {"type": "image_url", "image_url": {"url": "data:image/jpeg;base64," + b64}},
-                ]}])
-            raw = r.choices[0].message.content or ""
-            d = json.loads(re.search(r"\{.*\}", raw, re.S).group(0))
-            ok = (float(d.get("quality", 0)) >= 7 and not d.get("has_text")
-                  and not d.get("has_people") and not d.get("has_deformed_objects"))
-            return ok, str(d)
-        except Exception as e:
-            return True, f"contrôle vision ignoré ({type(e).__name__}: {str(e)[:120]})"
-
-    def _best_image(self, prompt):
-        candidates = []
-        n = max(1, IMAGE_CANDIDATES)
-        for i in range(n):
-            log(f"Candidat {i + 1}/{n} : génération…")
-            seed = int(time.time() * 1000) % 2_000_000_000 + i * 7919
-            img, source = self._generate_one(prompt, seed)
-            if img is None:
-                log(f"Candidat {i + 1}/{n} : aucune image exploitable.", level="WARN")
-                break   # tous les services ont échoué : inutile de réessayer tout de suite
-            score = self._score_image(img)
-            log(f"Candidat {i + 1}/{n} : {source} | {img.size[0]}x{img.size[1]} | "
-                f"score {score:.1f}", level="OK")
-            ok, detail = self._vision_ok(img)
-            log(f"Contrôle vision : {'ACCEPTÉE' if ok else 'REJETÉE'} | {detail}",
-                level="OK" if ok else "WARN")
-            if not ok:
-                continue          # image refusée : on régénère le candidat suivant
-            candidates.append((score, img))
-            if not VISION_CHECK or GROQ_VISION_MODEL not in GROQ_AVAILABLE:
-                continue
-            break                 # image validée par la vision : inutile d'en générer d'autres
-        if not candidates:
-            return None
-        best = max(candidates, key=lambda c: c[0])
-        log(f"Meilleur candidat retenu (score {best[0]:.1f}).")
-        return best[1]
-
-    # ------------------------------------------------------------------
-    # 4) Post-traitement (netteté, couleur, vignette, grain)
-    # ------------------------------------------------------------------
-    @staticmethod
-    def _enhance_image(img):
-        img = img.filter(ImageFilter.UnsharpMask(radius=1.6, percent=60, threshold=3))
-        img = ImageEnhance.Contrast(img).enhance(1.07)
-        img = ImageEnhance.Color(img).enhance(1.05)
-        img = ImageEnhance.Sharpness(img).enhance(1.15)
-
-        w, h = img.size
-        # Vignette douce
-        mask = Image.radial_gradient("L").resize((w, h), Image.LANCZOS)
-        mask = mask.point(lambda p: int(max(0, p - 90) * 0.55))
-        img = Image.composite(Image.new("RGB", (w, h), (3, 8, 22)), img, mask)
-
-        # Grain très léger : casse l'aspect "lisse" typique des images IA
-        noise = Image.effect_noise((w, h), 14).convert("RGB")
-        img = Image.blend(img, ImageChops.soft_light(img, noise), 0.30)
-        return img
-
-    @staticmethod
-    def _load_font(size):
-        candidates = [
-            "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
-            "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
-            "/usr/share/fonts/truetype/freefont/FreeSansBold.ttf",
-        ]
-        for chemin in candidates:
-            if os.path.exists(chemin):
-                return ImageFont.truetype(chemin, size)
-        try:
-            return ImageFont.load_default(size=size)
-        except TypeError:
-            return ImageFont.load_default()
-
-    # ------------------------------------------------------------------
-    # Titre arabe + branding style "chaîne d'info" (comme Al Arabiya)
-    # ------------------------------------------------------------------
-    # L'affichage de l'arabe dépend de la version de Pillow (Raqm ou non). Au premier
-    # appel, le script teste le rendu réel et choisit un mode qui fonctionne :
-    #   "raqm"   : texte brut, Raqm/HarfBuzz fait le shaping + le sens RTL
-    #   "bidi"   : arabic_reshaper + python-bidi, moteur BASIC
-    #   "manual" : arabic_reshaper + inversion des lettres, moteur BASIC
-    # Dans tous les cas, l'ordre des mots est géré ici (un mot = un dessin), donc
-    # il ne peut plus être inversé par le moteur de texte.
-    _ar_mode = None
-    _AR_RE = re.compile(r"[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]")
-    _NUM_RE = re.compile(r"([0-9\u0660-\u0669][0-9\u0660-\u0669.,%]*)")
-
-    @staticmethod
-    def _ar_font_candidates():
-        noto_bold = sorted(glob.glob("/usr/share/fonts/**/NotoSansArabic*Bold*.ttf", recursive=True))
-        noto_any = sorted(glob.glob("/usr/share/fonts/**/NotoSansArabic*.ttf", recursive=True))
-        naskh = sorted(glob.glob("/usr/share/fonts/**/NotoNaskhArabic*Bold*.ttf", recursive=True))
-        return [
-            AR_FONT_ENV,
-            str(BASE_DIR / "fonts" / "Cairo-Bold.ttf"),
-            str(BASE_DIR / "fonts" / "Tajawal-Bold.ttf"),
-            str(BASE_DIR / "fonts" / "NotoSansArabic-Bold.ttf"),
-            *noto_bold,
-            *naskh,
-            *noto_any,
-            "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
-            "/usr/share/fonts/truetype/freefont/FreeSansBold.ttf",
-        ]
-
-    @classmethod
-    def _open_ar_font(cls, size, mode):
-        layout_cls = getattr(ImageFont, "Layout", None)
-        layout = None
-        if layout_cls is not None:
-            layout = layout_cls.RAQM if mode == "raqm" else layout_cls.BASIC
-        for chemin in cls._ar_font_candidates():
-            if chemin and os.path.exists(chemin):
-                try:
-                    if layout is not None:
-                        return ImageFont.truetype(chemin, size, layout_engine=layout)
-                    return ImageFont.truetype(chemin, size)
-                except Exception:
-                    continue
-        raise RuntimeError("Aucune police arabe trouvée")
-
-    @classmethod
-    def _load_arabic_font(cls, size):
-        mode = cls._detect_ar_mode()
-        try:
-            return cls._open_ar_font(size, mode)
-        except Exception:
-            log("ATTENTION : aucune police arabe trouvée (mets Cairo-Bold.ttf dans ./fonts/)")
-            return TextPost._load_font(size)
-
-    @classmethod
-    def _ar_word_visual(cls, word, mode):
-        """Un mot arabe -> chaîne à dessiner (gauche vers droite)."""
-        if mode == "raqm" or not ARABIC_OK:
-            return word
-        shaped = arabic_reshaper.reshape(word)
-        if mode == "bidi":
-            return get_display(shaped, base_dir="R")
-        # "manual" : lettres inversées, les chiffres gardent leur ordre
-        parts = cls._NUM_RE.split(shaped)
-        pieces = [p if i % 2 else p[::-1] for i, p in enumerate(parts)]
-        return "".join(reversed(pieces))
-
-    @classmethod
-    def _ar_selftest(cls, mode):
-        """Dessine 'اب' : l'alef (grande barre) doit être à DROITE du bêh."""
-        font = cls._open_ar_font(100, mode)
-        kw = {"direction": "rtl", "language": "ar"} if mode == "raqm" else {}
-        img = Image.new("L", (400, 260), 0)
-        ImageDraw.Draw(img).text(
-            (60, 40), cls._ar_word_visual("اب", mode), font=font, fill=255, **kw
-        )
-        bbox = img.getbbox()
-        if not bbox:
-            return False
-        x0, y0, x1, y1 = bbox
-        strip = max(4, (x1 - x0) // 5)
-        left = img.crop((x0, y0, x0 + strip, y1)).getbbox()
-        right = img.crop((x1 - strip, y0, x1, y1)).getbbox()
-        if not left or not right:
-            return False
-        return right[1] < left[1] - 5
-
-    @classmethod
-    def _detect_ar_mode(cls):
-        if cls._ar_mode:
-            return cls._ar_mode
-        candidates = []
-        try:
-            if features.check("raqm") and features.check("fribidi") and features.check("harfbuzz"):
-                candidates.append("raqm")
-        except Exception:
-            pass
-        if ARABIC_OK:
-            candidates += ["bidi", "manual"]
-
-        chosen = None
-        for mode in candidates:
-            try:
-                if cls._ar_selftest(mode):
-                    chosen = mode
-                    break
-                log(f"Mode arabe '{mode}' : rendu incorrect, essai suivant.")
-            except Exception as e:
-                log(f"Mode arabe '{mode}' indisponible : {e}")
-        if chosen is None:
-            chosen = "bidi" if ARABIC_OK else "plain"
-            log("ATTENTION : aucun mode arabe validé, l'affichage peut être incorrect.")
-        cls._ar_mode = chosen
-        log(f"Mode d'écriture arabe retenu : {chosen}")
-        return chosen
-
-    @classmethod
-    def _ar_runs(cls, text):
-        """Découpe en blocs : mots arabes seuls, mots latins/nombres regroupés (ordre LTR)."""
-        runs = []
-        for tok in text.split():
-            is_ar = bool(cls._AR_RE.search(tok))
-            if runs and not is_ar and not runs[-1][1]:
-                runs[-1] = (runs[-1][0] + " " + tok, False)
-            else:
-                runs.append((tok, is_ar))
-        return runs
-
-    @classmethod
-    def _run_args(cls, run, is_ar):
-        mode = cls._detect_ar_mode()
-        if is_ar:
-            kw = {"direction": "rtl", "language": "ar"} if mode == "raqm" else {}
-            return cls._ar_word_visual(run, mode), kw
-        return run, ({"direction": "ltr"} if mode == "raqm" else {})
-
-    def _line_width(self, draw, text, font):
-        runs = self._ar_runs(text)
-        space = draw.textlength(" ", font=font)
-        total = 0
-        for run, is_ar in runs:
-            s, kw = self._run_args(run, is_ar)
-            total += draw.textlength(s, font=font, **kw)
-        return total + space * max(0, len(runs) - 1)
-
-    def _draw_rtl_line(self, draw, right_x, y, text, font, fill):
-        """Dessine une ligne arabe alignée à droite : 1er mot à droite, suivants vers la gauche."""
-        space = draw.textlength(" ", font=font)
-        x = right_x
-        for run, is_ar in self._ar_runs(text):
-            s, kw = self._run_args(run, is_ar)
-            rw = draw.textlength(s, font=font, **kw)
-            x -= rw
-            draw.text((x, y), s, font=font, fill=fill, **kw)
-            x -= space
-
-    def _wrap(self, draw, text, font, max_w):
-        lines, cur = [], []
-        for word in text.split():
-            test = " ".join(cur + [word])
-            if cur and self._line_width(draw, test, font) > max_w:
-                lines.append(" ".join(cur))
-                cur = [word]
-            else:
-                cur.append(word)
-        if cur:
-            lines.append(" ".join(cur))
-        return lines
-
-    def _fit_headline(self, draw, text, max_w, max_h, w):
-        """Réduit la taille de police jusqu'à ce que le titre tienne (max 4 lignes)."""
-        size, min_size, max_lines = int(w * 0.078), int(w * 0.05), 4
-        while True:
-            font = self._load_arabic_font(size)
-            lines = self._wrap(draw, text, font, max_w)
-            line_h = int(size * 1.4)
-            fits = len(lines) <= max_lines and len(lines) * line_h <= max_h
-            if fits or size <= min_size:
-                break
-            size -= 2
-        if len(lines) > max_lines:
-            lines = lines[:max_lines]
-            lines[-1] = lines[-1].rstrip(" ،,.") + "…"
-        return font, lines, line_h
-
-    @staticmethod
-    def _load_logo(w, h):
-        """Charge imgs/logo_money_impact.png (PNG transparent conseillé). None si absent."""
-        try:
-            if not LOGO_PATH.is_file():
-                log(f"Logo introuvable ({LOGO_PATH}) : logo texte utilisé à la place.")
-                return None
-            logo = Image.open(LOGO_PATH).convert("RGBA")
-            ratio = min(int(w * 0.24) / logo.width, int(h * 0.11) / logo.height)
-            size = (max(1, int(logo.width * ratio)), max(1, int(logo.height * ratio)))
-            return logo.resize(size, Image.LANCZOS)
-        except Exception as e:
-            log(f"Logo illisible : {e}")
-            return None
-
-    def _add_branding(self, img, headline=None):
-        img = img.convert("RGBA")
-        w, h = img.size
-        margin = int(w * 0.07)
-        has_title = bool(headline and headline.strip())
-        logo = self._load_logo(w, h)
-
-        # ---- 1) Dégradés (bas fort pour le titre, haut léger pour le logo) ----
-        grad = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-        gd = ImageDraw.Draw(grad)
-        bottom_h = int(h * (0.50 if has_title else 0.28))
-        for i in range(bottom_h):
-            a = int(235 * (i / bottom_h) ** 1.5)
-            gd.line([(0, h - bottom_h + i), (w, h - bottom_h + i)], fill=(4, 10, 28, a))
-        top_h = int(h * 0.16)
-        for i in range(top_h):
-            a = int(160 * (1 - i / top_h) ** 1.6)
-            gd.line([(0, i), (w, i)], fill=(4, 10, 28, a))
-        img = Image.alpha_composite(img, grad)
-        probe = ImageDraw.Draw(img)
-
-        # ---- 2) Géométrie ----
-        lx, ly = int(w * 0.04), int(h * 0.03)
-        part_a, part_b = BRAND_NAME
-
-        if logo is not None:
-            logo_box = [lx, ly, lx + logo.width, ly + logo.height]
-        else:  # secours : logo en texte
-            f_logo = self._load_font(int(w * 0.046))
-            wa = probe.textlength(part_a, font=f_logo)
-            wb = probe.textlength(part_b, font=f_logo)
-            logo_bb = f_logo.getbbox(part_a + part_b)
-            pad_x, pad_y = int(w * 0.022), int(w * 0.013)
-            logo_box = [lx, ly, lx + wa + wb + 2 * pad_x, ly + logo_bb[3] + 2 * pad_y]
-
-        f_sub = self._load_font(int(w * 0.027))
-        handle_y = h - int(h * 0.055)
-
-        title_data = None
-        if has_title:
-            bottom = handle_y - int(h * 0.028)
-            font, lines, line_h = self._fit_headline(
-                probe, headline.strip(), w - 2 * margin, int(h * 0.30), w
-            )
-            top = bottom - len(lines) * line_h
-
-            # Étiquette = nom de la page (Money.impact)
-            f_tag = self._load_font(int(w * 0.038))
-            ta = probe.textlength(part_a, font=f_tag)
-            tb_w = probe.textlength(part_b, font=f_tag)
-            tbb = f_tag.getbbox(part_a + part_b)
-            tp_x, tp_y = int(w * 0.022), int(w * 0.011)
-            bar_w = max(8, int(w * 0.009))
-            box_w = int(ta + tb_w) + 2 * tp_x + bar_w
-            box_h = tbb[3] + 2 * tp_y
-            tag_right = w - margin
-            gap = int(h * 0.022)
-            tag_box = [tag_right - box_w, top - gap - box_h, tag_right, top - gap]
-            title_data = (font, lines, line_h, top, f_tag, ta, tag_box, tp_x, tp_y, bar_w)
-
-        # ---- 3) Ombres floutées ----
-        soft = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-        sd = ImageDraw.Draw(soft)
-        if logo is not None:
-            shadow = Image.new("RGBA", logo.size, (0, 0, 0, 0))
-            shadow.putalpha(logo.getchannel("A").point(lambda a: int(a * 0.75)))
-            soft.alpha_composite(shadow, (lx + 3, ly + 4))
-        if title_data:
-            font, lines, line_h, top = title_data[:4]
-            for i, line in enumerate(lines):
-                self._draw_rtl_line(sd, w - margin, top + i * line_h + 4, line, font,
-                                    (0, 0, 0, 220))
-        soft = soft.filter(ImageFilter.GaussianBlur(5))
-        img = Image.alpha_composite(img, soft)
-
-        # ---- 4) Fond translucide net (logo texte ou fond du logo image) ----
-        crisp = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-        cd = ImageDraw.Draw(crisp)
-        if logo is None:
-            cd.rectangle(logo_box, fill=(4, 10, 28, 190), outline=(255, 255, 255, 220), width=2)
-        elif LOGO_BACKDROP:
-            p = int(w * 0.012)
-            cd.rectangle([logo_box[0] - p, logo_box[1] - p, logo_box[2] + p, logo_box[3] + p],
-                         fill=(4, 10, 28, 190), outline=(255, 255, 255, 220), width=2)
-        img = Image.alpha_composite(img, crisp)
-
-        # ---- 5) Éléments opaques ----
-        if logo is not None:
-            img.alpha_composite(logo, (lx, ly))
-        draw = ImageDraw.Draw(img)
-
-        if logo is None:
-            draw.text((lx + pad_x, ly + pad_y), part_a, font=f_logo, fill=(255, 255, 255, 255))
-            draw.text((lx + pad_x + wa, ly + pad_y), part_b, font=f_logo,
-                      fill=BRAND_ACCENT + (255,))
-            draw.rectangle([logo_box[0], logo_box[3] - 5, logo_box[2], logo_box[3]],
-                           fill=BRAND_ACCENT + (255,))
-
-        if title_data:
-            font, lines, line_h, top, f_tag, ta, tag_box, tp_x, tp_y, bar_w = title_data
-            draw.rectangle(tag_box, fill=(255, 255, 255, 255))
-            draw.rectangle([tag_box[2] - bar_w, tag_box[1], tag_box[2], tag_box[3]],
-                           fill=BRAND_ACCENT + (255,))
-            draw.text((tag_box[0] + tp_x, tag_box[1] + tp_y), part_a, font=f_tag,
-                      fill=(5, 12, 30, 255))
-            draw.text((tag_box[0] + tp_x + ta, tag_box[1] + tp_y), part_b, font=f_tag,
-                      fill=(214, 148, 0, 255))
-            for i, line in enumerate(lines):
-                self._draw_rtl_line(draw, w - margin, top + i * line_h, line, font,
-                                    (255, 255, 255, 255))
-
-        draw.text((int(w * 0.04), handle_y), BRAND_HANDLE, font=f_sub,
-                  fill=(225, 230, 240, 235))
-
-        return img.convert("RGB")
-
-    # ------------------------------------------------------------------
-    # 5) Pipeline image complet
-    # ------------------------------------------------------------------
-    def generer_image(self, news_original=None, headline=None):
-        t0 = time.time()
-        log("Image 1/5 : demande du prompt photo au LLM (Groq)…")
-        prompt = self._build_prompt(news_original)
-        log(f"Image 2/5 : prompt final ({len(prompt.split())} mots) :")
-        log("      " + prompt)
-        log(f"Image 3/5 : génération de {max(1, IMAGE_CANDIDATES)} candidat(s) max…")
-        img = self._best_image(prompt)
-        if img is None:
-            # Pas d'image de mauvaise qualité : le post est annulé et sera retenté au prochain run
-            raise NoImageError("Aucune image de qualité suffisante : post annulé "
-                               "(sera retenté au prochain run)")
-
-        log("Image 4/5 : recadrage 4:5, netteté, couleurs, vignette, grain…")
-        img = ImageOps.fit(img, (OUT_W, OUT_H), Image.LANCZOS, centering=(0.5, 0.4))
-        img = self._enhance_image(img)
-
-        log("Image 5/5 : logo + titre arabe"
-            + (f" : « {headline} »" if headline else " (aucun titre)"))
-        img = self._add_branding(img, headline)
-
-        img.save(OUTPUT_DIR / "img.png")
-        output_jpg = OUTPUT_DIR / "img.jpg"
-        img.save(output_jpg, format="JPEG", quality=95, optimize=True, subsampling=0)
-        log(f"Image prête : {output_jpg.name} ({output_jpg.stat().st_size // 1024} Ko, "
-            f"{img.size[0]}x{img.size[1]}) en {time.time() - t0:.0f}s", level="OK")
-        return output_jpg
-
-    # ------------------------------------------------------------------
-    # 6) Publication Facebook + Instagram
-    # ------------------------------------------------------------------
-    @staticmethod
-    def _json_or_text(response):
-        if "json" in response.headers.get("content-type", ""):
-            try:
-                return response.json()
-            except Exception:
-                pass
-        return {"message": response.text[:500]}
-
-    def _publier_facebook(self, chemin, caption, page_id, token):
-        log(f"Facebook : envoi de la photo ({chemin.stat().st_size // 1024} Ko)…")
-        try:
-            with chemin.open("rb") as fichier:
-                response = requests.post(
-                    f"{GRAPH_URL}/{page_id}/photos",
-                    data={"message": caption, "access_token": token},
-                    files={"source": (chemin.name, fichier, "image/jpeg")},
-                    timeout=120,
-                )
-            data = self._json_or_text(response)
-            log(f"Facebook : réponse HTTP {response.status_code}")
-            if response.ok and "error" not in data:
-                log(f"Facebook : PUBLIÉ (id={data.get('post_id') or data.get('id')})", level="OK")
-                return True
-            log("Facebook : ÉCHEC -> " + explain_graph_error(data), level="ERROR")
-        except Exception as e:
-            log(f"Facebook : exception {type(e).__name__} : {str(e)[:300]}", level="ERROR")
-        return False
-
-    def _publier_instagram(self, chemin, caption, ig_id, token, cloud):
-        try:
-            cloudinary.config(cloud_name=cloud[0], api_key=cloud[1], api_secret=cloud[2],
-                              secure=True)
-            log("Instagram 1/4 : envoi de l'image sur Cloudinary…")
-            upload = cloudinary.uploader.upload(
-                str(chemin), resource_type="image", folder="actualites_financieres"
-            )
-            image_url = upload.get("secure_url")
-            if not (image_url and image_url.startswith("https://")):
-                log(f"Instagram : Cloudinary n'a pas renvoyé d'URL valide : {upload}", level="ERROR")
-                return False
-            log(f"Instagram 1/4 : image hébergée -> {image_url}", level="OK")
-
-            log("Instagram 2/4 : création du conteneur média…")
-            r = requests.post(
-                f"{GRAPH_URL}/{ig_id}/media",
-                data={"image_url": image_url, "caption": caption[:IG_CAPTION_LIMIT],
-                      "access_token": token},
-                timeout=90,
-            )
-            data = self._json_or_text(r)
-            log(f"Instagram 2/4 : HTTP {r.status_code}")
-            if not (r.ok and "error" not in data and data.get("id")):
-                log("Instagram : ÉCHEC création -> " + explain_graph_error(data), level="ERROR")
-                return False
-            creation_id = data["id"]
-            log(f"Instagram 2/4 : conteneur créé (id={creation_id})", level="OK")
-
-            log("Instagram 3/4 : attente du traitement par Instagram…")
-            statut = None
-            for i in range(12):
-                sr = requests.get(
-                    f"{GRAPH_URL}/{creation_id}",
-                    params={"fields": "status_code", "access_token": token},
-                    timeout=30,
-                )
-                statut = sr.json().get("status_code")
-                log(f"      contrôle {i + 1}/12 : {statut}")
-                if statut in ("FINISHED", "ERROR"):
-                    break
-                time.sleep(5)
-            if statut != "FINISHED":
-                log(f"Instagram : le média n'est pas prêt (statut final : {statut})", level="ERROR")
-                return False
-
-            log("Instagram 4/4 : publication…")
-            pr = requests.post(
-                f"{GRAPH_URL}/{ig_id}/media_publish",
-                data={"creation_id": creation_id, "access_token": token},
-                timeout=90,
-            )
-            pdata = self._json_or_text(pr)
-            log(f"Instagram 4/4 : HTTP {pr.status_code}")
-            if pr.ok and "error" not in pdata:
-                log(f"Instagram : PUBLIÉ (id={pdata.get('id')})", level="OK")
-                return True
-            log("Instagram : ÉCHEC publication -> " + explain_graph_error(pdata), level="ERROR")
-        except Exception as e:
-            log(f"Instagram : exception {type(e).__name__} : {str(e)[:300]}", level="ERROR")
-        return False
-
-    def publier_texte_partout(self, news_original, news_translited, headline=None):
-        resultats = {"image": None, "facebook": False, "instagram": False,
-                     "erreur": None, "no_image": False}
-
-        try:
-            log("── Génération de l'image ──", level="STEP")
-            chemin = Path(self.generer_image(news_original=news_original, headline=headline))
-            if not chemin.is_file():
-                raise FileNotFoundError(f"Image générée introuvable : {chemin.resolve()}")
-            resultats["image"] = str(chemin.resolve())
-
-            page_id = os.getenv("PAGE_ID", "")
-            token = os.getenv("PAGE_ACCESS_TOKEN", "")
-            ig_id = os.getenv("INSTAGRAM_BUSINESS_ID", "")
-            cloud = (os.getenv("CLOUDINARY_CLOUD_NAME", ""), os.getenv("CLOUDINARY_API_KEY", ""),
-                     os.getenv("CLOUDINARY_API_SECRET", ""))
-            if not token:
-                raise ValueError("PAGE_ACCESS_TOKEN est absent (secret non transmis au job ?)")
-
-            log("── Publication Facebook ──", level="STEP")
-            if page_id:
-                resultats["facebook"] = self._publier_facebook(chemin, news_translited,
-                                                               page_id, token)
-            else:
-                log("Facebook IGNORÉ : PAGE_ID est vide.", level="WARN")
-
-            log("── Publication Instagram ──", level="STEP")
-            manque = [n for n, v in (("INSTAGRAM_BUSINESS_ID", ig_id),
-                                     ("CLOUDINARY_CLOUD_NAME", cloud[0]),
-                                     ("CLOUDINARY_API_KEY", cloud[1]),
-                                     ("CLOUDINARY_API_SECRET", cloud[2])) if not v]
-            if manque:
-                log("Instagram IGNORÉ : variable(s) vide(s) -> " + ", ".join(manque), level="WARN")
-            else:
-                resultats["instagram"] = self._publier_instagram(chemin, news_translited,
-                                                                 ig_id, token, cloud)
-        except NoImageError as e:
-            resultats["erreur"] = str(e)
-            resultats["no_image"] = True
-            log(str(e), level="ERROR")
-        except Exception as e:
-            resultats["erreur"] = f"{type(e).__name__}: {e}"
-            log(f"Échec de la génération/préparation : {resultats['erreur']}", level="ERROR")
-            log(traceback.format_exc(limit=4))
-
-        return resultats
-
-
-# ======================================================================
-# EXTRACTION DES NEWS + TRADUCTION
-# ======================================================================
-class Extract_post:
-    def __init__(self):
-        self.model_groq_name = GROQ_MODEL
-        self.client = Groq(api_key=os.getenv("TOKEN_AI_DESCRYB_IMG", ""), timeout=60,
-                           max_retries=1)
-        self.TRUSTED_WEB_SOURCES = TRUSTED_WEB_SOURCES
-
-    def clean_html(self, text):
-        if not text:
-            return ""
-        soup = BeautifulSoup(text, "html.parser")
-        for element in soup(["script", "style"]):
-            element.decompose()
-        return soup.get_text(separator=" ", strip=True)
-
-    def get_publication_date(self, entry):
-        date_struct = entry.get("published_parsed") or entry.get("updated_parsed")
-        if not date_struct:
-            return None, None
-        date_utc = datetime(*date_struct[:6], tzinfo=timezone.utc)
-        return date_utc.strftime("%Y-%m-%d %H:%M"), date_utc
-
-    def fetch_all_news(self):
-        articles = []
-        seen_links = set()
-        headers = {
-            # Beaucoup de sites bloquent le User-Agent par défaut de feedparser/GitHub
-            "User-Agent": ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-                           "(KHTML, like Gecko) Chrome/124.0 Safari/537.36"),
-            "Accept": "application/rss+xml, application/xml, text/xml, */*",
-        }
-
-        for source_name, feed_url in self.TRUSTED_WEB_SOURCES.items():
-            t = time.time()
-            log(f"[{source_name}] lecture de {feed_url}")
-            try:
-                resp = requests.get(feed_url, headers=headers, timeout=30)
-                log(f"[{source_name}] HTTP {resp.status_code} | {len(resp.content) // 1024} Ko | "
-                    f"{resp.headers.get('content-type', '?')} | {time.time() - t:.1f}s")
-                if resp.status_code >= 400:
-                    log(f"[{source_name}] flux INACCESSIBLE. Début de la réponse : "
-                        f"{resp.text[:150]!r}", level="WARN")
-                    STATS["flux_ko"] += 1
-                    continue
-
-                feed = feedparser.parse(resp.content)
-                if getattr(feed, "bozo", 0):
-                    log(f"[{source_name}] XML imparfait : "
-                        f"{str(getattr(feed, 'bozo_exception', ''))[:150]}", level="WARN")
-                if not feed.entries:
-                    log(f"[{source_name}] 0 article dans le flux (page de blocage ?). "
-                        f"Début de la réponse : {resp.text[:150]!r}", level="WARN")
-                    STATS["flux_ko"] += 1
-                    continue
-
-                ajoutes = 0
-                for entry in feed.entries:
-                    link = entry.get("link", "").strip()
-                    title = entry.get("title", "").strip()
-
-                    if not title or not link or link in seen_links:
-                        continue
-
-                    raw_text = (
-                        entry.get("content", [{}])[0].get("value", "")
-                        if entry.get("content")
-                        else entry.get("summary", "")
-                    )
-
-                    clean_text = self.clean_html(raw_text)
-                    clean_text = re.sub(r"\s*The post .*? appeared first on .*$", "",
-                                        clean_text, flags=re.S)
-                    clean_text = clean_text.replace("[...]", "…").strip()
-                    publication_text, publication_datetime = self.get_publication_date(entry)
-
-                    if publication_text is None:
-                        continue
-
-                    seen_links.add(link)
-                    ajoutes += 1
-                    articles.append({
-                        "source": source_name,
-                        "title": self.clean_html(title),
-                        "date": publication_text,
-                        "continue": clean_text,
-                        "datetime": publication_datetime,
-                    })
-                log(f"[{source_name}] {ajoutes} article(s) retenu(s) sur {len(feed.entries)}",
-                    level="OK")
-                STATS["flux_ok"] += 1
-            except Exception as error:
-                log(f"[{source_name}] erreur {type(error).__name__} : {str(error)[:300]}",
-                    level="ERROR")
-                STATS["flux_ko"] += 1
-
-        articles.sort(key=lambda item: item["datetime"], reverse=True)
-        return articles
-
-    # ------------------------------------------------------------------
-    # Traduction en arabe : format texte brut (HEADLINE / CAPTION), sans JSON.
-    # Les guillemets et retours à la ligne de l'arabe ne cassent plus le parsing.
-    # ------------------------------------------------------------------
-    @staticmethod
-    def _clean_llm_text(text):
-        """Retire le raisonnement <think>…</think> (modèles Qwen / DeepSeek)."""
-        text = text or ""
-        low = text.lower()
-        if "<think>" in low and "</think>" not in low:
-            return ""   # raisonnement jamais terminé (réponse tronquée) : inutilisable
-        text = re.sub(r"<think>.*?</think>", "", text, flags=re.S | re.I)
-        return text.strip()
-
-    @classmethod
-    def _parse_translation(cls, text):
-        """Lit 'HEADLINE: …  CAPTION: …' en texte brut."""
-        text = cls._clean_llm_text(text)
-        if not text:
-            return None
-        text = re.sub(r"^```\w*\s*|\s*```$", "", text).strip()   # retire d'éventuels ```
-
-        m = re.search(r"HEADLINE\s*:\s*(.*?)\s*CAPTION\s*:\s*(.*)", text, re.S | re.I)
-        if m:
-            headline, caption = m.group(1), m.group(2)
-        else:
-            m = re.search(r"CAPTION\s*:\s*(.*)", text, re.S | re.I)   # légende seule
-            if not m:
-                return None
-            headline, caption = "", m.group(1)
-
-        headline = re.sub(r'["«»“”*#`]', " ", headline)
-        headline = " ".join(headline.split())
-        words = headline.split()
-        if len(words) > 18:
-            headline = " ".join(words[:18])
-
-        caption = caption.strip().strip("*`").strip()
-        # La légende doit contenir de l'arabe (sinon le modèle a répondu en anglais)
-        if not caption or not TextPost._AR_RE.search(caption):
-            return None
-        return {"caption": caption, "headline": headline}
-
-    def tradication_of_text(self, text):
-        system_prompt = (
-            "You are a professional Arabic translator specializing in financial news.\n"
-            "Translate into natural Modern Standard Arabic. Preserve the financial meaning, "
-            "figures and facts.\n"
-            "Be FAITHFUL to the source text: use only information that is present in it. "
-            "Never add, invent or borrow facts from other news.\n"
-            "Answer in EXACTLY this plain-text format (keep the two English labels), "
-            "and write nothing else:\n\n"
-            "HEADLINE: <short punchy Arabic news headline, 8 to 15 words, newsroom style, "
-            "key fact and market impact if any, based ONLY on the source text, no emojis, "
-            "no hashtags, no quotation marks, no source name>\n"
-            "CAPTION: <full Arabic translation of the text>"
-        )
-        messages = [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": f"SOURCE TEXT TO TRANSLATE:\n{text}"},
-        ]
-
-        # Modèle principal, puis modèles de secours (uniquement ceux disponibles sur le compte)
-        modeles = [self.model_groq_name] + [
-            m for m in GROQ_FALLBACKS
-            if m != self.model_groq_name and (not GROQ_AVAILABLE or m in GROQ_AVAILABLE)
-        ]
-        t = time.time()
-        last_error = None
-        for model in modeles[:3]:
-            log(f"Traduction en arabe (Groq, modèle {model})…")
-            try:
-                response = self.client.chat.completions.create(
-                    model=model,
-                    messages=messages,
-                    temperature=0.3,      # 0.0 est déconseillé pour les modèles Qwen
-                    max_tokens=4096,
-                )
-                data = self._parse_translation(response.choices[0].message.content)
-                if data:
-                    log(f"Traduction reçue en {time.time() - t:.1f}s (modèle {model})",
-                        level="OK")
-                    return data
-                last_error = f"{model} : réponse inexploitable (format ou langue incorrects)"
-                log(f"Traduction : {last_error}", level="WARN")
-            except Exception as e:
-                last_error = f"{model} : {type(e).__name__} : {str(e)[:300]}"
-                log(f"Traduction essai échoué ({last_error})", level="WARN")
-                if "429" in str(e) or "rate" in str(e).lower():
-                    time.sleep(5)
-
-        log(f"Traduction ÉCHOUÉE : {last_error}", level="ERROR")
-        return None
-
-
-# ======================================================================
-# MAIN
-# ======================================================================
-GROQ_FALLBACKS = ("llama-3.3-70b-versatile", "openai/gpt-oss-120b", "qwen/qwen3-32b",
-                  "llama-3.1-8b-instant")
-TOTAL_STEPS = 6
-
-
-def charger_historique(fichier_json):
-    if os.path.exists(fichier_json):
-        try:
-            with open(fichier_json, "r", encoding="utf-8") as f:
-                data = json.load(f)
-            data = data if isinstance(data, dict) else {}
-            log(f"Historique : {len(data)} news déjà publiées ({os.path.basename(fichier_json)})")
-            if IS_GHA and not data:
-                log("Historique VIDE sur GitHub Actions : le fichier doit être commité après "
-                    "chaque run, sinon les mêmes news seront republiées.", level="WARN")
-            return data
-        except Exception as e:
-            log(f"Historique illisible ({e}) : repart de zéro.", level="WARN")
-            return {}
-    log("Historique : fichier absent -> création (premier lancement).", level="WARN")
-    with open(fichier_json, "w", encoding="utf-8") as f:
-        json.dump({}, f, ensure_ascii=False, indent=4)
-    return {}
-
-
-def diagnostic_environnement():
-    """Affiche la config + la présence des secrets (jamais leur valeur). Renvoie les manquants."""
-    log(f"Python {sys.version.split()[0]} | Pillow {PIL.__version__} | "
-        f"GitHub Actions : {'oui' if IS_GHA else 'non'}")
-    log(f"Script : {Path(__file__).name} | version {SCRIPT_VERSION}")
-    log(f"Heure UTC : {datetime.now(timezone.utc):%Y-%m-%d %H:%M:%S}")
-    log(f"Réglages : Groq traduction={GROQ_MODEL} | Groq prompt={GROQ_PROMPT_MODEL} | "
-        f"vision={GROQ_VISION_MODEL if VISION_CHECK else 'désactivée'} | "
-        f"image CF={CF_IMAGE_MODELS} | image HF={HF_IMAGE_MODEL} | "
-        f"candidats={IMAGE_CANDIDATES} | largeur min={MIN_IMG_W}px | max posts={MAX_POSTS_PER_RUN} | "
-        f"max tentatives={MAX_ATTEMPTS_PER_RUN} | âge max={MAX_NEWS_AGE_HOURS}h | "
-        f"Graph={GRAPH_URL.rsplit('/', 1)[-1]}")
-
-    variables = [
-        ("TOKEN_AI_DESCRYB_IMG", True, "Groq (traduction + prompt image)"),
-        ("PAGE_ACCESS_TOKEN", True, "token Meta (Facebook + Instagram)"),
-        ("CF_ACCOUNT_ID", False, "Cloudflare Workers AI (images FLUX gratuites)"),
-        ("CF_API_TOKEN", False, "Cloudflare Workers AI (images FLUX gratuites)"),
-        ("GEMINI_API_KEY", False, "Google Gemini (images) -> secours de qualité"),
-        ("TOGETHER_API_KEY", False, "Together AI (FLUX) -> secours"),
-        ("HF_TOKEN", False, "Hugging Face (images FLUX) -> secours"),
-        ("POLLINATIONS_API_KEY", False, "Pollinations (optionnel)"),
-        ("PAGE_ID", False, "ID de la page Facebook -> sinon Facebook ignoré"),
-        ("INSTAGRAM_BUSINESS_ID", False, "ID Instagram -> sinon Instagram ignoré"),
-        ("CLOUDINARY_CLOUD_NAME", False, "Cloudinary (requis pour Instagram)"),
-        ("CLOUDINARY_API_KEY", False, "Cloudinary (requis pour Instagram)"),
-        ("CLOUDINARY_API_SECRET", False, "Cloudinary (requis pour Instagram)"),
-    ]
-    manquants = []
-    for nom, obligatoire, role in variables:
-        if os.getenv(nom, ""):
-            log(f"{nom:<24} présent        | {role}", level="OK")
-        else:
-            log(f"{nom:<24} ABSENT/VIDE     | {role}", level="ERROR" if obligatoire else "WARN")
-            if obligatoire:
-                manquants.append(nom)
-    if IS_GHA:
-        log("   (un secret n'est visible du script que s'il est listé dans 'env:' du workflow)")
-
-    nb_images = sum(1 for n in ("CF_API_TOKEN", "GEMINI_API_KEY", "TOGETHER_API_KEY", "HF_TOKEN")
-                    if os.getenv(n, ""))
-    log(f"Générateurs d'image configurés : {nb_images} (+ Pollinations sans clé)",
-        level="OK" if nb_images else "WARN")
-
-    log(f"Logo : {'trouvé' if LOGO_PATH.is_file() else 'ABSENT'} ({LOGO_PATH})",
-        level="OK" if LOGO_PATH.is_file() else "WARN")
-    police = next((p for p in TextPost._ar_font_candidates() if p and os.path.exists(p)), None)
-    log(f"Police arabe : {police or 'AUCUNE (arabe illisible !)'}",
-        level="OK" if police else "ERROR")
-    log(f"Arabe : bibliothèques {'présentes' if ARABIC_OK else 'ABSENTES (pip install arabic-reshaper python-bidi)'}",
-        level="OK" if ARABIC_OK else "WARN")
-    TextPost._detect_ar_mode()
-    return manquants
-
-
-def resoudre_modele_groq():
-    """Vérifie les modèles Groq et bascule automatiquement sur des modèles disponibles :
-    - modèle de traduction (GROQ_MODEL)
-    - modèle de prompt d'image (GROQ_PROMPT_MODEL)
-    - modèle de vision (GROQ_VISION_MODEL, optionnel)"""
-    global GROQ_MODEL, GROQ_PROMPT_MODEL, GROQ_VISION_MODEL, GROQ_AVAILABLE
-    try:
-        client = Groq(api_key=os.getenv("TOKEN_AI_DESCRYB_IMG", ""), timeout=30, max_retries=1)
-        ids = sorted(m.id for m in client.models.list().data)
-    except Exception as e:
-        log(f"Groq inaccessible ({type(e).__name__}) : {str(e)[:300]}", level="ERROR")
-        log("   -> clé TOKEN_AI_DESCRYB_IMG invalide, ou réseau bloqué.", level="WARN")
-        return False
-    GROQ_AVAILABLE = ids
-    log(f"Groq : clé valide, {len(ids)} modèles : {', '.join(ids)}", level="OK")
-
-    # --- modèle de traduction
-    translation_ok = GROQ_MODEL in ids
-    if translation_ok:
-        log(f"Groq : modèle de traduction '{GROQ_MODEL}' disponible", level="OK")
+            results.append(("Facebook", publish_facebook(jpeg, caption)))
+            ok(f"Facebook : publié ({results[-1][1]})")
+        except Exception as e:  # noqa: BLE001
+            err(f"Facebook : {e}")
     else:
-        log(f"Le modèle de traduction '{GROQ_MODEL}' N'EXISTE PAS.", level="ERROR")
-        for cand in GROQ_FALLBACKS:
-            if cand in ids:
-                GROQ_MODEL = cand
-                log(f"   -> bascule automatique sur '{cand}' (fixe GROQ_MODEL pour le garder)",
-                    level="WARN")
-                translation_ok = True
-                break
-
-    # --- modèle de prompt d'image : jamais bloquant, bascule sur un modèle existant
-    if GROQ_PROMPT_MODEL in ids:
-        log(f"Groq : modèle de prompt d'image '{GROQ_PROMPT_MODEL}' disponible", level="OK")
+        warn("Facebook ignoré (PAGE_ID / PAGE_ACCESS_TOKEN absent)")
+    if IG_ID and META_TOKEN:
+        try:
+            url = cloudinary_upload(jpeg)
+            results.append(("Instagram", publish_instagram(url, caption)))
+            ok(f"Instagram : publié ({results[-1][1]})")
+        except Exception as e:  # noqa: BLE001
+            err(f"Instagram : {e}")
     else:
-        old = GROQ_PROMPT_MODEL
-        for cand in (GROQ_MODEL, "openai/gpt-oss-120b", "qwen/qwen3-32b", "llama-3.1-8b-instant"):
-            if cand in ids:
-                GROQ_PROMPT_MODEL = cand
-                log(f"Groq : '{old}' absent -> prompts d'image avec '{cand}' "
-                    "(fixe GROQ_PROMPT_MODEL pour le garder)", level="WARN")
-                break
-        else:
-            log(f"Groq : '{old}' absent et aucun remplaçant -> scènes de secours.", level="WARN")
-
-    # --- modèle de vision : optionnel
-    if VISION_CHECK:
-        if GROQ_VISION_MODEL in ids:
-            log(f"Groq : modèle de vision '{GROQ_VISION_MODEL}' disponible "
-                "(contrôle qualité des images actif)", level="OK")
-        else:
-            auto = next((i for i in ids if any(k in i.lower()
-                                               for k in ("scout", "maverick", "vision"))), None)
-            if auto:
-                log(f"Groq : vision '{GROQ_VISION_MODEL}' absent -> utilisation de '{auto}'",
-                    level="WARN")
-                GROQ_VISION_MODEL = auto
-            else:
-                log("Groq : aucun modèle de vision disponible -> contrôle qualité par vision "
-                    "désactivé (le filtre de taille minimale reste actif).", level="WARN")
-    return translation_ok
+        warn("Instagram ignoré (INSTAGRAM_BUSINESS_ID absent)")
+    return results
 
 
-def verifier_meta():
-    """Teste les tokens Meta AVANT de générer des images. Renvoie (facebook_ok, instagram_ok)."""
-    token = os.getenv("PAGE_ACCESS_TOKEN", "")
-    page_id, ig_id = os.getenv("PAGE_ID", ""), os.getenv("INSTAGRAM_BUSINESS_ID", "")
-    fb_ok = ig_ok = False
-
-    def appel(obj_id, champs):
-        r = requests.get(f"{GRAPH_URL}/{obj_id}", params={"fields": champs, "access_token": token},
-                         timeout=30)
-        try:
-            return r.status_code, r.json()
-        except Exception:
-            return r.status_code, {"message": r.text[:300]}
-
-    if page_id:
-        try:
-            code, data = appel(page_id, "id,name")
-            if code == 200 and "error" not in data:
-                log(f"Facebook : accès OK à la page « {data.get('name')} » (id {data.get('id')})",
-                    level="OK")
-                fb_ok = True
-            else:
-                log("Facebook : accès REFUSÉ -> " + explain_graph_error(data), level="ERROR")
-        except Exception as e:
-            log(f"Facebook : test impossible ({type(e).__name__}) : {str(e)[:200]}", level="ERROR")
-    if ig_id:
-        try:
-            code, data = appel(ig_id, "id,username")
-            if code == 200 and "error" not in data:
-                log(f"Instagram : accès OK au compte @{data.get('username')}", level="OK")
-                ig_ok = True
-            else:
-                log("Instagram : accès REFUSÉ -> " + explain_graph_error(data), level="ERROR")
-        except Exception as e:
-            log(f"Instagram : test impossible ({type(e).__name__}) : {str(e)[:200]}", level="ERROR")
-    return fb_ok, ig_ok
-
-
-def ecrire_resume(statut):
-    lignes = [
-        f"## Agent Facebook / Instagram — {statut}",
-        "",
-        "| Indicateur | Valeur |", "|---|---|",
-        f"| Flux RSS OK / en échec | {STATS['flux_ok']} / {STATS['flux_ko']} |",
-        f"| News récupérées | {STATS['news_total']} |",
-        f"| Déjà publiées | {STATS['deja']} |",
-        f"| Trop anciennes (> {MAX_NEWS_AGE_HOURS} h) | {STATS['anciennes']} |",
-        f"| À publier | {STATS['candidates']} |",
-        f"| Tentatives | {STATS['tentatives']} |",
-        f"| **Publiées** | **{STATS['publies']}** |",
+# ════════════════════════════════════════════════════════════════════
+# Programme principal
+# ════════════════════════════════════════════════════════════════════
+def check_env():
+    banner("ÉTAPE 1/6 — Configuration et environnement")
+    log(f"Python {sys.version.split()[0]} | Pillow {Image.__version__} | GitHub Actions : "
+        f"{'oui' if env('GITHUB_ACTIONS') else 'non'}")
+    log(f"Script : {os.path.basename(__file__)} | version {VERSION}")
+    log(f"Heure UTC : {dt.datetime.now(dt.timezone.utc):%Y-%m-%d %H:%M:%S}")
+    log(f"Réglages : ordre images={'>'.join(IMAGE_ORDER)} | carte Pillow=secours final | "
+        f"min={MIN_IMG_W}px | sens>={MIN_RELEVANCE}/10 | qualité>={MIN_QUALITY}/10 | "
+        f"vision={'oui' if VISION_CHECK else 'non'} (obligatoire={'oui' if VISION_REQUIRED else 'non'}) | "
+        f"max posts={MAX_POSTS} | max tentatives={MAX_ATTEMPTS} | âge max={MAX_AGE_H}h | Graph={GRAPH}")
+    rows = [
+        ("TOKEN_AI_DESCRYB_IMG", GROQ_KEY, "Groq (texte + vision)"),
+        ("PAGE_ACCESS_TOKEN", META_TOKEN, "token Meta (Facebook + Instagram)"),
+        ("CF_ACCOUNT_ID", CF_ACCOUNT, "Cloudflare Workers AI"),
+        ("CF_API_TOKEN", CF_TOKEN, "Cloudflare Workers AI"),
+        ("GEMINI_API_KEY", GEMINI_KEY, "Gemini (texte, vision, image) -> secours"),
+        ("PEXELS_API_KEY", PEXELS_KEY, "Pexels (photos libres) -> secours"),
+        ("PIXABAY_API_KEY", PIXABAY_KEY, "Pixabay (photos libres) -> secours"),
+        ("PAGE_ID", PAGE_ID, "ID page Facebook"),
+        ("INSTAGRAM_BUSINESS_ID", IG_ID, "ID Instagram"),
+        ("CLOUDINARY_CLOUD_NAME", CLD_NAME, "Cloudinary (requis pour Instagram)"),
+        ("CLOUDINARY_API_KEY", CLD_KEY, "Cloudinary (requis pour Instagram)"),
+        ("CLOUDINARY_API_SECRET", CLD_SECRET, "Cloudinary (requis pour Instagram)"),
     ]
-    if STATS["echecs"]:
-        lignes += ["", "### Échecs"]
-        lignes += [f"- {t[:80]} — {raison}" for t, raison in STATS["echecs"]]
-    step_summary("\n".join(lignes))
-
-
-def terminer(code, statut):
-    faulthandler.cancel_dump_traceback_later()
-    banner(6, TOTAL_STEPS, "RÉSUMÉ")
-    log(f"Flux OK : {STATS['flux_ok']} | Flux en échec : {STATS['flux_ko']} | "
-        f"News : {STATS['news_total']} | Déjà publiées : {STATS['deja']} | "
-        f"Trop anciennes : {STATS['anciennes']} | À publier : {STATS['candidates']}")
-    log(f"Tentatives : {STATS['tentatives']} | PUBLIÉES : {STATS['publies']}",
-        level="OK" if STATS["publies"] else "WARN")
-    for titre, raison in STATS["echecs"]:
-        log(f"   échec : {titre[:70]} -> {raison}", level="ERROR")
-    log(f"Durée totale : {time.time() - T0:.0f}s | Résultat : {statut} (code de sortie {code})",
-        level="OK" if code == 0 else "ERROR")
-    ecrire_resume(statut)
-    sys.exit(code)
+    for name, val, role in rows:
+        log(f"{'✅' if val else '⚠️ '} {name:<24}{'présent' if val else 'ABSENT/VIDE':<12} | {role}")
+    if not GROQ_KEY and not GEMINI_KEY:
+        err("Aucun LLM disponible (Groq ou Gemini requis)")
+        sys.exit(1)
 
 
 def main():
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    fichier_json = os.path.join(base_dir, "historique_posts.json")
+    print(f"▶ Python démarré (version {VERSION})", flush=True)
+    check_env()
 
-    # ---------------- ÉTAPE 1 : environnement ----------------
-    banner(1, TOTAL_STEPS, "Configuration et environnement")
-    manquants = diagnostic_environnement()
-    if manquants:
-        log("Variables obligatoires manquantes : " + ", ".join(manquants), level="ERROR")
-        log("   -> ajoute-les dans Settings > Secrets ET dans la section 'env:' du workflow.")
-        STATS["echecs"].append(("Démarrage", "secrets manquants : " + ", ".join(manquants)))
-        terminer(1, "ÉCHEC (configuration)")
+    banner("ÉTAPE 2/6 — Lecture des flux")
+    news, ok_n, fail_n = fetch_news()
+    published = load_state()
 
-    # ---------------- ÉTAPE 2 : accès aux services ----------------
-    banner(2, TOTAL_STEPS, "Vérification des accès (Groq, Facebook, Instagram)")
-    if not resoudre_modele_groq():
-        STATS["echecs"].append(("Groq", "clé invalide ou aucun modèle utilisable"))
-        terminer(1, "ÉCHEC (Groq)")
-    fb_ok, ig_ok = verifier_meta()
-    if not (fb_ok or ig_ok):
-        log("Aucune destination utilisable (Facebook et Instagram refusés) : arrêt, inutile de "
-            "générer des images.", level="ERROR")
-        STATS["echecs"].append(("Meta", "token/ID refusés par l'API Graph"))
-        terminer(1, "ÉCHEC (Meta)")
+    banner("ÉTAPE 3/6 — Sélection")
+    cutoff = dt.datetime.now(dt.timezone.utc) - dt.timedelta(hours=MAX_AGE_H)
+    fresh = [n for n in news if n["when"] >= cutoff]
+    todo = [n for n in fresh if n["id"] not in published]
+    log(f"Flux OK : {ok_n} | Flux en échec : {fail_n} | News : {len(news)} | "
+        f"Déjà publiées : {len(fresh) - len(todo)} | Trop anciennes : {len(news) - len(fresh)} | "
+        f"À publier : {len(todo)}")
 
-    extract_post = Extract_post()
-    text_post = TextPost()   # créé APRÈS resoudre_modele_groq() : utilise le bon modèle de prompt
-
-    # ---------------- ÉTAPE 3 : flux RSS ----------------
-    banner(3, TOTAL_STEPS, "Lecture des flux RSS")
-    all_news = extract_post.fetch_all_news()
-    STATS["news_total"] = len(all_news)
-    if not all_news:
-        log("AUCUNE news récupérée : les 3 flux sont bloqués ou vides (voir lignes ci-dessus).",
-            level="ERROR")
-        STATS["echecs"].append(("Flux RSS", "aucune news récupérée"))
-        terminer(1, "ÉCHEC (aucune news)")
-
-    # ---------------- ÉTAPE 4 : sélection ----------------
-    banner(4, TOTAL_STEPS, "Sélection des news à publier")
-    historique = charger_historique(fichier_json)
-    now = datetime.now(timezone.utc)
-    candidates = []
-    for i, news in enumerate(all_news):
-        post_id = f"{news['source']}_{news['title']}_{news['date']}"
-        age_h = (now - news["datetime"]).total_seconds() / 3600
-        if post_id in historique:
-            statut = "déjà publiée"
-            STATS["deja"] += 1
-        elif age_h > MAX_NEWS_AGE_HOURS:
-            statut = f"trop ancienne ({age_h:.0f} h)"
-            STATS["anciennes"] += 1
-        else:
-            statut = "À PUBLIER"
-            candidates.append((news, post_id))
-        if i < 15:
-            log(f"[{i + 1:02d}] {news['source'][:22]:<22} {news['date']} ({age_h:5.1f} h) "
-                f"{statut:<22} | {news['title'][:60]}")
-    STATS["candidates"] = len(candidates)
-    log(f"Bilan : {len(all_news)} news | {STATS['deja']} déjà publiées | "
-        f"{STATS['anciennes']} trop anciennes | {len(candidates)} à publier",
-        level="OK" if candidates else "WARN")
-
-    if not candidates:
-        if STATS["deja"] and not STATS["anciennes"]:
-            log("Rien de nouveau : toutes les news récentes sont déjà publiées.")
-        elif STATS["anciennes"]:
-            log(f"Toutes les news non publiées ont plus de {MAX_NEWS_AGE_HOURS} h : "
-                "augmente MAX_NEWS_AGE_HOURS si tu veux les publier.", level="WARN")
-        terminer(0, "RIEN À PUBLIER")
-
-    # ---------------- ÉTAPE 5 : publication ----------------
-    banner(5, TOTAL_STEPS, "Traduction, image et publication")
-    for k, (news, post_id) in enumerate(candidates, 1):
-        if STATS["publies"] >= MAX_POSTS_PER_RUN:
-            log(f"Limite atteinte ({MAX_POSTS_PER_RUN} publication(s) par exécution).")
+    banner("ÉTAPE 4/6 — Traitement (analyse + image)")
+    done, attempts, failures = 0, 0, []
+    for i, n in enumerate(todo[:MAX_ATTEMPTS], 1):
+        if done >= MAX_POSTS:
             break
-        if STATS["tentatives"] >= MAX_ATTEMPTS_PER_RUN:
-            log(f"Limite de tentatives atteinte ({MAX_ATTEMPTS_PER_RUN}).", level="WARN")
-            break
-
-        STATS["tentatives"] += 1
-        title, content, date, src = news["title"], news["continue"], news["date"], news["source"]
-        log(f"━━ News {k}/{len(candidates)} (tentative {STATS['tentatives']}/{MAX_ATTEMPTS_PER_RUN}) ━━",
-            level="STEP")
-        log(f"Source : {src} | Date : {date}")
-        log(f"Titre  : {title}")
-        log(f"Texte  : {len(content)} caractères")
-
-        text_original = f"{title}\n{content}\n\nsource: {src}, date: {date}"
-        text_translated = extract_post.tradication_of_text(text_original)
-
-        if not isinstance(text_translated, dict):
-            STATS["echecs"].append((title, "traduction échouée"))
+        attempts += 1
+        info_log(f"━━ News {i}/{min(len(todo), MAX_ATTEMPTS)} ━━")
+        log(f"Source : {n['source']} | Date : {n['when']:%Y-%m-%d %H:%M}")
+        log(f"Titre  : {n['title']}")
+        info = analyze_news(n)
+        if not info:
+            failures.append((n["title"], "analyse LLM impossible"))
             continue
-        caption = str(text_translated.get("caption") or "").strip()
-        if not caption:
-            log(f"Traduction sans 'caption' : {str(text_translated)[:200]}", level="ERROR")
-            STATS["echecs"].append((title, "traduction vide"))
-            continue
-        headline = str(text_translated.get("headline") or "").strip()
-        if not headline:  # secours : début de la légende
-            headline = " ".join(caption.split()[:14])
-            log("Pas de titre court renvoyé : début de la légende utilisé.", level="WARN")
-        log(f"Titre arabe : {headline}")
-        log(f"Légende     : {len(caption)} caractères")
+        # Le code garde la main sur l'objet visuel si le LLM est vague
+        if info["visual_object"].lower() in ("", "none", "n/a"):
+            info["visual_object"] = fallback_object(n)
+        log(f"Titre arabe : {info['title_ar']}")
+        jpeg, src = get_image(info, n)
+        ok(f"Image retenue : {src}")
 
-        resultat = text_post.publier_texte_partout(text_original, caption, headline)
-
-        if resultat.get("facebook") or resultat.get("instagram"):
-            historique[post_id] = {"source": src, "titre": title, "date": date}
-            with open(fichier_json, "w", encoding="utf-8") as f:
-                json.dump(historique, f, ensure_ascii=False, indent=4)
-            STATS["publies"] += 1
-            log(f"PUBLIÉ (Facebook : {'oui' if resultat['facebook'] else 'non'} | "
-                f"Instagram : {'oui' if resultat['instagram'] else 'non'}) -> historique mis à jour",
-                level="OK")
+        banner("ÉTAPE 5/6 — Publication")
+        res = publish_all(jpeg, build_caption(info, n))
+        if res:
+            published.add(n["id"])
+            save_state(published)
+            done += 1
         else:
-            raison = resultat.get("erreur") or "Facebook et Instagram n'ont pas confirmé (voir ❌ ci-dessus)"
-            STATS["echecs"].append((title, raison))
-            log(f"NON PUBLIÉ : {raison}", level="ERROR")
-            if resultat.get("no_image"):
-                log("Aucune image de qualité disponible : arrêt du run "
-                    "(les news restantes seront retentées au prochain run).", level="WARN")
-                break
+            failures.append((n["title"], "publication impossible"))
 
-    # ---------------- ÉTAPE 6 : résumé ----------------
-    if STATS["publies"] > 0:
-        terminer(0, "SUCCÈS")
-    terminer(1, "ÉCHEC (rien n'a été publié)")
+    banner("ÉTAPE 6/6 — RÉSUMÉ")
+    log(f"Tentatives : {attempts} | PUBLIÉES : {done}")
+    for t, why in failures:
+        err(f"échec : {t} -> {why}")
+    log(f"Durée totale : {time.time() - T0:.0f}s")
+    if done == 0:
+        err("Résultat : ÉCHEC (rien n'a été publié)")
+        sys.exit(1)
+    ok("Résultat : SUCCÈS")
 
 
 if __name__ == "__main__":
-    try:
-        main()
-    except SystemExit:
-        raise
-    except BaseException as exc:
-        log(f"ERREUR INATTENDUE : {type(exc).__name__} : {exc}", level="ERROR")
-        print(traceback.format_exc(), flush=True)
-        STATS["echecs"].append(("Erreur inattendue", f"{type(exc).__name__}: {exc}"))
-        ecrire_resume("CRASH")
-        sys.exit(1)
+    main()
