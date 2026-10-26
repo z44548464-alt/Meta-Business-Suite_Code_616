@@ -70,8 +70,8 @@ OUT_W, OUT_H = 1080, 1350      # sortie finale 4:5 (Facebook / Instagram)
 IMAGE_CANDIDATES = int(os.getenv("IMAGE_CANDIDATES", "1"))
 
 # Contrôle de publication
-MAX_POSTS_PER_RUN = int(os.getenv("MAX_POSTS_PER_RUN", "300"))
-MAX_ATTEMPTS_PER_RUN = int(os.getenv("MAX_ATTEMPTS_PER_RUN", "330"))
+MAX_POSTS_PER_RUN = int(os.getenv("MAX_POSTS_PER_RUN", "1"))
+MAX_ATTEMPTS_PER_RUN = int(os.getenv("MAX_ATTEMPTS_PER_RUN", "1"))
 MAX_NEWS_AGE_HOURS = int(os.getenv("MAX_NEWS_AGE_HOURS", "72"))
 IG_CAPTION_LIMIT = 2200
 
