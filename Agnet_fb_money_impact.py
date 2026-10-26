@@ -1,6 +1,6 @@
 import sys
 import faulthandler
-SCRIPT_VERSION = "2026-10-26-robust-images"
+SCRIPT_VERSION = "2026-10-26-robust-translation"
 print(f"▶ Python démarré (version {SCRIPT_VERSION}), chargement des modules…", flush=True)
 faulthandler.enable()
 # Si le script reste figé, affiche la pile d'appel toutes les 90 s (montre OÙ il bloque)
@@ -71,7 +71,8 @@ IMAGE_CANDIDATES = int(os.getenv("IMAGE_CANDIDATES", "1"))
 
 # Contrôle de publication
 MAX_POSTS_PER_RUN = int(os.getenv("MAX_POSTS_PER_RUN", "1"))
-MAX_ATTEMPTS_PER_RUN = int(os.getenv("MAX_ATTEMPTS_PER_RUN", "1"))
+# 3 tentatives : si la traduction d'une news échoue, le script essaie la suivante
+MAX_ATTEMPTS_PER_RUN = int(os.getenv("MAX_ATTEMPTS_PER_RUN", "3"))
 MAX_NEWS_AGE_HOURS = int(os.getenv("MAX_NEWS_AGE_HOURS", "72"))
 IG_CAPTION_LIMIT = 2200
 
@@ -1193,59 +1194,94 @@ class Extract_post:
         articles.sort(key=lambda item: item["datetime"], reverse=True)
         return articles
 
+    # ------------------------------------------------------------------
+    # Traduction en arabe : format texte brut (HEADLINE / CAPTION), sans JSON.
+    # Les guillemets et retours à la ligne de l'arabe ne cassent plus le parsing.
+    # ------------------------------------------------------------------
     @staticmethod
-    def _extract_json(text):
-        """Extrait l'objet JSON d'une réponse LLM (gère <think>…</think> et ```json)."""
-        text = re.sub(r"<think>.*?</think>", "", text or "", flags=re.S | re.I).strip()
-        try:
-            return json.loads(text)
-        except Exception:
-            m = re.search(r"\{.*\}", text, re.S)
-            if m:
-                return json.loads(m.group(0))
-            raise
+    def _clean_llm_text(text):
+        """Retire le raisonnement <think>…</think> (modèles Qwen / DeepSeek)."""
+        text = text or ""
+        low = text.lower()
+        if "<think>" in low and "</think>" not in low:
+            return ""   # raisonnement jamais terminé (réponse tronquée) : inutilisable
+        text = re.sub(r"<think>.*?</think>", "", text, flags=re.S | re.I)
+        return text.strip()
+
+    @classmethod
+    def _parse_translation(cls, text):
+        """Lit 'HEADLINE: …  CAPTION: …' en texte brut."""
+        text = cls._clean_llm_text(text)
+        if not text:
+            return None
+        text = re.sub(r"^```\w*\s*|\s*```$", "", text).strip()   # retire d'éventuels ```
+
+        m = re.search(r"HEADLINE\s*:\s*(.*?)\s*CAPTION\s*:\s*(.*)", text, re.S | re.I)
+        if m:
+            headline, caption = m.group(1), m.group(2)
+        else:
+            m = re.search(r"CAPTION\s*:\s*(.*)", text, re.S | re.I)   # légende seule
+            if not m:
+                return None
+            headline, caption = "", m.group(1)
+
+        headline = re.sub(r'["«»“”*#`]', " ", headline)
+        headline = " ".join(headline.split())
+        words = headline.split()
+        if len(words) > 18:
+            headline = " ".join(words[:18])
+
+        caption = caption.strip().strip("*`").strip()
+        # La légende doit contenir de l'arabe (sinon le modèle a répondu en anglais)
+        if not caption or not TextPost._AR_RE.search(caption):
+            return None
+        return {"caption": caption, "headline": headline}
 
     def tradication_of_text(self, text):
-        prompt = """
-        You are a professional Arabic translator specializing in financial news.
-        Translate into natural Modern Standard Arabic. Preserve financial meaning and facts.
-        Return ONLY a valid JSON object with two fields:
-        {"caption": "full translation of the text",
-         "headline": "short punchy Arabic news headline"}
-        The headline: 8 to 15 words, newsroom style, captures the key fact (and the
-        market impact if any), no emojis, no hashtags, no quotation marks, no source name.
-        """
-        t = time.time()
-        log(f"Traduction en arabe (Groq, modèle {self.model_groq_name})…")
+        system_prompt = (
+            "You are a professional Arabic translator specializing in financial news.\n"
+            "Translate into natural Modern Standard Arabic. Preserve the financial meaning, "
+            "figures and facts.\n"
+            "Answer in EXACTLY this plain-text format (keep the two English labels), "
+            "and write nothing else:\n\n"
+            "HEADLINE: <short punchy Arabic news headline, 8 to 15 words, newsroom style, "
+            "key fact and market impact if any, no emojis, no hashtags, no quotation marks, "
+            "no source name>\n"
+            "CAPTION: <full Arabic translation of the text>"
+        )
         messages = [
-            {"role": "system", "content": prompt},
+            {"role": "system", "content": system_prompt},
             {"role": "user", "content": f"SOURCE TEXT TO TRANSLATE:\n{text}"},
         ]
+
+        # Modèle principal, puis modèles de secours si la réponse est inexploitable
+        modeles = [self.model_groq_name] + [m for m in GROQ_FALLBACKS
+                                            if m != self.model_groq_name]
+        t = time.time()
         last_error = None
-        for mode_json in (True, False):   # 1) mode JSON strict, 2) texte libre puis extraction
+        for model in modeles[:3]:
+            log(f"Traduction en arabe (Groq, modèle {model})…")
             try:
-                kwargs = {"response_format": {"type": "json_object"}} if mode_json else {}
                 response = self.client.chat.completions.create(
-                    model=self.model_groq_name,
+                    model=model,
                     messages=messages,
-                    temperature=0.0,
-                    **kwargs,
+                    temperature=0.3,      # 0.0 est déconseillé pour les modèles Qwen
+                    max_tokens=4096,
                 )
-                data = self._extract_json(response.choices[0].message.content)
-                if isinstance(data, dict) and str(data.get("caption") or "").strip():
-                    log(f"Traduction reçue en {time.time() - t:.1f}s", level="OK")
+                data = self._parse_translation(response.choices[0].message.content)
+                if data:
+                    log(f"Traduction reçue en {time.time() - t:.1f}s (modèle {model})",
+                        level="OK")
                     return data
-                last_error = f"réponse sans 'caption' : {str(data)[:150]}"
-                log(f"Traduction inexploitable ({last_error})", level="WARN")
+                last_error = f"{model} : réponse inexploitable (format ou langue incorrects)"
+                log(f"Traduction : {last_error}", level="WARN")
             except Exception as e:
-                last_error = f"{type(e).__name__} : {str(e)[:300]}"
-                log(f"Traduction essai {'JSON' if mode_json else 'texte'} échoué ({last_error})",
-                    level="WARN")
+                last_error = f"{model} : {type(e).__name__} : {str(e)[:300]}"
+                log(f"Traduction essai échoué ({last_error})", level="WARN")
+                if "429" in str(e) or "rate" in str(e).lower():
+                    time.sleep(5)
+
         log(f"Traduction ÉCHOUÉE : {last_error}", level="ERROR")
-        if last_error and "model" in last_error.lower() and (
-                "not" in last_error.lower() or "exist" in last_error.lower()):
-            log("   -> le modèle Groq n'existe pas / n'est plus disponible : "
-                "change la variable GROQ_MODEL.", level="WARN")
         return None
 
 
