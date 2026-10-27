@@ -53,14 +53,14 @@ jobs:
         run: |
           ls -la
           ls -la fonts imgs 2>/dev/null || echo "Dossiers fonts/ ou imgs/ absents"
-          grep -c "def banner" Agnet_fb_money_impact.py || echo ">>> ANCIENNE VERSION du script <<<"
-          python -m py_compile Agnet_fb_money_impact.py && echo "Syntaxe OK"
+          grep -c "def banner" Agnet_fb_money_impact_2.py || echo ">>> ANCIENNE VERSION du script <<<"
+          python -m py_compile Agnet_fb_money_impact_2.py && echo "Syntaxe OK"
 
       - name: Lancer l'agent
         timeout-minutes: 30
         run: |
           set -o pipefail
-          python -u Agnet_fb_money_impact.py 2>&1 | tee agent.log
+          python -u Agnet_fb_money_impact_2.py 2>&1 | tee agent.log
         env:
         # work flow pour genere les images
           CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
