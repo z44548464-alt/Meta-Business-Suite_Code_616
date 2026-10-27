@@ -1,6 +1,6 @@
 import sys
 import faulthandler
-SCRIPT_VERSION = "2026-10-27-money-impact-strict-score75"
+SCRIPT_VERSION = "2026-10-27-money-impact-strict-score75-latinfont"
 print(f"▶ Python démarré (version {SCRIPT_VERSION}), chargement des modules…", flush=True)
 faulthandler.enable()
 faulthandler.dump_traceback_later(90, repeat=True, file=sys.stderr)
@@ -481,6 +481,21 @@ def llm_chat(messages, temperature=0.2, max_tokens=1800, order=None):
 # ======================================================================
 # GÉNÉRATION DE POST (image + publication)
 # ======================================================================
+class _FontPair:
+    """Police arabe + police latine de secours (même taille).
+
+    Beaucoup de polices arabes (ex. Noto Sans Arabic) n'ont PAS les lettres latines :
+    « DoorDash » s'affichait alors en carrés □□□□. Les mots non arabes sont donc
+    dessinés avec la police latine, les mots arabes avec la police arabe."""
+
+    def __init__(self, ar, lat):
+        self.ar = ar
+        self.lat = lat
+
+    def pick(self, is_ar):
+        return self.ar if is_ar else self.lat
+
+
 class TextPost:
     def __init__(self):
         pass
@@ -861,11 +876,12 @@ class TextPost:
     @classmethod
     def _load_arabic_font(cls, size):
         mode = cls._detect_ar_mode()
+        latin = TextPost._load_font(size)   # DejaVu / Liberation Bold : contient le latin
         try:
-            return cls._open_ar_font(size, mode)
+            return _FontPair(cls._open_ar_font(size, mode), latin)
         except Exception:
             log("ATTENTION : aucune police arabe trouvée (mets Cairo-Bold.ttf dans ./fonts/)")
-            return TextPost._load_font(size)
+            return _FontPair(latin, latin)
 
     @classmethod
     def _ar_word_visual(cls, word, mode):
@@ -947,21 +963,22 @@ class TextPost:
 
     def _line_width(self, draw, text, font):
         runs = self._ar_runs(text)
-        space = draw.textlength(" ", font=font)
+        space = draw.textlength(" ", font=font.ar)
         total = 0
         for run, is_ar in runs:
             s, kw = self._run_args(run, is_ar)
-            total += draw.textlength(s, font=font, **kw)
+            total += draw.textlength(s, font=font.pick(is_ar), **kw)
         return total + space * max(0, len(runs) - 1)
 
     def _draw_rtl_line(self, draw, right_x, y, text, font, fill):
-        space = draw.textlength(" ", font=font)
+        space = draw.textlength(" ", font=font.ar)
         x = right_x
         for run, is_ar in self._ar_runs(text):
             s, kw = self._run_args(run, is_ar)
-            rw = draw.textlength(s, font=font, **kw)
+            f = font.pick(is_ar)
+            rw = draw.textlength(s, font=f, **kw)
             x -= rw
-            draw.text((x, y), s, font=font, fill=fill, **kw)
+            draw.text((x, y), s, font=f, fill=fill, **kw)
             x -= space
 
     def _wrap(self, draw, text, font, max_w):
