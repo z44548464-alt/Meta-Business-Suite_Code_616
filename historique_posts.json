@@ -158,5 +158,26 @@
         "source": "Investing.com",
         "titre": "Williams raises quarterly dividend 5% to $0.525 per share",
         "date": "2026-10-27 18:16"
+    },
+    "Bloomberg Markets_DoorDash Is Said to Near $17B Takeover of Instacart_2026-10-27 19:00": {
+        "source": "Bloomberg Markets",
+        "titre": "DoorDash Is Said to Near $17B Takeover of Instacart",
+        "date": "2026-10-27 19:00",
+        "note": 90,
+        "categorie": "Stocks"
+    },
+    "Bloomberg Economics_South Africa Corn Plantings Seen at Seven-Year Low on El Niño Risk_2026-10-27 18:09": {
+        "source": "Bloomberg Economics",
+        "titre": "South Africa Corn Plantings Seen at Seven-Year Low on El Niño Risk",
+        "date": "2026-10-27 18:09",
+        "note": 80,
+        "categorie": "Economic news"
+    },
+    "Bloomberg Markets_Corporate-Bond Trading Is Moving Beyond Top Securities, Barclays Says_2026-10-27 17:35": {
+        "source": "Bloomberg Markets",
+        "titre": "Corporate-Bond Trading Is Moving Beyond Top Securities, Barclays Says",
+        "date": "2026-10-27 17:35",
+        "note": 80,
+        "categorie": "Bonds"
     }
 }
