@@ -289,14 +289,14 @@
         "source": "Bloomberg Economics",
         "titre": "French Consumer Confidence Drops to 13-Year Low After Riots",
         "date": "2026-10-27 07:45",
-        "note": 80,
+        "note": 85,
         "categorie": "Economic news"
     },
     "Bloomberg Economics_BOJ’s Price Trend Indicator Jumps to Above 3%, Backing Hike Case_2026-10-27 06:11": {
         "source": "Bloomberg Economics",
         "titre": "BOJ’s Price Trend Indicator Jumps to Above 3%, Backing Hike Case",
         "date": "2026-10-27 06:11",
-        "note": 90,
+        "note": 85,
         "categorie": "Central banks"
     },
     "Bloomberg Economics_Japan’s UA Zensen Union Seeks 6% Pay Hike in 2027 Wage Talks_2026-10-27 03:25": {
@@ -347,5 +347,26 @@
         "date": "2026-10-26 09:00",
         "note": 90,
         "categorie": "Central banks"
+    },
+    "OilPrice_The Diesel Crisis Is Here To Stay_2026-10-27 19:00": {
+        "source": "OilPrice",
+        "titre": "The Diesel Crisis Is Here To Stay",
+        "date": "2026-10-27 19:00",
+        "note": 80,
+        "categorie": "Oil"
+    },
+    "Bloomberg Markets_Gold Recovers as Bargain Hunters Return Ahead of Fed Decision_2026-10-26 23:20": {
+        "source": "Bloomberg Markets",
+        "titre": "Gold Recovers as Bargain Hunters Return Ahead of Fed Decision",
+        "date": "2026-10-26 23:20",
+        "note": 80,
+        "categorie": "Gold"
+    },
+    "Bloomberg Markets_Latest Oil Market News and Analysis for Oct. 27_2026-10-26 22:03": {
+        "source": "Bloomberg Markets",
+        "titre": "Latest Oil Market News and Analysis for Oct. 27",
+        "date": "2026-10-26 22:03",
+        "note": 75,
+        "categorie": "Oil"
     }
 }
