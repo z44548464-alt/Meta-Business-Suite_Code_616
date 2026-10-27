@@ -438,5 +438,33 @@
         "date": "2026-10-27 22:09",
         "note": 80,
         "categorie": "Stocks"
+    },
+    "Bloomberg Markets_Dongshan Precision Set to Debut After $1.3 Billion HK Listing_2026-10-27 23:00": {
+        "source": "Bloomberg Markets",
+        "titre": "Dongshan Precision Set to Debut After $1.3 Billion HK Listing",
+        "date": "2026-10-27 23:00",
+        "note": 80,
+        "categorie": "Stocks"
+    },
+    "OilPrice_Americans Hit Hardest by War-Driven Oil Price Surge_2026-10-27 23:00": {
+        "source": "OilPrice",
+        "titre": "Americans Hit Hardest by War-Driven Oil Price Surge",
+        "date": "2026-10-27 23:00",
+        "note": 80,
+        "categorie": "Oil"
+    },
+    "Bloomberg Economics_IMF Strikes Preliminary Argentina Deal As Market Return Dims_2026-10-27 22:19": {
+        "source": "Bloomberg Economics",
+        "titre": "IMF Strikes Preliminary Argentina Deal As Market Return Dims",
+        "date": "2026-10-27 22:19",
+        "note": 80,
+        "categorie": "Economic news"
+    },
+    "Bloomberg Economics_Chile Central Bank Delivers Hawkish Rate Hold_2026-10-27 21:00": {
+        "source": "Bloomberg Economics",
+        "titre": "Chile Central Bank Delivers Hawkish Rate Hold",
+        "date": "2026-10-27 21:00",
+        "note": 85,
+        "categorie": "Central banks"
     }
 }
