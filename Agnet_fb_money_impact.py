@@ -40,11 +40,39 @@ print("▶ Modules chargés.", flush=True)
 # ======================================================================
 # CONFIGURATION
 # ======================================================================
+
 TRUSTED_WEB_SOURCES = {
+    # Sources actuelles
     "FXStreet": "https://www.fxstreet.com/rss/news",
     "InvestingLive Macro": "https://investinglive.com/rss/news",
     "ActionForex Fundamental": "https://www.actionforex.com/category/fundamental-analysis/feed/",
+
+    # Marchés financiers
+    "Bloomberg Markets": "https://feeds.bloomberg.com/markets/news.rss",
+    "Bloomberg Economics": "https://feeds.bloomberg.com/economics/news.rss",
+    "CNBC Economy": "https://www.cnbc.com/id/20910258/device/rss/rss.html",
+    "CNBC Finance": "https://www.cnbc.com/id/10000664/device/rss/rss.html",
+    "MarketWatch": "https://feeds.content.dowjones.io/public/rss/mw_topstories",
+    "Financial Times Markets": "https://www.ft.com/markets?format=rss",
+    "Financial Times": "https://www.ft.com/rss/home",
+    "Investing.com": "https://www.investing.com/rss/news.rss",
+    "Benzinga": "https://www.benzinga.com/feed",
+    "Seeking Alpha": "https://seekingalpha.com/feed.xml",
+
+    # Banques centrales et macroéconomie
+    "Federal Reserve": "https://www.federalreserve.gov/feeds/press_all.xml",
+    "ECB": "https://www.ecb.europa.eu/rss/press.html",
+    "Bank of England": "https://www.bankofengland.co.uk/rss/news",
+
+    # Matières premières et marchés à terme
+    "CME Group": "https://www.cmegroup.com/rss/commentary-home-insights-analysis.rss",
+    "OilPrice": "https://oilprice.com/rss/main",
+
+    # Analyse économique
+    "The Economist": "https://www.economist.com/finance-and-economics/rss.xml",
+    "NPR Economy": "https://feeds.npr.org/1017/rss.xml",
 }
+
 
 # Une actualité doit être directement liée à la finance de marché ou avoir un impact
 # financier concret. La simple mention d'argent ne suffit pas.
