@@ -396,5 +396,40 @@
         "date": "2026-10-27 16:43",
         "note": 80,
         "categorie": "Bonds"
+    },
+    "Bloomberg Markets_Raizen Debt to Be Eyed by FS, Mubadala in Restructuring_2026-10-27 21:02": {
+        "source": "Bloomberg Markets",
+        "titre": "Raizen Debt to Be Eyed by FS, Mubadala in Restructuring",
+        "date": "2026-10-27 21:02",
+        "note": 80,
+        "categorie": "Stocks"
+    },
+    "Bloomberg Economics_Chile Holds Key Rate as Growth Fades and Inflation Picks Up_2026-10-27 21:00": {
+        "source": "Bloomberg Economics",
+        "titre": "Chile Holds Key Rate as Growth Fades and Inflation Picks Up",
+        "date": "2026-10-27 21:00",
+        "note": 90,
+        "categorie": "Central banks"
+    },
+    "OilPrice_Turkey’s Libya Deal Puts Oil Majors in a Bind_2026-10-27 21:00": {
+        "source": "OilPrice",
+        "titre": "Turkey’s Libya Deal Puts Oil Majors in a Bind",
+        "date": "2026-10-27 21:00",
+        "note": 80,
+        "categorie": "Oil"
+    },
+    "OilPrice_US Crude Oil Inventories Buck Analyst Expectations_2026-10-27 20:56": {
+        "source": "OilPrice",
+        "titre": "US Crude Oil Inventories Buck Analyst Expectations",
+        "date": "2026-10-27 20:56",
+        "note": 85,
+        "categorie": "Oil"
+    },
+    "Bloomberg Markets_Trafigura, Mubadala Cancel Planned Sale of Brazilian Iron Port_2026-10-27 20:20": {
+        "source": "Bloomberg Markets",
+        "titre": "Trafigura, Mubadala Cancel Planned Sale of Brazilian Iron Port",
+        "date": "2026-10-27 20:20",
+        "note": 80,
+        "categorie": "Economic news"
     }
 }
