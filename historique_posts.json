@@ -1173,5 +1173,47 @@
         "date": "2026-10-28 18:09",
         "note": 85,
         "categorie": "Bonds"
+    },
+    "Bloomberg Markets_Petrobras Pumps at Record as Iran War Upends Oil Markets_2026-10-28 23:06": {
+        "source": "Bloomberg Markets",
+        "titre": "Petrobras Pumps at Record as Iran War Upends Oil Markets",
+        "date": "2026-10-28 23:06",
+        "note": 85,
+        "categorie": "Oil"
+    },
+    "OilPrice_Oil Refineries Become Prime Targets as Global Fuel Shortage Worsens_2026-10-28 23:00": {
+        "source": "OilPrice",
+        "titre": "Oil Refineries Become Prime Targets as Global Fuel Shortage Worsens",
+        "date": "2026-10-28 23:00",
+        "note": 80,
+        "categorie": "Oil"
+    },
+    "Bloomberg Economics_Fed Holds Fire as Warsh Telegraphs More Hikes Without Saying It_2026-10-28 22:44": {
+        "source": "Bloomberg Economics",
+        "titre": "Fed Holds Fire as Warsh Telegraphs More Hikes Without Saying It",
+        "date": "2026-10-28 22:44",
+        "note": 80,
+        "categorie": "Central banks"
+    },
+    "OilPrice_How Trump’s Russian Diesel Could End Up in Cuba Instead_2026-10-28 22:28": {
+        "source": "OilPrice",
+        "titre": "How Trump’s Russian Diesel Could End Up in Cuba Instead",
+        "date": "2026-10-28 22:28",
+        "note": 80,
+        "categorie": "Oil"
+    },
+    "Bloomberg Markets_US Stock Futures Fall After Alphabet, Fed Holds: Markets Wrap_2026-10-28 22:11": {
+        "source": "Bloomberg Markets",
+        "titre": "US Stock Futures Fall After Alphabet, Fed Holds: Markets Wrap",
+        "date": "2026-10-28 22:11",
+        "note": 80,
+        "categorie": "Stocks"
+    },
+    "Bloomberg Markets_Sprouts Sinks After Outlook Cut on Cyclospora, Consumer Woes_2026-10-28 21:24": {
+        "source": "Bloomberg Markets",
+        "titre": "Sprouts Sinks After Outlook Cut on Cyclospora, Consumer Woes",
+        "date": "2026-10-28 21:24",
+        "note": 80,
+        "categorie": "Stocks"
     }
 }
