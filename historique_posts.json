@@ -1068,5 +1068,26 @@
         "date": "2026-10-28 12:29",
         "note": 90,
         "categorie": "Stocks"
+    },
+    "Seeking Alpha_Another Solid Quarter Is In The Books For Prosperity Bancshares_2026-10-28 20:22": {
+        "source": "Seeking Alpha",
+        "titre": "Another Solid Quarter Is In The Books For Prosperity Bancshares",
+        "date": "2026-10-28 20:22",
+        "note": 80,
+        "categorie": "Stocks"
+    },
+    "OilPrice_India’s Record LNG Buying Meets Record-High Prices_2026-10-28 20:00": {
+        "source": "OilPrice",
+        "titre": "India’s Record LNG Buying Meets Record-High Prices",
+        "date": "2026-10-28 20:00",
+        "note": 80,
+        "categorie": "Oil"
+    },
+    "Bloomberg Markets_Gold Cuts Losses as Fed Pauses and Stays Silent on Future Hikes_2026-10-27 23:36": {
+        "source": "Bloomberg Markets",
+        "titre": "Gold Cuts Losses as Fed Pauses and Stays Silent on Future Hikes",
+        "date": "2026-10-27 23:36",
+        "note": 85,
+        "categorie": "Gold"
     }
 }
