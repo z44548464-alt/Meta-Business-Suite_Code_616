@@ -557,5 +557,26 @@
         "date": "2026-10-27 08:42",
         "note": 80,
         "categorie": "Stocks"
+    },
+    "Bloomberg Markets_New Zealand Dollar Slides Most Versus Aussie Since 2017 on RBNZ_2026-10-28 01:50": {
+        "source": "Bloomberg Markets",
+        "titre": "New Zealand Dollar Slides Most Versus Aussie Since 2017 on RBNZ",
+        "date": "2026-10-28 01:50",
+        "note": 90,
+        "categorie": "Forex"
+    },
+    "Bloomberg Economics_Australia Under Pressure to Hike Rates Further as Prices Quicken_2026-10-28 00:32": {
+        "source": "Bloomberg Economics",
+        "titre": "Australia Under Pressure to Hike Rates Further as Prices Quicken",
+        "date": "2026-10-28 00:32",
+        "note": 80,
+        "categorie": "Central banks"
+    },
+    "Bloomberg Markets_Asian Stocks Climb on AI Trade Optimism, Oil Gains: Markets Wrap_2026-10-27 22:09": {
+        "source": "Bloomberg Markets",
+        "titre": "Asian Stocks Climb on AI Trade Optimism, Oil Gains: Markets Wrap",
+        "date": "2026-10-27 22:09",
+        "note": 80,
+        "categorie": "Stocks"
     }
 }
