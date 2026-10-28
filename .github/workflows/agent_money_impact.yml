@@ -77,6 +77,15 @@ jobs:
           CF_API_TOKEN5: ${{ secrets.CF_API_TOKEN5 }}
           CF_ACCOUNT_ID6: ${{ secrets.CF_ACCOUNT_ID6 }}
           CF_API_TOKEN6: ${{ secrets.CF_API_TOKEN6 }}
+          CF_ACCOUNT_ID7: ${{ secrets.CF_ACCOUNT_ID7 }}
+          CF_API_TOKEN7: ${{ secrets.CF_API_TOKEN7 }}
+          CF_ACCOUNT_ID8: ${{ secrets.CF_ACCOUNT_ID8 }}
+          CF_API_TOKEN8: ${{ secrets.CF_API_TOKEN8 }}
+          CF_ACCOUNT_ID9: ${{ secrets.CF_ACCOUNT_ID9 }}
+          CF_API_TOKEN9: ${{ secrets.CF_API_TOKEN9 }}
+          CF_ACCOUNT_ID10: ${{ secrets.CF_ACCOUNT_ID10 }}
+          CF_API_TOKEN10: ${{ secrets.CF_API_TOKEN10 }}
+
          
 
           #information of pages 
