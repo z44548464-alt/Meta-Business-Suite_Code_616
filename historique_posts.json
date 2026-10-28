@@ -1124,5 +1124,54 @@
         "date": "2026-10-28 20:26",
         "note": 90,
         "categorie": "Central banks"
+    },
+    "OilPrice_U.S. Natural Gas Production Hits New Records as Demand Surges_2026-10-28 22:00": {
+        "source": "OilPrice",
+        "titre": "U.S. Natural Gas Production Hits New Records as Demand Surges",
+        "date": "2026-10-28 22:00",
+        "note": 80,
+        "categorie": "Oil"
+    },
+    "Bloomberg Markets_Fed mantiene tasas sin dar muchas pistas sobre diciembre_2026-10-28 21:32": {
+        "source": "Bloomberg Markets",
+        "titre": "Fed mantiene tasas sin dar muchas pistas sobre diciembre",
+        "date": "2026-10-28 21:32",
+        "note": 90,
+        "categorie": "Central banks"
+    },
+    "Bloomberg Economics_Bank of Canada Chief Tiff Macklem Warns US Deficits Are Costly and Unsustainable_2026-10-28 21:25": {
+        "source": "Bloomberg Economics",
+        "titre": "Bank of Canada Chief Tiff Macklem Warns US Deficits Are Costly and Unsustainable",
+        "date": "2026-10-28 21:25",
+        "note": 80,
+        "categorie": "Central banks"
+    },
+    "Bloomberg Markets_Sprouts Slashes Outlook After Cyclospora Outbreak Hit Sales_2026-10-28 21:24": {
+        "source": "Bloomberg Markets",
+        "titre": "Sprouts Slashes Outlook After Cyclospora Outbreak Hit Sales",
+        "date": "2026-10-28 21:24",
+        "note": 80,
+        "categorie": "Stocks"
+    },
+    "Bloomberg Markets_Fed Officials Left Interest Rates Unchanged_2026-10-28 21:15": {
+        "source": "Bloomberg Markets",
+        "titre": "Fed Officials Left Interest Rates Unchanged",
+        "date": "2026-10-28 21:15",
+        "note": 95,
+        "categorie": "Central banks"
+    },
+    "OilPrice_GE Vernova Expands in High-Voltage Grid Gear With Trench Deal_2026-10-28 20:30": {
+        "source": "OilPrice",
+        "titre": "GE Vernova Expands in High-Voltage Grid Gear With Trench Deal",
+        "date": "2026-10-28 20:30",
+        "note": 80,
+        "categorie": "Stocks"
+    },
+    "Bloomberg Economics_US Short-Term Yields Fall as Traders Parse Warsh, Fed Path_2026-10-28 18:09": {
+        "source": "Bloomberg Economics",
+        "titre": "US Short-Term Yields Fall as Traders Parse Warsh, Fed Path",
+        "date": "2026-10-28 18:09",
+        "note": 85,
+        "categorie": "Bonds"
     }
 }
