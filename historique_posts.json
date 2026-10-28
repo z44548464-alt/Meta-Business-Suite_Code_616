@@ -578,5 +578,19 @@
         "date": "2026-10-27 22:09",
         "note": 80,
         "categorie": "Stocks"
+    },
+    "Bloomberg Markets_Chinese Government to Speed Bond Sales to Stimulate Growth_2026-10-28 03:00": {
+        "source": "Bloomberg Markets",
+        "titre": "Chinese Government to Speed Bond Sales to Stimulate Growth",
+        "date": "2026-10-28 03:00",
+        "note": 90,
+        "categorie": "Bonds"
+    },
+    "Seeking Alpha_Seagate Q1: Earnings Beat, Stock Plunges But Valuation Concerns Exist (Rating Downgrade)_2026-10-28 02:55": {
+        "source": "Seeking Alpha",
+        "titre": "Seagate Q1: Earnings Beat, Stock Plunges But Valuation Concerns Exist (Rating Downgrade)",
+        "date": "2026-10-28 02:55",
+        "note": 80,
+        "categorie": "Stocks"
     }
 }
