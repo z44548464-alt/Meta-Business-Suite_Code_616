@@ -613,5 +613,61 @@
         "date": "2026-10-27 22:09",
         "note": 80,
         "categorie": "Stocks"
+    },
+    "Seeking Alpha_Oil Hits Six-Month High And The Impact Could Be Felt In Many Aspects Of The Economy_2026-10-28 12:15": {
+        "source": "Seeking Alpha",
+        "titre": "Oil Hits Six-Month High And The Impact Could Be Felt In Many Aspects Of The Economy",
+        "date": "2026-10-28 12:15",
+        "note": 85,
+        "categorie": "Oil"
+    },
+    "Bloomberg Markets_Saudi Oil Exports Near Wartime High as Houthis Mount Attacks_2026-10-28 11:44": {
+        "source": "Bloomberg Markets",
+        "titre": "Saudi Oil Exports Near Wartime High as Houthis Mount Attacks",
+        "date": "2026-10-28 11:44",
+        "note": 80,
+        "categorie": "Oil"
+    },
+    "OilPrice_India's Gasoline Demand Could Peak by 2035 as EVs Gain Ground_2026-10-28 11:30": {
+        "source": "OilPrice",
+        "titre": "India's Gasoline Demand Could Peak by 2035 as EVs Gain Ground",
+        "date": "2026-10-28 11:30",
+        "note": 80,
+        "categorie": "Oil"
+    },
+    "Bloomberg Markets_SK Hynix Profits Surge, Fed Decision on Deck_2026-10-28 11:19": {
+        "source": "Bloomberg Markets",
+        "titre": "SK Hynix Profits Surge, Fed Decision on Deck",
+        "date": "2026-10-28 11:19",
+        "note": 80,
+        "categorie": "Stocks"
+    },
+    "ActionForex Fundamental_Crypto Recovers as Fed Decision Looms_2026-10-28 11:04": {
+        "source": "ActionForex Fundamental",
+        "titre": "Crypto Recovers as Fed Decision Looms",
+        "date": "2026-10-28 11:04",
+        "note": 80,
+        "categorie": "Crypto"
+    },
+    "ActionForex Fundamental_Reserve Bank of New Zealand Keeps Rates on Hold but Signals Further Hikes_2026-10-28 11:03": {
+        "source": "ActionForex Fundamental",
+        "titre": "Reserve Bank of New Zealand Keeps Rates on Hold but Signals Further Hikes",
+        "date": "2026-10-28 11:03",
+        "note": 90,
+        "categorie": "Central banks"
+    },
+    "Bloomberg Markets_Wall Street’s AI Debt Machine Is Starting to Choke on Supply_2026-10-28 10:30": {
+        "source": "Bloomberg Markets",
+        "titre": "Wall Street’s AI Debt Machine Is Starting to Choke on Supply",
+        "date": "2026-10-28 10:30",
+        "note": 80,
+        "categorie": "Economic news"
+    },
+    "OilPrice_China’s Wind and Solar Power Capacity Surpasses 2 Terawatts_2026-10-28 10:20": {
+        "source": "OilPrice",
+        "titre": "China’s Wind and Solar Power Capacity Surpasses 2 Terawatts",
+        "date": "2026-10-28 10:20",
+        "note": 80,
+        "categorie": "Economic news"
     }
 }
