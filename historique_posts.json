@@ -669,5 +669,54 @@
         "date": "2026-10-28 10:20",
         "note": 80,
         "categorie": "Economic news"
+    },
+    "Bloomberg Economics_UK Budget Does Little to Ease Pressure on BOE for Rate Hikes_2026-10-28 16:17": {
+        "source": "Bloomberg Economics",
+        "titre": "UK Budget Does Little to Ease Pressure on BOE for Rate Hikes",
+        "date": "2026-10-28 16:17",
+        "note": 80,
+        "categorie": "Economic news"
+    },
+    "Seeking Alpha_SpaceX Is Quietly Deflating Amidst AI Skepticism_2026-10-28 16:16": {
+        "source": "Seeking Alpha",
+        "titre": "SpaceX Is Quietly Deflating Amidst AI Skepticism",
+        "date": "2026-10-28 16:16",
+        "note": 80,
+        "categorie": "Stocks"
+    },
+    "OilPrice_UBS Data Shows Russian Oil Exports Only 10% Below Pre-War Levels_2026-10-28 16:00": {
+        "source": "OilPrice",
+        "titre": "UBS Data Shows Russian Oil Exports Only 10% Below Pre-War Levels",
+        "date": "2026-10-28 16:00",
+        "note": 80,
+        "categorie": "Oil"
+    },
+    "Bloomberg Markets_Wall Street empieza a atragantarse con la gigantesca ola de deuda de la IA_2026-10-28 15:57": {
+        "source": "Bloomberg Markets",
+        "titre": "Wall Street empieza a atragantarse con la gigantesca ola de deuda de la IA",
+        "date": "2026-10-28 15:57",
+        "note": 80,
+        "categorie": "Bonds"
+    },
+    "Bloomberg Economics_UK Budget Pledges £4.1 Billion in Cost-of-Living Relief_2026-10-28 15:56": {
+        "source": "Bloomberg Economics",
+        "titre": "UK Budget Pledges £4.1 Billion in Cost-of-Living Relief",
+        "date": "2026-10-28 15:56",
+        "note": 80,
+        "categorie": "Economic news"
+    },
+    "Bloomberg Markets_UK Homebuilders Fall as First Time Buyer Support Disappoints_2026-10-28 15:37": {
+        "source": "Bloomberg Markets",
+        "titre": "UK Homebuilders Fall as First Time Buyer Support Disappoints",
+        "date": "2026-10-28 15:37",
+        "note": 80,
+        "categorie": "Stocks"
+    },
+    "OilPrice_PetroChina Q3 Profit Jumps to $7.78 Billion_2026-10-28 15:30": {
+        "source": "OilPrice",
+        "titre": "PetroChina Q3 Profit Jumps to $7.78 Billion",
+        "date": "2026-10-28 15:30",
+        "note": 80,
+        "categorie": "Oil"
     }
 }
