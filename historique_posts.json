@@ -592,5 +592,26 @@
         "date": "2026-10-28 02:55",
         "note": 80,
         "categorie": "Stocks"
+    },
+    "OilPrice_Oil Prices Climb as Houthi Attacks Reignite Saudi Supply Fears_2026-10-28 03:53": {
+        "source": "OilPrice",
+        "titre": "Oil Prices Climb as Houthi Attacks Reignite Saudi Supply Fears",
+        "date": "2026-10-28 03:53",
+        "note": 90,
+        "categorie": "Oil"
+    },
+    "Bloomberg Markets_Dongshan Precision Shares Erase Losses in Hong Kong Debut_2026-10-27 23:00": {
+        "source": "Bloomberg Markets",
+        "titre": "Dongshan Precision Shares Erase Losses in Hong Kong Debut",
+        "date": "2026-10-27 23:00",
+        "note": 80,
+        "categorie": "Stocks"
+    },
+    "Bloomberg Markets_Tech Rally Deepens on Hynix Earnings, Oil Climbs: Markets Wrap_2026-10-27 22:09": {
+        "source": "Bloomberg Markets",
+        "titre": "Tech Rally Deepens on Hynix Earnings, Oil Climbs: Markets Wrap",
+        "date": "2026-10-27 22:09",
+        "note": 80,
+        "categorie": "Stocks"
     }
 }
