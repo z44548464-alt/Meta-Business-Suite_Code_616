@@ -1089,5 +1089,40 @@
         "date": "2026-10-27 23:36",
         "note": 85,
         "categorie": "Gold"
+    },
+    "Seeking Alpha_First Look At EQT's And Range Resources' Combination_2026-10-28 21:08": {
+        "source": "Seeking Alpha",
+        "titre": "First Look At EQT's And Range Resources' Combination",
+        "date": "2026-10-28 21:08",
+        "note": 90,
+        "categorie": "Stocks"
+    },
+    "OilPrice_Solar Has Overtaken Nuclear in the Global Power Mix_2026-10-28 21:00": {
+        "source": "OilPrice",
+        "titre": "Solar Has Overtaken Nuclear in the Global Power Mix",
+        "date": "2026-10-28 21:00",
+        "note": 80,
+        "categorie": "Economic news"
+    },
+    "MarketWatch_Chipotle expects modestly higher sales this year as drive-thru ‘Chipotlanes’ come to more stores_2026-10-28 20:58": {
+        "source": "MarketWatch",
+        "titre": "Chipotle expects modestly higher sales this year as drive-thru ‘Chipotlanes’ come to more stores",
+        "date": "2026-10-28 20:58",
+        "note": 80,
+        "categorie": "Stocks"
+    },
+    "Bloomberg Markets_The Fed Will Deliver Price Stability, Warsh Says_2026-10-28 20:28": {
+        "source": "Bloomberg Markets",
+        "titre": "The Fed Will Deliver Price Stability, Warsh Says",
+        "date": "2026-10-28 20:28",
+        "note": 80,
+        "categorie": "Central banks"
+    },
+    "Bloomberg Economics_Bank of Canada Rate Hike Hurts Housing Market Already in Slump_2026-10-28 20:26": {
+        "source": "Bloomberg Economics",
+        "titre": "Bank of Canada Rate Hike Hurts Housing Market Already in Slump",
+        "date": "2026-10-28 20:26",
+        "note": 90,
+        "categorie": "Central banks"
     }
 }
