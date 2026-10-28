@@ -466,5 +466,33 @@
         "date": "2026-10-27 21:00",
         "note": 85,
         "categorie": "Central banks"
+    },
+    "Bloomberg Markets_SK Hynix Posts Record Profit Amid AI Rush_2026-10-28 00:18": {
+        "source": "Bloomberg Markets",
+        "titre": "SK Hynix Posts Record Profit Amid AI Rush",
+        "date": "2026-10-28 00:18",
+        "note": 80,
+        "categorie": "Stocks"
+    },
+    "OilPrice_America Produces Less Than 1% of the Rare Earth Magnets It Needs_2026-10-28 00:00": {
+        "source": "OilPrice",
+        "titre": "America Produces Less Than 1% of the Rare Earth Magnets It Needs",
+        "date": "2026-10-28 00:00",
+        "note": 80,
+        "categorie": "Economic news"
+    },
+    "Bloomberg Markets_China Stock Premium Over Hong Kong Widens on State Intervention_2026-10-27 23:49": {
+        "source": "Bloomberg Markets",
+        "titre": "China Stock Premium Over Hong Kong Widens on State Intervention",
+        "date": "2026-10-27 23:49",
+        "note": 80,
+        "categorie": "Stocks"
+    },
+    "Bloomberg Markets_Stocks in Asia Advance on Resurgent AI Optimism: Markets Wrap_2026-10-27 22:09": {
+        "source": "Bloomberg Markets",
+        "titre": "Stocks in Asia Advance on Resurgent AI Optimism: Markets Wrap",
+        "date": "2026-10-27 22:09",
+        "note": 80,
+        "categorie": "Stocks"
     }
 }
