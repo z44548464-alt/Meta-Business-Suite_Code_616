@@ -907,5 +907,47 @@
         "date": "2026-10-28 06:45",
         "note": 80,
         "categorie": "Oil"
+    },
+    "OilPrice_UBS Sees $110 Brent by Year-End as Gulf Flows Stay Below Prewar Levels_2026-10-28 17:30": {
+        "source": "OilPrice",
+        "titre": "UBS Sees $110 Brent by Year-End as Gulf Flows Stay Below Prewar Levels",
+        "date": "2026-10-28 17:30",
+        "note": 80,
+        "categorie": "Oil"
+    },
+    "Bloomberg Markets_Anthropic Is Said to Plan UK Share Offering Via RetailBook_2026-10-28 17:24": {
+        "source": "Bloomberg Markets",
+        "titre": "Anthropic Is Said to Plan UK Share Offering Via RetailBook",
+        "date": "2026-10-28 17:24",
+        "note": 80,
+        "categorie": "Stocks"
+    },
+    "MarketWatch_Wendy’s buyout offer suggests the burger chain’s overhaul could be very expensive_2026-10-28 17:24": {
+        "source": "MarketWatch",
+        "titre": "Wendy’s buyout offer suggests the burger chain’s overhaul could be very expensive",
+        "date": "2026-10-28 17:24",
+        "note": 80,
+        "categorie": "Stocks"
+    },
+    "Bloomberg Markets_Baker Hughes 3Q EPS Beat Falls Short of High Bar_2026-10-28 17:07": {
+        "source": "Bloomberg Markets",
+        "titre": "Baker Hughes 3Q EPS Beat Falls Short of High Bar",
+        "date": "2026-10-28 17:07",
+        "note": 80,
+        "categorie": "Stocks"
+    },
+    "OilPrice_Energy Crisis Shapes UK Budget as Chancellor Faces Pressure Over Defence Spendin_2026-10-28 17:00": {
+        "source": "OilPrice",
+        "titre": "Energy Crisis Shapes UK Budget as Chancellor Faces Pressure Over Defence Spendin",
+        "date": "2026-10-28 17:00",
+        "note": 80,
+        "categorie": "Economic news"
+    },
+    "OilPrice_Equinor Raises Oil and Gas Output Forecast as Operating Profit Doubles_2026-10-28 16:30": {
+        "source": "OilPrice",
+        "titre": "Equinor Raises Oil and Gas Output Forecast as Operating Profit Doubles",
+        "date": "2026-10-28 16:30",
+        "note": 80,
+        "categorie": "Oil"
     }
 }
