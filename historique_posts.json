@@ -949,5 +949,61 @@
         "date": "2026-10-28 16:30",
         "note": 80,
         "categorie": "Oil"
+    },
+    "Bloomberg Markets_Fed Leaves Rates Unchanged, Cook and Hammack Dissent_2026-10-28 18:19": {
+        "source": "Bloomberg Markets",
+        "titre": "Fed Leaves Rates Unchanged, Cook and Hammack Dissent",
+        "date": "2026-10-28 18:19",
+        "note": 95,
+        "categorie": "Central banks"
+    },
+    "Bloomberg Economics_Bond Traders See 90% Chance of December Hike After Fed Holds_2026-10-28 18:09": {
+        "source": "Bloomberg Economics",
+        "titre": "Bond Traders See 90% Chance of December Hike After Fed Holds",
+        "date": "2026-10-28 18:09",
+        "note": 80,
+        "categorie": "Central banks"
+    },
+    "NPR Economy_Fed holds interest rates steady even as inflation remains stubborn_2026-10-28 18:04": {
+        "source": "NPR Economy",
+        "titre": "Fed holds interest rates steady even as inflation remains stubborn",
+        "date": "2026-10-28 18:04",
+        "note": 90,
+        "categorie": "Central banks"
+    },
+    "Bloomberg Economics_Fed Holds Rates, Says More Data Will Help Next Decision_2026-10-28 18:00": {
+        "source": "Bloomberg Economics",
+        "titre": "Fed Holds Rates, Says More Data Will Help Next Decision",
+        "date": "2026-10-28 18:00",
+        "note": 90,
+        "categorie": "Central banks"
+    },
+    "Seeking Alpha_Bank Of Canada Raises Rate By 25bps To 'Lean Against' Cost Pass-Through Expectations_2026-10-28 17:58": {
+        "source": "Seeking Alpha",
+        "titre": "Bank Of Canada Raises Rate By 25bps To 'Lean Against' Cost Pass-Through Expectations",
+        "date": "2026-10-28 17:58",
+        "note": 95,
+        "categorie": "Central banks"
+    },
+    "Bloomberg Economics_British Business Laments Healey’s Lack of Help in Budget_2026-10-28 17:41": {
+        "source": "Bloomberg Economics",
+        "titre": "British Business Laments Healey’s Lack of Help in Budget",
+        "date": "2026-10-28 17:41",
+        "note": 80,
+        "categorie": "Economic news"
+    },
+    "Bloomberg Markets_Lionsgate in Investor Talks for Rare Film Library-Backed Bonds_2026-10-28 17:10": {
+        "source": "Bloomberg Markets",
+        "titre": "Lionsgate in Investor Talks for Rare Film Library-Backed Bonds",
+        "date": "2026-10-28 17:10",
+        "note": 80,
+        "categorie": "Bonds"
+    },
+    "Bloomberg Markets_Gold Holds Losses After Fed Keeps Rates Steady With Two Dissents_2026-10-27 23:36": {
+        "source": "Bloomberg Markets",
+        "titre": "Gold Holds Losses After Fed Keeps Rates Steady With Two Dissents",
+        "date": "2026-10-27 23:36",
+        "note": 90,
+        "categorie": "Gold"
     }
 }
