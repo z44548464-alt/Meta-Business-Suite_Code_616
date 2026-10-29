@@ -1,6 +1,6 @@
 import sys
 import faulthandler
-SCRIPT_VERSION = "2026-10-29-money-impact-video-reels"
+SCRIPT_VERSION = "2026-10-29-money-impact-video-page12h"
 print(f"▶ Python démarré (version {SCRIPT_VERSION}), chargement des modules…", flush=True)
 faulthandler.enable()
 faulthandler.dump_traceback_later(90, repeat=True, file=sys.stderr)
@@ -499,7 +499,7 @@ class _FontPair:
 
 class TextPost:
     def __init__(self):
-        # URL Cloudinary de la dernière image publiée (sert au module vidéo).
+        # URL Cloudinary de la dernière image publiée (conservée dans l'historique des posts).
         self.last_image_url = None
 
     # ------------------------------------------------------------------
@@ -1210,7 +1210,7 @@ class TextPost:
                 log(f"Instagram : Cloudinary n'a pas renvoyé d'URL valide : {upload}", level="ERROR")
                 return False
             log(f"Instagram 1/4 : image hébergée -> {image_url}", level="OK")
-            self.last_image_url = image_url   # conservée pour la vidéo Reel
+            self.last_image_url = image_url
 
             log("Instagram 2/4 : création du conteneur média…")
             r = requests.post(
@@ -2026,7 +2026,7 @@ def main():
             STATS["echecs"].append((title, raison))
             log(f"NON PUBLIÉ : {raison}", level="ERROR")
 
-    # DERNIÈRE ÉTAPE : vidéo Reel avec les 3 à 5 dernières images jamais utilisées.
+    # DERNIÈRE ÉTAPE : vidéo Reel avec les 3 à 5 images de la page (12 dernières heures) jamais utilisées.
     publier_video_reel(historique)
 
     if STATS["publies"] > 0:
