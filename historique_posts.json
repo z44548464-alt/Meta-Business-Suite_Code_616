@@ -2104,5 +2104,19 @@
         "date": "2026-10-29 16:27",
         "note": 80,
         "categorie": "Economic news"
+    },
+    "OilPrice_BYD Earnings Miss Estimates as China's EV Price War Takes Its Toll_2026-10-29 19:00": {
+        "source": "OilPrice",
+        "titre": "BYD Earnings Miss Estimates as China's EV Price War Takes Its Toll",
+        "date": "2026-10-29 19:00",
+        "note": 80,
+        "categorie": "Stocks"
+    },
+    "MarketWatch_Why Alphabet’s stock is on track for its worst day ever after the latest results_2026-10-29 18:50": {
+        "source": "MarketWatch",
+        "titre": "Why Alphabet’s stock is on track for its worst day ever after the latest results",
+        "date": "2026-10-29 18:50",
+        "note": 90,
+        "categorie": "Stocks"
     }
 }
