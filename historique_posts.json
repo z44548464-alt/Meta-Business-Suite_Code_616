@@ -1250,5 +1250,54 @@
         "date": "2026-10-28 23:01",
         "note": 80,
         "categorie": "Stocks"
+    },
+    "ActionForex Fundamental_Fed Review: Fed Pauses, But Tightening Cycle is Not Over_2026-10-29 01:39": {
+        "source": "ActionForex Fundamental",
+        "titre": "Fed Review: Fed Pauses, But Tightening Cycle is Not Over",
+        "date": "2026-10-29 01:39",
+        "note": 90,
+        "categorie": "Central banks"
+    },
+    "ActionForex Fundamental_The FOMC Pause to Reflect_2026-10-29 01:34": {
+        "source": "ActionForex Fundamental",
+        "titre": "The FOMC Pause to Reflect",
+        "date": "2026-10-29 01:34",
+        "note": 90,
+        "categorie": "Central banks"
+    },
+    "Bloomberg Markets_Siam Cement, PTT Global Forge $5.5 Billion Petrochemical Deal_2026-10-29 01:10": {
+        "source": "Bloomberg Markets",
+        "titre": "Siam Cement, PTT Global Forge $5.5 Billion Petrochemical Deal",
+        "date": "2026-10-29 01:10",
+        "note": 90,
+        "categorie": "Stocks"
+    },
+    "Seeking Alpha_Fed's Interest Rate Decision: October 28, 2026_2026-10-29 01:00": {
+        "source": "Seeking Alpha",
+        "titre": "Fed's Interest Rate Decision: October 28, 2026",
+        "date": "2026-10-29 01:00",
+        "note": 95,
+        "categorie": "Central banks"
+    },
+    "Bloomberg Markets_Shapoorji Seeks to Raise Up to $200 Million to Repay Debt_2026-10-29 00:56": {
+        "source": "Bloomberg Markets",
+        "titre": "Shapoorji Seeks to Raise Up to $200 Million to Repay Debt",
+        "date": "2026-10-29 00:56",
+        "note": 80,
+        "categorie": "Stocks"
+    },
+    "Bloomberg Markets_Tech Stocks Drop on Concerns About AI, Oil Falls: Markets Wrap_2026-10-28 22:11": {
+        "source": "Bloomberg Markets",
+        "titre": "Tech Stocks Drop on Concerns About AI, Oil Falls: Markets Wrap",
+        "date": "2026-10-28 22:11",
+        "note": 80,
+        "categorie": "Stocks"
+    },
+    "ActionForex Fundamental_Rate call: RBA to Hike in November, as Inflation Remains Too High_2026-10-28 03:31": {
+        "source": "ActionForex Fundamental",
+        "titre": "Rate call: RBA to Hike in November, as Inflation Remains Too High",
+        "date": "2026-10-28 03:31",
+        "note": 80,
+        "categorie": "Central banks"
     }
 }
