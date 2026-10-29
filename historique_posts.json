@@ -1845,5 +1845,61 @@
         "date": "2026-10-28 22:11",
         "note": 80,
         "categorie": "Indices"
+    },
+    "OilPrice_UK National Grid to Extend France Power Link Operation to 2050_2026-10-29 14:30": {
+        "source": "OilPrice",
+        "titre": "UK National Grid to Extend France Power Link Operation to 2050",
+        "date": "2026-10-29 14:30",
+        "note": 80,
+        "categorie": "Economic news"
+    },
+    "Bloomberg Economics_The Race to Replace Lagarde Begins_2026-10-29 14:13": {
+        "source": "Bloomberg Economics",
+        "titre": "The Race to Replace Lagarde Begins",
+        "date": "2026-10-29 14:13",
+        "note": 80,
+        "categorie": "Central banks"
+    },
+    "Bloomberg Markets_Eli Lilly Shares Surge on Raised Sales Forecast_2026-10-29 14:12": {
+        "source": "Bloomberg Markets",
+        "titre": "Eli Lilly Shares Surge on Raised Sales Forecast",
+        "date": "2026-10-29 14:12",
+        "note": 85,
+        "categorie": "Stocks"
+    },
+    "ECB_Christine Lagarde, Boris Vujčić: Monetary policy statement_2026-10-29 14:00": {
+        "source": "ECB",
+        "titre": "Christine Lagarde, Boris Vujčić: Monetary policy statement",
+        "date": "2026-10-29 14:00",
+        "note": 90,
+        "categorie": "Central banks"
+    },
+    "ActionForex Fundamental_U.S. Consumer Spending Cools in September as Inflation Bites_2026-10-29 13:57": {
+        "source": "ActionForex Fundamental",
+        "titre": "U.S. Consumer Spending Cools in September as Inflation Bites",
+        "date": "2026-10-29 13:57",
+        "note": 85,
+        "categorie": "Economic news"
+    },
+    "ActionForex Fundamental_US: Growth Accelerates in Q3, Led by Consumer Spending and Business Investment_2026-10-29 13:55": {
+        "source": "ActionForex Fundamental",
+        "titre": "US: Growth Accelerates in Q3, Led by Consumer Spending and Business Investment",
+        "date": "2026-10-29 13:55",
+        "note": 90,
+        "categorie": "Economic news"
+    },
+    "Bloomberg Markets_Poundland Starts Insolvency Process in Latest UK Retail Setback_2026-10-29 13:23": {
+        "source": "Bloomberg Markets",
+        "titre": "Poundland Starts Insolvency Process in Latest UK Retail Setback",
+        "date": "2026-10-29 13:23",
+        "note": 80,
+        "categorie": "Stocks"
+    },
+    "Bloomberg Economics_Lagarde Downplays Risk That Inflation Will Broaden as ECB Holds_2026-10-29 13:15": {
+        "source": "Bloomberg Economics",
+        "titre": "Lagarde Downplays Risk That Inflation Will Broaden as ECB Holds",
+        "date": "2026-10-29 13:15",
+        "note": 80,
+        "categorie": "Central banks"
     }
 }
