@@ -1607,5 +1607,54 @@
         "date": "2026-10-29 07:06",
         "note": 85,
         "categorie": "Stocks"
+    },
+    "MarketWatch_The Fed held off on a rate hike. Today’s GDP and inflation reports could make waiting harder._2026-10-29 11:11": {
+        "source": "MarketWatch",
+        "titre": "The Fed held off on a rate hike. Today’s GDP and inflation reports could make waiting harder.",
+        "date": "2026-10-29 11:11",
+        "note": 80,
+        "categorie": "Central banks"
+    },
+    "Bloomberg Markets_US Stock Futures Fall as Alphabet Sales Miss Revives AI Fears_2026-10-29 11:09": {
+        "source": "Bloomberg Markets",
+        "titre": "US Stock Futures Fall as Alphabet Sales Miss Revives AI Fears",
+        "date": "2026-10-29 11:09",
+        "note": 85,
+        "categorie": "Stocks"
+    },
+    "Bloomberg Markets_Blue Owl Fees Beat Estimates Though Redemptions Weigh on Inflows_2026-10-29 11:02": {
+        "source": "Bloomberg Markets",
+        "titre": "Blue Owl Fees Beat Estimates Though Redemptions Weigh on Inflows",
+        "date": "2026-10-29 11:02",
+        "note": 80,
+        "categorie": "Stocks"
+    },
+    "Bloomberg Economics_De Cos and Knot Are Top ECB Candidates After Early Lagarde Exit_2026-10-29 11:00": {
+        "source": "Bloomberg Economics",
+        "titre": "De Cos and Knot Are Top ECB Candidates After Early Lagarde Exit",
+        "date": "2026-10-29 11:00",
+        "note": 80,
+        "categorie": "Central banks"
+    },
+    "Bloomberg Markets_Anwar Cuts a Deal With Opposition to Clear a 2027 Budget Hurdle_2026-10-29 10:52": {
+        "source": "Bloomberg Markets",
+        "titre": "Anwar Cuts a Deal With Opposition to Clear a 2027 Budget Hurdle",
+        "date": "2026-10-29 10:52",
+        "note": 80,
+        "categorie": "Economic news"
+    },
+    "Bloomberg Markets_Qatar to Buy LNG From Woodside as It Scours for US Supply_2026-10-29 08:35": {
+        "source": "Bloomberg Markets",
+        "titre": "Qatar to Buy LNG From Woodside as It Scours for US Supply",
+        "date": "2026-10-29 08:35",
+        "note": 80,
+        "categorie": "Oil"
+    },
+    "Bloomberg Markets_Oil Slides as Traders Weigh Signs of Tentative Iran Diplomacy_2026-10-28 22:05": {
+        "source": "Bloomberg Markets",
+        "titre": "Oil Slides as Traders Weigh Signs of Tentative Iran Diplomacy",
+        "date": "2026-10-28 22:05",
+        "note": 80,
+        "categorie": "Oil"
     }
 }
