@@ -1,9 +1,10 @@
 """Module vidéo Reels (Facebook + Instagram) pour Money.impact.
 
-Prend les photos publiées sur la Page Facebook dans les dernières VIDEO_LOOKBACK_HOURS heures,
-écarte celles déjà utilisées dans une vidéo, et s'il en reste au moins 3 crée un diaporama 9:16
-(Ken Burns + transitions aléatoires + musique aléatoire music/news_musique*.mp3).
-Appelé en dernier par le script principal : publier_video_reel(historique, ctx).
+Lit UNIQUEMENT la Page Facebook : photos publiées dans les dernières VIDEO_LOOKBACK_HOURS heures,
+écarte celles déjà utilisées dans une vidéo (historique_videos.json), et s'il en reste au moins 3,
+crée un diaporama 9:16 (Ken Burns + transitions aléatoires + musique aléatoire news_musique*.mp3)
+avec 3 à 5 images, puis le publie en Reel sur Facebook et Instagram.
+Appelé par video_only.py : publier_video_reel(historique, ctx).
 """
 import io
 import json
@@ -26,19 +27,15 @@ from PIL import Image, ImageEnhance, ImageFilter, ImageOps
 # Réglages
 # ----------------------------------------------------------------------
 VIDEO_FPS = 30
-# Meilleur format pour les Reels Instagram ET Facebook : 9:16, 1080x1920
-VIDEO_FORMATS = {"instagram": (1080, 1920), "facebook": (1080, 1920)}
-VIDEO_LOOKBACK_HOURS = int(os.getenv("VIDEO_LOOKBACK_HOURS", "12"))   # fenêtre de recherche
+VIDEO_FORMATS = {"instagram": (1080, 1920), "facebook": (1080, 1920)}   # 9:16
+VIDEO_LOOKBACK_HOURS = int(os.getenv("VIDEO_LOOKBACK_HOURS", "12"))
 VIDEO_MIN_IMAGES, VIDEO_MAX_IMAGES = 3, 5
-# Durée proportionnelle au nombre d'images : n -> (min s, max s)
 VIDEO_DURATIONS = {3: (10, 20), 4: (18, 30), 5: (25, 40)}
 VIDEO_TRANSITION_S = 0.8
-# Transitions ffmpeg xfade (modifiable : circleopen, wipeleft, smoothleft, ...)
 VIDEO_TRANSITIONS = ("fade", "slideleft", "slideright", "slideup", "slidedown")
-VIDEO_ZOOM_AMOUNT = 0.12            # Ken Burns : +12 % de zoom sur la durée d'un plan
+VIDEO_ZOOM_AMOUNT = 0.12
 VIDEO_HASHTAGS = "#الأسواق_المالية #فوركس #الذهب #البورصة #اقتصاد #forex #trading #money_impact"
 
-# Renseignés à chaque appel par publier_video_reel()
 C = None
 VIDEO_DIR = None
 MUSIC_DIR = None
@@ -80,7 +77,7 @@ def _sauver_hist_videos(data):
 
 
 # ----------------------------------------------------------------------
-# Recherche des images : page Facebook (source principale) / historique local (secours)
+# Images : Page Facebook uniquement
 # ----------------------------------------------------------------------
 def _parse_date(s):
     if not s:
@@ -96,14 +93,14 @@ def _parse_date(s):
 
 def _candidats_facebook(page_id, token):
     """Photos publiées sur la Page dans les VIDEO_LOOKBACK_HOURS dernières heures.
-    Retourne une liste (éventuellement vide) ou None si l'API Facebook échoue."""
+    Liste (éventuellement vide) ou None si l'API Facebook échoue."""
     limite = datetime.now(timezone.utc) - timedelta(hours=VIDEO_LOOKBACK_HOURS)
     url = f"{C.graph_url}/{page_id}/photos"
     params = {"type": "uploaded", "fields": "id,created_time,name,images",
               "limit": 50, "access_token": token}
     out = []
     try:
-        for _ in range(4):                                    # pagination de sécurité
+        for _ in range(6):
             r = requests.get(url, params=params, timeout=40)
             d = C.json_or_text(r)
             if not r.ok or "error" in d:
@@ -116,7 +113,7 @@ def _candidats_facebook(page_id, token):
                 if not created:
                     continue
                 if created < limite:
-                    stop = True                               # photos triées du + récent au + ancien
+                    stop = True
                     continue
                 best = max(p.get("images") or [], key=lambda i: i.get("width", 0), default=None)
                 if best and best.get("source"):
@@ -132,33 +129,19 @@ def _candidats_facebook(page_id, token):
         return None
 
 
-def _candidats_historique(historique):
-    """Secours : posts de historique_posts.json qui ont un image_url (publiés dans la fenêtre)."""
-    limite = datetime.now(timezone.utc) - timedelta(hours=VIDEO_LOOKBACK_HOURS)
-    out = []
-    for pid, v in historique.items():
-        if not isinstance(v, dict) or not v.get("image_url"):
-            continue
-        created = _parse_date(v.get("publie_le"))
-        if created and created >= limite:
-            out.append({"id": str(pid), "created": created, "url": v["image_url"],
-                        "titre": v.get("titre", "")})
-    return out
-
-
 def _choisir_images(candidats, deja_utilises):
-    """Images libres (jamais utilisées dans une vidéo) -> 3 à 5 des plus récentes."""
+    """Images jamais utilisées dans une vidéo -> 3 à 5 des plus récentes."""
     libres = [c for c in candidats if c["id"] not in deja_utilises]
     libres.sort(key=lambda c: c["created"], reverse=True)
     if len(libres) < VIDEO_MIN_IMAGES:
         return None, len(libres)
     n = random.randint(VIDEO_MIN_IMAGES, min(VIDEO_MAX_IMAGES, len(libres)))
-    choisies = sorted(libres[:n], key=lambda c: c["created"])      # ordre chronologique
+    choisies = sorted(libres[:n], key=lambda c: c["created"])
     return choisies, len(libres)
 
 
 def _telecharger_images(choisies):
-    """Télécharge dans output/video/img1.png, img2.png, ... -> [(id, Path, titre)]."""
+    """Télécharge dans output/video/img1.png, img2.png... -> [(id, Path, titre)]."""
     VIDEO_DIR.mkdir(parents=True, exist_ok=True)
     for ancien in VIDEO_DIR.glob("*"):
         if ancien.is_file():
@@ -173,15 +156,15 @@ def _telecharger_images(choisies):
             chemin = VIDEO_DIR / f"img{idx}.png"
             img.save(chemin)
             out.append((c["id"], chemin, c["titre"]))
-            _log(f"Image {idx} téléchargée (post {c['id']}, {img.size[0]}x{img.size[1]})")
+            _log(f"Image {idx} téléchargée (photo {c['id']}, {img.size[0]}x{img.size[1]})")
         except Exception as e:
-            _log(f"Image ignorée ({type(e).__name__} {str(e)[:100]}) : post {c['id']}",
+            _log(f"Image ignorée ({type(e).__name__} {str(e)[:100]}) : photo {c['id']}",
                  level="WARN")
     return out
 
 
 def _composer_cadre(src, dst, size):
-    """Image au centre + fond flou assombri (plein écran 9:16, sans bandes noires)."""
+    """Image au centre + fond flou assombri (plein écran 9:16)."""
     w, h = size
     img = Image.open(src).convert("RGB")
     fond = ImageOps.fit(img, (w, h), Image.LANCZOS, centering=(0.5, 0.5)).filter(
@@ -203,7 +186,7 @@ def _trouver_dossier_musique():
 
 
 def _choisir_musique():
-    fichiers = sorted(MUSIC_DIR.glob("news_musique*.mp3"))
+    fichiers = sorted(MUSIC_DIR.glob("news_musique*.mp3")) if MUSIC_DIR.is_dir() else []
     if not fichiers:
         _log(f"Aucune musique trouvée dans {MUSIC_DIR} (news_musique*.mp3) : vidéo sans musique.",
              level="WARN")
@@ -217,12 +200,11 @@ def _choisir_musique():
 # Montage ffmpeg
 # ----------------------------------------------------------------------
 def _rendre_video(items, size, duration, music, plan, sortie):
-    """Ken Burns par image + transitions xfade + musique (coupée si longue, bouclée si courte)."""
     w, h = size
     n = len(items)
     fps, T = VIDEO_FPS, VIDEO_TRANSITION_S
-    L = (duration + (n - 1) * T) / n          # durée de chaque plan (chevauchement T)
-    N = max(2, int(round(L * fps)))           # images par plan
+    L = (duration + (n - 1) * T) / n
+    N = max(2, int(round(L * fps)))
 
     frames = []
     for i, (_, src, _) in enumerate(items, 1):
@@ -234,12 +216,12 @@ def _rendre_video(items, size, duration, music, plan, sortie):
     for f in frames:
         cmd += ["-i", str(f)]
     if music:
-        cmd += ["-stream_loop", "-1", "-i", str(music)]      # boucle si trop courte
+        cmd += ["-stream_loop", "-1", "-i", str(music)]
     else:
         cmd += ["-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo"]
 
     amt = VIDEO_ZOOM_AMOUNT
-    big_w, big_h = int(w * 1.5) // 2 * 2, int(h * 1.5) // 2 * 2   # sur-échantillonnage anti-saccades
+    big_w, big_h = int(w * 1.5) // 2 * 2, int(h * 1.5) // 2 * 2
     fc = []
     for i in range(n):
         if plan["zooms"][i] == "in":
@@ -282,7 +264,6 @@ def _rendre_video(items, size, duration, music, plan, sortie):
 # Légende
 # ----------------------------------------------------------------------
 def _court(titre):
-    """Retire la ligne « المصدر: ... » et garde le début de la légende du post."""
     t = re.sub(r"\n*\s*المصدر\s*[:：].*$", "", titre or "", flags=re.S).strip()
     return " ".join(t.split())[:260]
 
@@ -343,7 +324,7 @@ def _reel_instagram(video_url, caption, ig_id, token):
 
         _log("Reel Instagram 2/3 : traitement de la vidéo par Instagram…")
         statut = None
-        for i in range(45):                                   # jusqu'à ~6 min
+        for i in range(45):
             sr = requests.get(f"{C.graph_url}/{creation_id}",
                               params={"fields": "status_code,status", "access_token": token},
                               timeout=30).json()
@@ -403,7 +384,7 @@ def _reel_facebook(chemin, caption, page_id, token):
         if not (fin.ok and "error" not in fd):
             _log("Reel Facebook : ÉCHEC finish -> " + C.explain_graph_error(fd), level="ERROR")
             return None
-        for i in range(20):                                   # simple suivi du traitement
+        for i in range(20):
             st = requests.get(f"{C.graph_url}/{video_id}",
                               params={"fields": "status", "access_token": token},
                               timeout=30).json().get("status", {})
@@ -423,29 +404,28 @@ def _reel_facebook(chemin, caption, page_id, token):
 # Point d'entrée
 # ----------------------------------------------------------------------
 def publier_video_reel(historique, ctx):
-    """Dernière étape : images de la Page (12 h) jamais utilisées -> vidéo Reel -> Facebook + Instagram.
-    Ne lève jamais d'exception et ne change pas le code de sortie du script."""
+    """Images de la Page (12 h) jamais utilisées -> vidéo Reel -> Facebook + Instagram.
+    Ne lève jamais d'exception."""
     global C, VIDEO_DIR, MUSIC_DIR
     C = ctx
     VIDEO_DIR = Path(C.output_dir) / "video"
     MUSIC_DIR = _trouver_dossier_musique()
 
     if os.getenv("VIDEO_ENABLED", "1") != "1":
-        _log("Vidéo Reel désactivée (VIDEO_ENABLED=0).")
+        _log("Vidéo Reel désactivée (VIDEO_ENABLED != 1).")
         return
     try:
-        _log("━━ Vidéo Reel : diaporama des images publiées ━━", level="STEP")
+        _log("━━ Vidéo Reel : diaporama des images de la Page ━━", level="STEP")
         if not shutil.which("ffmpeg"):
-            _log("ffmpeg introuvable (sudo apt-get install -y ffmpeg) : vidéo ignorée.",
-                 level="ERROR")
+            _log("ffmpeg introuvable : vidéo ignorée.", level="ERROR")
             return
 
         token, page_id, ig_id = (C.menv("PAGE_ACCESS_TOKEN"), C.menv("PAGE_ID"),
                                  C.menv("INSTAGRAM_BUSINESS_ID"))
         cloud = (os.getenv("CLOUDINARY_CLOUD_NAME", ""), os.getenv("CLOUDINARY_API_KEY", ""),
                  os.getenv("CLOUDINARY_API_SECRET", ""))
-        if not token or not (page_id or ig_id):
-            _log("Token ou identifiants Meta absents : vidéo ignorée.", level="ERROR")
+        if not token or not page_id:
+            _log("PAGE_ACCESS_TOKEN ou PAGE_ID absent : impossible de lire la Page.", level="ERROR")
             return
         if ig_id and not all(cloud):
             _log("Cloudinary incomplet : Instagram sera ignoré pour la vidéo.", level="WARN")
@@ -454,39 +434,40 @@ def publier_video_reel(historique, ctx):
         hv = _charger_hist_videos()
         deja = set(str(x) for x in hv["used_post_ids"])
 
-        # 1) images publiées dans les dernières heures : Page Facebook, sinon historique local
-        candidats, source = None, "page Facebook"
-        if page_id:
-            candidats = _candidats_facebook(page_id, token)
+        # 1) photos publiées sur la Page dans la fenêtre
+        candidats = _candidats_facebook(page_id, token)
+        source = "page Facebook"
         if candidats is None:
-            candidats, source = _candidats_historique(historique), "historique local"
+            _log("Lecture de la Page impossible (permission pages_read_engagement ?) : "
+                 "pas de vidéo pour ce run.", level="ERROR")
+            return
         deja_dans_fenetre = sum(1 for c in candidats if c["id"] in deja)
         _log(f"Images publiées dans les {VIDEO_LOOKBACK_HOURS} dernières heures ({source}) : "
              f"{len(candidats)} | déjà utilisées dans une vidéo : {deja_dans_fenetre} | "
              f"libres : {len(candidats) - deja_dans_fenetre}")
 
-        # 2) sélection : 3 à 5 images libres (jamais utilisées dans une vidéo)
+        # 2) sélection de 3 à 5 images libres
         choisies, nb_libres = _choisir_images(candidats, deja)
         if not choisies:
             _log(f"Seulement {nb_libres} image(s) libre(s) (minimum {VIDEO_MIN_IMAGES}) : "
                  "pas de vidéo pour ce run.", level="WARN")
             return
 
-        # 3) téléchargement : output/video/img1.png, img2.png, ...
+        # 3) téléchargement
         items = _telecharger_images(choisies)
         if len(items) < VIDEO_MIN_IMAGES:
             _log(f"Seulement {len(items)} image(s) téléchargée(s) : vidéo annulée.", level="WARN")
             return
         n = len(items)
 
-        # 4) paramètres aléatoires (communs aux deux formats)
+        # 4) paramètres aléatoires
         duree = round(random.uniform(*VIDEO_DURATIONS[n]), 1)
         musique = _choisir_musique()
         plan = {"transitions": [random.choice(VIDEO_TRANSITIONS) for _ in range(n - 1)],
                 "zooms": [random.choice(("in", "out")) for _ in range(n)]}
         _log(f"Vidéo : {n} images | {duree}s | zooms={plan['zooms']}")
 
-        # 5) rendu (un fichier par format distinct ; ici 9:16 pour les deux)
+        # 5) rendu
         rendus = {}
         for plateforme, size in VIDEO_FORMATS.items():
             if size not in rendus:
@@ -501,8 +482,7 @@ def publier_video_reel(historique, ctx):
 
         # 6) publication
         fb_id = ig_post_id = None
-        if page_id:
-            fb_id = _reel_facebook(rendus[VIDEO_FORMATS["facebook"]], caption, page_id, token)
+        fb_id = _reel_facebook(rendus[VIDEO_FORMATS["facebook"]], caption, page_id, token)
         if ig_id:
             try:
                 url = _heberger_video(rendus[VIDEO_FORMATS["instagram"]], cloud)
@@ -510,7 +490,7 @@ def publier_video_reel(historique, ctx):
             except Exception as e:
                 _log(f"Instagram vidéo : {type(e).__name__} {str(e)[:300]}", level="ERROR")
 
-        # 7) suivi : une réussite suffit pour marquer les images comme utilisées
+        # 7) suivi
         if fb_id or ig_post_id:
             hv["used_post_ids"].extend(pid for pid, _, _ in items)
             hv["videos"].append({
