@@ -1901,5 +1901,138 @@
         "date": "2026-10-29 13:15",
         "note": 80,
         "categorie": "Central banks"
+    },
+    "OilPrice_Mexico’s Richest Man Sells $1.15 Billion in Oil Stocks_2026-10-29 17:30": {
+        "source": "OilPrice",
+        "titre": "Mexico’s Richest Man Sells $1.15 Billion in Oil Stocks",
+        "date": "2026-10-29 17:30",
+        "note": 80,
+        "categorie": "Stocks"
+    },
+    "Bloomberg Markets_Universal Music Subscription Revenue Growth Shows Improvement_2026-10-29 17:20": {
+        "source": "Bloomberg Markets",
+        "titre": "Universal Music Subscription Revenue Growth Shows Improvement",
+        "date": "2026-10-29 17:20",
+        "note": 80,
+        "categorie": "Stocks"
+    },
+    "Seeking Alpha_Bank Of Canada Raises Rates As Inflation Pressures Persist_2026-10-29 17:20": {
+        "source": "Seeking Alpha",
+        "titre": "Bank Of Canada Raises Rates As Inflation Pressures Persist",
+        "date": "2026-10-29 17:20",
+        "note": 95,
+        "categorie": "Central banks"
+    },
+    "OilPrice_Sinopec Third-Quarter Profit Jumps 64% as Oil Prices Climb_2026-10-29 16:30": {
+        "source": "OilPrice",
+        "titre": "Sinopec Third-Quarter Profit Jumps 64% as Oil Prices Climb",
+        "date": "2026-10-29 16:30",
+        "note": 80,
+        "categorie": "Oil"
+    },
+    "Bloomberg Markets_Chipotle Sales Beat as New Chicken, Chips Bring Diners Back_2026-10-29 16:28": {
+        "source": "Bloomberg Markets",
+        "titre": "Chipotle Sales Beat as New Chicken, Chips Bring Diners Back",
+        "date": "2026-10-29 16:28",
+        "note": 80,
+        "categorie": "Stocks"
+    },
+    "Bloomberg Markets_Venezuelan Leader Commits to Elections Ahead of Machado Speech_2026-10-29 16:27": {
+        "source": "Bloomberg Markets",
+        "titre": "Venezuelan Leader Commits to Elections Ahead of Machado Speech",
+        "date": "2026-10-29 16:27",
+        "note": 80,
+        "categorie": "Economic news"
+    },
+    "Bloomberg Markets_DoorDash to Buy Rival Instacart in $17 Billion Deal_2026-10-29 16:15": {
+        "source": "Bloomberg Markets",
+        "titre": "DoorDash to Buy Rival Instacart in $17 Billion Deal",
+        "date": "2026-10-29 16:15",
+        "note": 95,
+        "categorie": "Stocks"
+    },
+    "Bloomberg Markets_Hungary, US Sign Agreement on ‘Trump Peace Pipeline Framework’_2026-10-29 16:08": {
+        "source": "Bloomberg Markets",
+        "titre": "Hungary, US Sign Agreement on ‘Trump Peace Pipeline Framework’",
+        "date": "2026-10-29 16:08",
+        "note": 80,
+        "categorie": "Oil"
+    },
+    "OilPrice_UK Budget Signals Wave of New North Sea Oil and Gas Drilling_2026-10-29 16:00": {
+        "source": "OilPrice",
+        "titre": "UK Budget Signals Wave of New North Sea Oil and Gas Drilling",
+        "date": "2026-10-29 16:00",
+        "note": 80,
+        "categorie": "Oil"
+    },
+    "ECB_Piero Cipollone: Next-day securities settlement, tokenisation and the transformation of Europe’s financial infrastructure_2026-10-29 15:50": {
+        "source": "ECB",
+        "titre": "Piero Cipollone: Next-day securities settlement, tokenisation and the transformation of Europe’s financial infrastructure",
+        "date": "2026-10-29 15:50",
+        "note": 80,
+        "categorie": "Central banks"
+    },
+    "Bloomberg Economics_ECB Officials Are Ready to Raise Interest Rates in December_2026-10-29 15:35": {
+        "source": "Bloomberg Economics",
+        "titre": "ECB Officials Are Ready to Raise Interest Rates in December",
+        "date": "2026-10-29 15:35",
+        "note": 90,
+        "categorie": "Central banks"
+    },
+    "OilPrice_Trafigura Signs New Gas Supply Deal with German SEFE_2026-10-29 15:30": {
+        "source": "OilPrice",
+        "titre": "Trafigura Signs New Gas Supply Deal with German SEFE",
+        "date": "2026-10-29 15:30",
+        "note": 80,
+        "categorie": "Oil"
+    },
+    "Bloomberg Markets_Applebee’s Owner Adopts Poison Pill to Fend Off Takeover_2026-10-29 15:21": {
+        "source": "Bloomberg Markets",
+        "titre": "Applebee’s Owner Adopts Poison Pill to Fend Off Takeover",
+        "date": "2026-10-29 15:21",
+        "note": 80,
+        "categorie": "Stocks"
+    },
+    "Bloomberg Markets_Polymarket Investigates Suspicious Trades on Israel Election_2026-10-29 14:57": {
+        "source": "Bloomberg Markets",
+        "titre": "Polymarket Investigates Suspicious Trades on Israel Election",
+        "date": "2026-10-29 14:57",
+        "note": 80,
+        "categorie": "Crypto"
+    },
+    "Bloomberg Markets_Paschi Investors Deal Crushing Blow to CEO in Win for Intesa_2026-10-29 14:43": {
+        "source": "Bloomberg Markets",
+        "titre": "Paschi Investors Deal Crushing Blow to CEO in Win for Intesa",
+        "date": "2026-10-29 14:43",
+        "note": 90,
+        "categorie": "Stocks"
+    },
+    "Bloomberg Economics_Ukraine Economy to Shrink For the First Time Since Full-Scale War_2026-10-29 14:23": {
+        "source": "Bloomberg Economics",
+        "titre": "Ukraine Economy to Shrink For the First Time Since Full-Scale War",
+        "date": "2026-10-29 14:23",
+        "note": 80,
+        "categorie": "Economic news"
+    },
+    "Bloomberg Economics_Lagarde Downplays Risk of Inflation Broadening as ECB Holds_2026-10-29 13:15": {
+        "source": "Bloomberg Economics",
+        "titre": "Lagarde Downplays Risk of Inflation Broadening as ECB Holds",
+        "date": "2026-10-29 13:15",
+        "note": 80,
+        "categorie": "Central banks"
+    },
+    "Bloomberg Economics_US Economy Grows Most in a Year on Strong Spending, Investment_2026-10-29 12:32": {
+        "source": "Bloomberg Economics",
+        "titre": "US Economy Grows Most in a Year on Strong Spending, Investment",
+        "date": "2026-10-29 12:32",
+        "note": 90,
+        "categorie": "Economic news"
+    },
+    "Bloomberg Markets_Tech Stocks Slide as Alphabet’s Record Plunge Revives AI Fears_2026-10-29 11:09": {
+        "source": "Bloomberg Markets",
+        "titre": "Tech Stocks Slide as Alphabet’s Record Plunge Revives AI Fears",
+        "date": "2026-10-29 11:09",
+        "note": 85,
+        "categorie": "Stocks"
     }
 }
