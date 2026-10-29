@@ -1215,5 +1215,40 @@
         "date": "2026-10-28 21:24",
         "note": 80,
         "categorie": "Stocks"
+    },
+    "Seeking Alpha_Market Stays Muted After Fed Decision To Keep Rates Steady_2026-10-28 23:45": {
+        "source": "Seeking Alpha",
+        "titre": "Market Stays Muted After Fed Decision To Keep Rates Steady",
+        "date": "2026-10-28 23:45",
+        "note": 80,
+        "categorie": "Central banks"
+    },
+    "Bloomberg Markets_Gold Edges Lower After Fed Holds Rates With Limited Guidance_2026-10-28 23:44": {
+        "source": "Bloomberg Markets",
+        "titre": "Gold Edges Lower After Fed Holds Rates With Limited Guidance",
+        "date": "2026-10-28 23:44",
+        "note": 90,
+        "categorie": "Gold"
+    },
+    "Bloomberg Markets_BYD Short Sellers Retreat Ahead of Expected Profit Rebound_2026-10-28 23:30": {
+        "source": "Bloomberg Markets",
+        "titre": "BYD Short Sellers Retreat Ahead of Expected Profit Rebound",
+        "date": "2026-10-28 23:30",
+        "note": 80,
+        "categorie": "Stocks"
+    },
+    "Bloomberg Economics_BOJ Set to Hold Rate as Inflation Reaches Long-Awaited Milestone_2026-10-28 23:30": {
+        "source": "Bloomberg Economics",
+        "titre": "BOJ Set to Hold Rate as Inflation Reaches Long-Awaited Milestone",
+        "date": "2026-10-28 23:30",
+        "note": 80,
+        "categorie": "Central banks"
+    },
+    "Bloomberg Markets_Bankers in Failed Firmus IPO Probed by Australian Regulator_2026-10-28 23:01": {
+        "source": "Bloomberg Markets",
+        "titre": "Bankers in Failed Firmus IPO Probed by Australian Regulator",
+        "date": "2026-10-28 23:01",
+        "note": 80,
+        "categorie": "Stocks"
     }
 }
