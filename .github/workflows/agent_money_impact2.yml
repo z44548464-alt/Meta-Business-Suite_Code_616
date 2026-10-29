@@ -1,4 +1,4 @@
-name: Agent Facebook Instagram2 (money impact)
+name: Agent Facebook Instagram 2 (money impact)
 
 on:
   schedule:
@@ -52,9 +52,10 @@ jobs:
       - name: Vérifier la version du script
         run: |
           ls -la
-          ls -la fonts imgs music 2>/dev/null || echo "Dossiers fonts/, imgs/ ou music/ absents"
-          echo "Musiques trouvées : $(ls music/news_musique*.mp3 2>/dev/null | wc -l)"
+          ls -la fonts imgs music music_NEWS 2>/dev/null || echo "Dossiers fonts/, imgs/, music/ ou music_NEWS/ absents"
+          echo "Musiques trouvées : $(ls music/news_musique*.mp3 music_NEWS/news_musique*.mp3 2>/dev/null | wc -l)"
           grep -c "def banner" Agnet_fb_money_impact_3.py || echo ">>> ANCIENNE VERSION du script <<<"
+          grep -m1 "SCRIPT_VERSION =" Agnet_fb_money_impact_3.py
           python -m py_compile Agnet_fb_money_impact_3.py video_reel.py && echo "Syntaxe OK"
 
       - name: Lancer l'agent
@@ -100,8 +101,9 @@ jobs:
           TOGETHER_API_KEY: ${{ secrets.TOGETHER_API_KEY }}
           POLLINATIONS_API_KEY: ${{ secrets.POLLINATIONS_API_KEY }}
 
-          # vidéo Reels (mettre "0" pour la désactiver)
-          VIDEO_ENABLED: "1"
+          # vidéo Reels
+          VIDEO_ENABLED: "1"            # mettre "0" pour la désactiver
+          VIDEO_LOOKBACK_HOURS: "12"    # fenêtre de recherche des images sur la page
 
       - name: Garder le log complet
         if: always()
@@ -168,7 +170,7 @@ jobs:
           remote_data = load_json(remote_path, "Historique distant")
 
           if is_video:
-              # Historique vidéos : union des post_id utilisés + union des vidéos (clé = date).
+              # Historique vidéos : union des IDs utilisés + union des vidéos (clé = date).
               used = []
               for pid in list(remote_data.get("used_post_ids", [])) + list(local_data.get("used_post_ids", [])):
                   if pid not in used:
