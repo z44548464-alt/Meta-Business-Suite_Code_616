@@ -1,17 +1,20 @@
 """Module vidéo Reels (Facebook + Instagram) pour Money.impact.
 
-Crée un diaporama 9:16 avec les 3 à 5 dernières images publiées qui n'ont jamais servi dans une
-vidéo : Ken Burns + transitions aléatoires + musique aléatoire (music/news_musique*.mp3).
+Prend les photos publiées sur la Page Facebook dans les dernières VIDEO_LOOKBACK_HOURS heures,
+écarte celles déjà utilisées dans une vidéo, et s'il en reste au moins 3 crée un diaporama 9:16
+(Ken Burns + transitions aléatoires + musique aléatoire music/news_musique*.mp3).
 Appelé en dernier par le script principal : publier_video_reel(historique, ctx).
 """
 import io
 import json
+import os
 import random
+import re
 import shutil
 import subprocess
 import time
 import traceback
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import requests
@@ -25,6 +28,8 @@ from PIL import Image, ImageEnhance, ImageFilter, ImageOps
 VIDEO_FPS = 30
 # Meilleur format pour les Reels Instagram ET Facebook : 9:16, 1080x1920
 VIDEO_FORMATS = {"instagram": (1080, 1920), "facebook": (1080, 1920)}
+VIDEO_LOOKBACK_HOURS = int(os.getenv("VIDEO_LOOKBACK_HOURS", "12"))   # fenêtre de recherche
+VIDEO_MIN_IMAGES, VIDEO_MAX_IMAGES = 3, 5
 # Durée proportionnelle au nombre d'images : n -> (min s, max s)
 VIDEO_DURATIONS = {3: (10, 20), 4: (18, 30), 5: (25, 40)}
 VIDEO_TRANSITION_S = 0.8
@@ -35,8 +40,8 @@ VIDEO_HASHTAGS = "#الأسواق_المالية #فوركس #الذهب #الب
 
 # Renseignés à chaque appel par publier_video_reel()
 C = None
-VIDEO_DIR = "video_SIMPLE"
-MUSIC_DIR = "music_NEWS"
+VIDEO_DIR = None
+MUSIC_DIR = None
 
 
 def _log(*args, **kwargs):
@@ -75,39 +80,102 @@ def _sauver_hist_videos(data):
 
 
 # ----------------------------------------------------------------------
-# Sélection + téléchargement des images
+# Recherche des images : page Facebook (source principale) / historique local (secours)
 # ----------------------------------------------------------------------
-def _choisir_posts_video(historique, deja_utilises):
-    """Les 3 à 5 posts les plus récents (avec image hébergée) jamais utilisés dans une vidéo."""
-    libres = [(pid, v) for pid, v in historique.items()
-              if isinstance(v, dict) and v.get("image_url") and v.get("publie_le")
-              and pid not in deja_utilises]
-    libres.sort(key=lambda x: x[1]["publie_le"], reverse=True)
-    if len(libres) < 3:
+def _parse_date(s):
+    if not s:
+        return None
+    for fn in (lambda x: datetime.strptime(x, "%Y-%m-%dT%H:%M:%S%z"), datetime.fromisoformat):
+        try:
+            d = fn(s)
+            return d if d.tzinfo else d.replace(tzinfo=timezone.utc)
+        except Exception:
+            continue
+    return None
+
+
+def _candidats_facebook(page_id, token):
+    """Photos publiées sur la Page dans les VIDEO_LOOKBACK_HOURS dernières heures.
+    Retourne une liste (éventuellement vide) ou None si l'API Facebook échoue."""
+    limite = datetime.now(timezone.utc) - timedelta(hours=VIDEO_LOOKBACK_HOURS)
+    url = f"{C.graph_url}/{page_id}/photos"
+    params = {"type": "uploaded", "fields": "id,created_time,name,images",
+              "limit": 50, "access_token": token}
+    out = []
+    try:
+        for _ in range(4):                                    # pagination de sécurité
+            r = requests.get(url, params=params, timeout=40)
+            d = C.json_or_text(r)
+            if not r.ok or "error" in d:
+                _log("Lecture des photos de la Page impossible -> " + C.explain_graph_error(d),
+                     level="WARN")
+                return None
+            stop = False
+            for p in d.get("data", []):
+                created = _parse_date(p.get("created_time"))
+                if not created:
+                    continue
+                if created < limite:
+                    stop = True                               # photos triées du + récent au + ancien
+                    continue
+                best = max(p.get("images") or [], key=lambda i: i.get("width", 0), default=None)
+                if best and best.get("source"):
+                    out.append({"id": str(p["id"]), "created": created, "url": best["source"],
+                                "titre": (p.get("name") or "").strip()})
+            nxt = (d.get("paging") or {}).get("next")
+            if stop or not nxt:
+                break
+            url, params = nxt, None
+        return out
+    except Exception as e:
+        _log(f"Lecture des photos de la Page : {type(e).__name__} {str(e)[:150]}", level="WARN")
+        return None
+
+
+def _candidats_historique(historique):
+    """Secours : posts de historique_posts.json qui ont un image_url (publiés dans la fenêtre)."""
+    limite = datetime.now(timezone.utc) - timedelta(hours=VIDEO_LOOKBACK_HOURS)
+    out = []
+    for pid, v in historique.items():
+        if not isinstance(v, dict) or not v.get("image_url"):
+            continue
+        created = _parse_date(v.get("publie_le"))
+        if created and created >= limite:
+            out.append({"id": str(pid), "created": created, "url": v["image_url"],
+                        "titre": v.get("titre", "")})
+    return out
+
+
+def _choisir_images(candidats, deja_utilises):
+    """Images libres (jamais utilisées dans une vidéo) -> 3 à 5 des plus récentes."""
+    libres = [c for c in candidats if c["id"] not in deja_utilises]
+    libres.sort(key=lambda c: c["created"], reverse=True)
+    if len(libres) < VIDEO_MIN_IMAGES:
         return None, len(libres)
-    n = random.randint(3, min(5, len(libres)))
-    return libres[:n], len(libres)
+    n = random.randint(VIDEO_MIN_IMAGES, min(VIDEO_MAX_IMAGES, len(libres)))
+    choisies = sorted(libres[:n], key=lambda c: c["created"])      # ordre chronologique
+    return choisies, len(libres)
 
 
-def _telecharger_images(posts):
-    """Télécharge dans output/video/img1.png, img2.png, ... -> [(post_id, Path, titre)]."""
+def _telecharger_images(choisies):
+    """Télécharge dans output/video/img1.png, img2.png, ... -> [(id, Path, titre)]."""
     VIDEO_DIR.mkdir(parents=True, exist_ok=True)
     for ancien in VIDEO_DIR.glob("*"):
         if ancien.is_file():
             ancien.unlink()
     out = []
-    for pid, v in posts:
+    for c in choisies:
         idx = len(out) + 1
         try:
-            r = requests.get(v["image_url"], timeout=60)
+            r = requests.get(c["url"], timeout=60)
             r.raise_for_status()
             img = Image.open(io.BytesIO(r.content)).convert("RGB")
             chemin = VIDEO_DIR / f"img{idx}.png"
             img.save(chemin)
-            out.append((pid, chemin, v.get("titre", "")))
-            _log(f"Image {idx} téléchargée : {v['image_url']}")
+            out.append((c["id"], chemin, c["titre"]))
+            _log(f"Image {idx} téléchargée (post {c['id']}, {img.size[0]}x{img.size[1]})")
         except Exception as e:
-            _log(f"Image ignorée ({type(e).__name__} {str(e)[:100]}) : {v.get('image_url')}",
+            _log(f"Image ignorée ({type(e).__name__} {str(e)[:100]}) : post {c['id']}",
                  level="WARN")
     return out
 
@@ -124,6 +192,16 @@ def _composer_cadre(src, dst, size):
     fond.save(dst)
 
 
+def _trouver_dossier_musique():
+    base = Path(C.base_dir)
+    env = os.getenv("MUSIC_DIR", "").strip()
+    essais = ([Path(env)] if env else []) + [base / "music_NEWS", base / "music"]
+    for d in essais:
+        if d.is_dir() and any(d.glob("news_musique*.mp3")):
+            return d
+    return essais[0] if essais else base / "music"
+
+
 def _choisir_musique():
     fichiers = sorted(MUSIC_DIR.glob("news_musique*.mp3"))
     if not fichiers:
@@ -131,7 +209,7 @@ def _choisir_musique():
              level="WARN")
         return None
     choix = random.choice(fichiers)
-    _log(f"Musique choisie : {choix.name} (sur {len(fichiers)})")
+    _log(f"Musique choisie : {choix.name} (sur {len(fichiers)}, dossier {MUSIC_DIR.name})")
     return choix
 
 
@@ -203,25 +281,32 @@ def _rendre_video(items, size, duration, music, plan, sortie):
 # ----------------------------------------------------------------------
 # Légende
 # ----------------------------------------------------------------------
+def _court(titre):
+    """Retire la ligne « المصدر: ... » et garde le début de la légende du post."""
+    t = re.sub(r"\n*\s*المصدر\s*[:：].*$", "", titre or "", flags=re.S).strip()
+    return " ".join(t.split())[:260]
+
+
 def _legende_video(titres):
     base_fixe = "أهم أخبار السوق اليوم 📊"
     pied = f"\n\n{C.brand_handle}\n{VIDEO_HASHTAGS}"
-    liste = "\n".join(f"- {t}" for t in titres if t)
+    liste = "\n".join(f"{i}. {_court(t)}" for i, t in enumerate(titres, 1) if t)
     msgs = [
         {"role": "system", "content":
             "You write short Instagram/Facebook Reels captions in Modern Standard Arabic for a "
-            "financial-markets news page. Translate the given English headlines faithfully into "
-            "Arabic as a short bullet list (one line each, starting with '•'), preceded by one short "
-            "catchy Arabic intro line. Do NOT add facts, numbers, hashtags, the page name or links. "
-            "Max 700 characters. Return ONLY the caption text."},
+            "financial-markets news page. Each numbered item is a news post (Arabic or English). "
+            "Write ONE short Arabic bullet line per item (starting with '•', max 15 words), "
+            "preceded by one short catchy Arabic intro line. Stay faithful to the items: do NOT add "
+            "facts, numbers, hashtags, the page name or links. Max 700 characters. "
+            "Return ONLY the caption text."},
         {"role": "user", "content": liste},
     ]
-    try:
-        out = C.llm_chat(msgs, temperature=0.2, max_tokens=900)
-    except Exception as e:
-        _log(f"Légende LLM : {type(e).__name__} {str(e)[:120]}", level="WARN")
-        out = None
-    texte = (out or "").strip().strip("`")
+    texte = ""
+    if liste:
+        try:
+            texte = (C.llm_chat(msgs, temperature=0.2, max_tokens=900) or "").strip().strip("`")
+        except Exception as e:
+            _log(f"Légende LLM : {type(e).__name__} {str(e)[:120]}", level="WARN")
     if len(texte) < 20:
         _log("Légende LLM indisponible : légende fixe utilisée.", level="WARN")
         texte = base_fixe
@@ -338,34 +423,23 @@ def _reel_facebook(chemin, caption, page_id, token):
 # Point d'entrée
 # ----------------------------------------------------------------------
 def publier_video_reel(historique, ctx):
-    """Dernière étape : vidéo Reel (3-5 dernières images jamais utilisées) -> Facebook + Instagram.
+    """Dernière étape : images de la Page (12 h) jamais utilisées -> vidéo Reel -> Facebook + Instagram.
     Ne lève jamais d'exception et ne change pas le code de sortie du script."""
     global C, VIDEO_DIR, MUSIC_DIR
-    import os
     C = ctx
     VIDEO_DIR = Path(C.output_dir) / "video"
-    MUSIC_DIR = Path(os.getenv("MUSIC_DIR", str(Path(C.base_dir) / "music")))
+    MUSIC_DIR = _trouver_dossier_musique()
 
     if os.getenv("VIDEO_ENABLED", "1") != "1":
         _log("Vidéo Reel désactivée (VIDEO_ENABLED=0).")
         return
     try:
-        _log("━━ Vidéo Reel : diaporama des dernières images ━━", level="STEP")
+        _log("━━ Vidéo Reel : diaporama des images publiées ━━", level="STEP")
         if not shutil.which("ffmpeg"):
             _log("ffmpeg introuvable (sudo apt-get install -y ffmpeg) : vidéo ignorée.",
                  level="ERROR")
             return
-        hv = _charger_hist_videos()
-        deja = set(hv["used_post_ids"])
 
-        # 1) sélection : 3 à 5 posts récents dont l'image n'a JAMAIS servi dans une vidéo
-        posts, nb_libres = _choisir_posts_video(historique, deja)
-        if not posts:
-            _log(f"Seulement {nb_libres} image(s) neuve(s) disponible(s) (minimum 3) : "
-                 "pas de vidéo pour ce run.", level="WARN")
-            return
-
-        # 2) accès Meta / Cloudinary
         token, page_id, ig_id = (C.menv("PAGE_ACCESS_TOKEN"), C.menv("PAGE_ID"),
                                  C.menv("INSTAGRAM_BUSINESS_ID"))
         cloud = (os.getenv("CLOUDINARY_CLOUD_NAME", ""), os.getenv("CLOUDINARY_API_KEY", ""),
@@ -377,9 +451,30 @@ def publier_video_reel(historique, ctx):
             _log("Cloudinary incomplet : Instagram sera ignoré pour la vidéo.", level="WARN")
             ig_id = ""
 
+        hv = _charger_hist_videos()
+        deja = set(str(x) for x in hv["used_post_ids"])
+
+        # 1) images publiées dans les dernières heures : Page Facebook, sinon historique local
+        candidats, source = None, "page Facebook"
+        if page_id:
+            candidats = _candidats_facebook(page_id, token)
+        if candidats is None:
+            candidats, source = _candidats_historique(historique), "historique local"
+        deja_dans_fenetre = sum(1 for c in candidats if c["id"] in deja)
+        _log(f"Images publiées dans les {VIDEO_LOOKBACK_HOURS} dernières heures ({source}) : "
+             f"{len(candidats)} | déjà utilisées dans une vidéo : {deja_dans_fenetre} | "
+             f"libres : {len(candidats) - deja_dans_fenetre}")
+
+        # 2) sélection : 3 à 5 images libres (jamais utilisées dans une vidéo)
+        choisies, nb_libres = _choisir_images(candidats, deja)
+        if not choisies:
+            _log(f"Seulement {nb_libres} image(s) libre(s) (minimum {VIDEO_MIN_IMAGES}) : "
+                 "pas de vidéo pour ce run.", level="WARN")
+            return
+
         # 3) téléchargement : output/video/img1.png, img2.png, ...
-        items = _telecharger_images(posts)
-        if len(items) < 3:
+        items = _telecharger_images(choisies)
+        if len(items) < VIDEO_MIN_IMAGES:
             _log(f"Seulement {len(items)} image(s) téléchargée(s) : vidéo annulée.", level="WARN")
             return
         n = len(items)
@@ -423,11 +518,11 @@ def publier_video_reel(historique, ctx):
                 "post_ids": [pid for pid, _, _ in items],
                 "facebook_video_id": fb_id, "instagram_media_id": ig_post_id,
                 "duree_s": duree, "musique": musique.name if musique else None,
-                "transitions": plan["transitions"],
+                "transitions": plan["transitions"], "source": source,
             })
             _sauver_hist_videos(hv)
             _log(f"VIDÉO PUBLIÉE (Facebook : {'oui' if fb_id else 'non'} | "
-                 f"Instagram : {'oui' if ig_post_id else 'non'}) -> historique vidéos mis à jour",
+                 f"Instagram : {'oui' if ig_post_id else 'non'}) -> IDs des images enregistrés",
                  level="OK")
             C.step_summary(f"**Vidéo Reel** : {n} images, {duree}s — "
                            f"FB={'✅' if fb_id else '❌'} IG={'✅' if ig_post_id else '❌'}")
