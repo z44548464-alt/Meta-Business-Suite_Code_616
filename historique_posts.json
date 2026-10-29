@@ -1523,5 +1523,89 @@
         "date": "2026-10-29 08:57",
         "note": 80,
         "categorie": "Economic news"
+    },
+    "Seeking Alpha_Serve Robotics: Failing To Scale Fast Enough_2026-10-29 10:30": {
+        "source": "Seeking Alpha",
+        "titre": "Serve Robotics: Failing To Scale Fast Enough",
+        "date": "2026-10-29 10:30",
+        "note": 80,
+        "categorie": "Stocks"
+    },
+    "OilPrice_Equinor Doubles Estimate for Major North Sea Gas Discovery_2026-10-29 10:30": {
+        "source": "OilPrice",
+        "titre": "Equinor Doubles Estimate for Major North Sea Gas Discovery",
+        "date": "2026-10-29 10:30",
+        "note": 80,
+        "categorie": "Oil"
+    },
+    "Bloomberg Markets_Cosco Profit Jumps Most in Two Years as Turmoil Supports Rates_2026-10-29 10:18": {
+        "source": "Bloomberg Markets",
+        "titre": "Cosco Profit Jumps Most in Two Years as Turmoil Supports Rates",
+        "date": "2026-10-29 10:18",
+        "note": 80,
+        "categorie": "Stocks"
+    },
+    "Bloomberg Markets_Lagarde to Step Down as ECB President on Feb. 7_2026-10-29 10:18": {
+        "source": "Bloomberg Markets",
+        "titre": "Lagarde to Step Down as ECB President on Feb. 7",
+        "date": "2026-10-29 10:18",
+        "note": 90,
+        "categorie": "Central banks"
+    },
+    "Bloomberg Economics_Costa Says EU Will Start Search for New ECB President Today_2026-10-29 10:10": {
+        "source": "Bloomberg Economics",
+        "titre": "Costa Says EU Will Start Search for New ECB President Today",
+        "date": "2026-10-29 10:10",
+        "note": 80,
+        "categorie": "Central banks"
+    },
+    "ECB_ECB President Lagarde to step down on 7 February 2027_2026-10-29 10:00": {
+        "source": "ECB",
+        "titre": "ECB President Lagarde to step down on 7 February 2027",
+        "date": "2026-10-29 10:00",
+        "note": 90,
+        "categorie": "Central banks"
+    },
+    "Bank of England_Bank of England sets out approach to tokenised collateral in central clearing_2026-10-29 10:00": {
+        "source": "Bank of England",
+        "titre": "Bank of England sets out approach to tokenised collateral in central clearing",
+        "date": "2026-10-29 10:00",
+        "note": 80,
+        "categorie": "Central banks"
+    },
+    "Bloomberg Economics_Lagarde to Leave ECB Early, Igniting Race to Replace Her_2026-10-29 09:59": {
+        "source": "Bloomberg Economics",
+        "titre": "Lagarde to Leave ECB Early, Igniting Race to Replace Her",
+        "date": "2026-10-29 09:59",
+        "note": 90,
+        "categorie": "Central banks"
+    },
+    "Bloomberg Economics_UK Mortgage Approvals Hit 33-Month Low as Loan Costs Bite_2026-10-29 09:39": {
+        "source": "Bloomberg Economics",
+        "titre": "UK Mortgage Approvals Hit 33-Month Low as Loan Costs Bite",
+        "date": "2026-10-29 09:39",
+        "note": 80,
+        "categorie": "Economic news"
+    },
+    "Bloomberg Markets_Euro Bearish Bias Persists in Options and Charts Before ECB_2026-10-29 09:22": {
+        "source": "Bloomberg Markets",
+        "titre": "Euro Bearish Bias Persists in Options and Charts Before ECB",
+        "date": "2026-10-29 09:22",
+        "note": 80,
+        "categorie": "Forex"
+    },
+    "Bloomberg Economics_South Africa Economy 4.9% Bigger Than Thought After Rebasing_2026-10-29 09:00": {
+        "source": "Bloomberg Economics",
+        "titre": "South Africa Economy 4.9% Bigger Than Thought After Rebasing",
+        "date": "2026-10-29 09:00",
+        "note": 80,
+        "categorie": "Economic news"
+    },
+    "Bloomberg Markets_Shell Lifts Buyback to $5 Billion as Refining Windfall Grows_2026-10-29 07:06": {
+        "source": "Bloomberg Markets",
+        "titre": "Shell Lifts Buyback to $5 Billion as Refining Windfall Grows",
+        "date": "2026-10-29 07:06",
+        "note": 85,
+        "categorie": "Stocks"
     }
 }
