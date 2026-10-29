@@ -1733,5 +1733,117 @@
         "date": "2026-10-29 09:00",
         "note": 80,
         "categorie": "Economic news"
+    },
+    "Bloomberg Economics_Business Investment, Government Spending Bolster US GDP_2026-10-29 13:32": {
+        "source": "Bloomberg Economics",
+        "titre": "Business Investment, Government Spending Bolster US GDP",
+        "date": "2026-10-29 13:32",
+        "note": 90,
+        "categorie": "Economic news"
+    },
+    "Seeking Alpha_Smurfit Westrock: Another Guidance Cut, But 2027 Recovery Keeps Us Bullish_2026-10-29 13:30": {
+        "source": "Seeking Alpha",
+        "titre": "Smurfit Westrock: Another Guidance Cut, But 2027 Recovery Keeps Us Bullish",
+        "date": "2026-10-29 13:30",
+        "note": 80,
+        "categorie": "Stocks"
+    },
+    "OilPrice_Iran War Hikes EU’s Oil Import Bill By $11 Billion Per Month_2026-10-29 13:30": {
+        "source": "OilPrice",
+        "titre": "Iran War Hikes EU’s Oil Import Bill By $11 Billion Per Month",
+        "date": "2026-10-29 13:30",
+        "note": 90,
+        "categorie": "Oil"
+    },
+    "Bloomberg Markets_ECB Holds Rates as Lagarde Announces Early Resignation_2026-10-29 13:27": {
+        "source": "Bloomberg Markets",
+        "titre": "ECB Holds Rates as Lagarde Announces Early Resignation",
+        "date": "2026-10-29 13:27",
+        "note": 90,
+        "categorie": "Central banks"
+    },
+    "Bloomberg Economics_ECB Holds as Lagarde Exit Compounds Alarm Over Oil, France_2026-10-29 13:15": {
+        "source": "Bloomberg Economics",
+        "titre": "ECB Holds as Lagarde Exit Compounds Alarm Over Oil, France",
+        "date": "2026-10-29 13:15",
+        "note": 90,
+        "categorie": "Central banks"
+    },
+    "ECB_Monetary policy decisions_2026-10-29 13:15": {
+        "source": "ECB",
+        "titre": "Monetary policy decisions",
+        "date": "2026-10-29 13:15",
+        "note": 90,
+        "categorie": "Central banks"
+    },
+    "NPR Economy_With days to go before the midterms, data shows the U.S. economy is doing well_2026-10-29 13:05": {
+        "source": "NPR Economy",
+        "titre": "With days to go before the midterms, data shows the U.S. economy is doing well",
+        "date": "2026-10-29 13:05",
+        "note": 80,
+        "categorie": "Economic news"
+    },
+    "MarketWatch_Consumer spending flattens out after inflation surge_2026-10-29 13:01": {
+        "source": "MarketWatch",
+        "titre": "Consumer spending flattens out after inflation surge",
+        "date": "2026-10-29 13:01",
+        "note": 80,
+        "categorie": "Economic news"
+    },
+    "MarketWatch_DoorDash and Instacart want to join forces. Will the U.S. government get in their way?_2026-10-29 12:58": {
+        "source": "MarketWatch",
+        "titre": "DoorDash and Instacart want to join forces. Will the U.S. government get in their way?",
+        "date": "2026-10-29 12:58",
+        "note": 80,
+        "categorie": "Stocks"
+    },
+    "MarketWatch_Inflation surges, PCE shows. Fed pause on rate hikes unlikely to last long with prices still rising._2026-10-29 12:36": {
+        "source": "MarketWatch",
+        "titre": "Inflation surges, PCE shows. Fed pause on rate hikes unlikely to last long with prices still rising.",
+        "date": "2026-10-29 12:36",
+        "note": 90,
+        "categorie": "Economic news"
+    },
+    "MarketWatch_Economy grows at fastest pace in a year, GDP shows, and shows little sign of slowing_2026-10-29 12:35": {
+        "source": "MarketWatch",
+        "titre": "Economy grows at fastest pace in a year, GDP shows, and shows little sign of slowing",
+        "date": "2026-10-29 12:35",
+        "note": 90,
+        "categorie": "Economic news"
+    },
+    "Bloomberg Economics_US Economy Grows a Faster-Than-Expected 3.4%, Most in a Year_2026-10-29 12:32": {
+        "source": "Bloomberg Economics",
+        "titre": "US Economy Grows a Faster-Than-Expected 3.4%, Most in a Year",
+        "date": "2026-10-29 12:32",
+        "note": 90,
+        "categorie": "Economic news"
+    },
+    "Bloomberg Markets_HSBC Seeks to Hedge Data Center Debt With Credit Risk Insurance_2026-10-29 12:20": {
+        "source": "Bloomberg Markets",
+        "titre": "HSBC Seeks to Hedge Data Center Debt With Credit Risk Insurance",
+        "date": "2026-10-29 12:20",
+        "note": 80,
+        "categorie": "Bonds"
+    },
+    "Bloomberg Markets_AI Trade Shows New Cracks, Healey Defends UK Budget’s Scale_2026-10-29 11:47": {
+        "source": "Bloomberg Markets",
+        "titre": "AI Trade Shows New Cracks, Healey Defends UK Budget’s Scale",
+        "date": "2026-10-29 11:47",
+        "note": 80,
+        "categorie": "Stocks"
+    },
+    "ActionForex Fundamental_Bitcoin Has Failed to Break Through Resistance, Whereas Bnb Is Gaining Ground_2026-10-29 11:03": {
+        "source": "ActionForex Fundamental",
+        "titre": "Bitcoin Has Failed to Break Through Resistance, Whereas Bnb Is Gaining Ground",
+        "date": "2026-10-29 11:03",
+        "note": 80,
+        "categorie": "Crypto"
+    },
+    "Bloomberg Markets_Nasdaq 100 Falls 2% as AI Trade Shows New Cracks: Markets Wrap_2026-10-28 22:11": {
+        "source": "Bloomberg Markets",
+        "titre": "Nasdaq 100 Falls 2% as AI Trade Shows New Cracks: Markets Wrap",
+        "date": "2026-10-28 22:11",
+        "note": 80,
+        "categorie": "Indices"
     }
 }
