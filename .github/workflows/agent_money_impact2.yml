@@ -54,14 +54,14 @@ jobs:
           ls -la
           ls -la fonts imgs music 2>/dev/null || echo "Dossiers fonts/, imgs/ ou music/ absents"
           echo "Musiques trouvées : $(ls music/news_musique*.mp3 2>/dev/null | wc -l)"
-          grep -c "def banner" Agnet_fb_money_impact_2.py || echo ">>> ANCIENNE VERSION du script <<<"
-          python -m py_compile Agnet_fb_money_impact_2.py video_reel.py && echo "Syntaxe OK"
+          grep -c "def banner" Agnet_fb_money_impact_3.py || echo ">>> ANCIENNE VERSION du script <<<"
+          python -m py_compile Agnet_fb_money_impact_3.py video_reel.py && echo "Syntaxe OK"
 
       - name: Lancer l'agent
         timeout-minutes: 45
         run: |
           set -o pipefail
-          python -u Agnet_fb_money_impact_2.py 2>&1 | tee agent.log
+          python -u Agnet_fb_money_impact_3.py 2>&1 | tee agent.log
         env:
           # comptes pour générer les images / le texte
           CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
