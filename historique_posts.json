@@ -1481,5 +1481,33 @@
         "date": "2026-10-28 22:11",
         "note": 80,
         "categorie": "Stocks"
+    },
+    "Bloomberg Markets_Lloyds Profit Beat Marred by Flat Outlook Amid Rising Rates_2026-10-29 07:24": {
+        "source": "Bloomberg Markets",
+        "titre": "Lloyds Profit Beat Marred by Flat Outlook Amid Rising Rates",
+        "date": "2026-10-29 07:24",
+        "note": 80,
+        "categorie": "Stocks"
+    },
+    "Bloomberg Markets_Shell Announces $5 Billion Buyback as Oil Refining Booms_2026-10-29 07:06": {
+        "source": "Bloomberg Markets",
+        "titre": "Shell Announces $5 Billion Buyback as Oil Refining Booms",
+        "date": "2026-10-29 07:06",
+        "note": 90,
+        "categorie": "Oil"
+    },
+    "ActionForex Fundamental_Gold Is Holding on to $4,000_2026-10-29 01:19": {
+        "source": "ActionForex Fundamental",
+        "titre": "Gold Is Holding on to $4,000",
+        "date": "2026-10-29 01:19",
+        "note": 80,
+        "categorie": "Gold"
+    },
+    "Bloomberg Markets_Nasdaq Futures Sink as AI Trade Shows New Cracks: Markets Wrap_2026-10-28 22:11": {
+        "source": "Bloomberg Markets",
+        "titre": "Nasdaq Futures Sink as AI Trade Shows New Cracks: Markets Wrap",
+        "date": "2026-10-28 22:11",
+        "note": 80,
+        "categorie": "Stocks"
     }
 }
