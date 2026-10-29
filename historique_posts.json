@@ -2118,5 +2118,19 @@
         "date": "2026-10-29 18:50",
         "note": 90,
         "categorie": "Stocks"
+    },
+    "Bloomberg Markets_Canadian Dollar Poised for Best Month Since April After BOC Hike_2026-10-29 19:10": {
+        "source": "Bloomberg Markets",
+        "titre": "Canadian Dollar Poised for Best Month Since April After BOC Hike",
+        "date": "2026-10-29 19:10",
+        "note": 80,
+        "categorie": "Forex"
+    },
+    "Bloomberg Markets_Credit Swaps For Tech Companies Reach Records Amid Supply Fears_2026-10-29 15:02": {
+        "source": "Bloomberg Markets",
+        "titre": "Credit Swaps For Tech Companies Reach Records Amid Supply Fears",
+        "date": "2026-10-29 15:02",
+        "note": 85,
+        "categorie": "Bonds"
     }
 }
