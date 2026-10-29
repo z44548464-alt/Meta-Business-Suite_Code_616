@@ -1376,5 +1376,40 @@
         "date": "2026-10-29 04:29",
         "note": 80,
         "categorie": "Stocks"
+    },
+    "Bloomberg Markets_ING Announces Job Cuts as Quarterly Profit Misses Estimates_2026-10-29 06:15": {
+        "source": "Bloomberg Markets",
+        "titre": "ING Announces Job Cuts as Quarterly Profit Misses Estimates",
+        "date": "2026-10-29 06:15",
+        "note": 80,
+        "categorie": "Stocks"
+    },
+    "OilPrice_Oil Prices Fall as Vance Moves to Restart Iran Peace Talks_2026-10-29 06:05": {
+        "source": "OilPrice",
+        "titre": "Oil Prices Fall as Vance Moves to Restart Iran Peace Talks",
+        "date": "2026-10-29 06:05",
+        "note": 80,
+        "categorie": "Oil"
+    },
+    "Bloomberg Markets_Healey Defends UK Budget, Warns 'Tough Decisions' Ahead_2026-10-29 06:00": {
+        "source": "Bloomberg Markets",
+        "titre": "Healey Defends UK Budget, Warns 'Tough Decisions' Ahead",
+        "date": "2026-10-29 06:00",
+        "note": 80,
+        "categorie": "Economic news"
+    },
+    "Bloomberg Markets_Tech Stocks Fall as Earnings Disappoint, Oil Drops: Markets Wrap_2026-10-28 22:11": {
+        "source": "Bloomberg Markets",
+        "titre": "Tech Stocks Fall as Earnings Disappoint, Oil Drops: Markets Wrap",
+        "date": "2026-10-28 22:11",
+        "note": 80,
+        "categorie": "Stocks"
+    },
+    "Bloomberg Economics_Meloni Woos Voters With Tax Cuts in €26 Billion Budget_2026-10-28 16:50": {
+        "source": "Bloomberg Economics",
+        "titre": "Meloni Woos Voters With Tax Cuts in €26 Billion Budget",
+        "date": "2026-10-28 16:50",
+        "note": 80,
+        "categorie": "Economic news"
     }
 }
