@@ -2174,5 +2174,26 @@
         "date": "2026-10-29 20:27",
         "note": 85,
         "categorie": "Bonds"
+    },
+    "Bloomberg Markets_Jersey Mike's CEO on 3Q Earnings, Expansion Plans_2026-10-29 22:23": {
+        "source": "Bloomberg Markets",
+        "titre": "Jersey Mike's CEO on 3Q Earnings, Expansion Plans",
+        "date": "2026-10-29 22:23",
+        "note": 80,
+        "categorie": "Stocks"
+    },
+    "Seeking Alpha_Intel: Guidance Disaster Causes 20%+ Price Slump_2026-10-29 22:10": {
+        "source": "Seeking Alpha",
+        "titre": "Intel: Guidance Disaster Causes 20%+ Price Slump",
+        "date": "2026-10-29 22:10",
+        "note": 90,
+        "categorie": "Stocks"
+    },
+    "Bloomberg Markets_Asia Stocks Under Pressure, Haven Bid Boosts Bonds: Markets Wrap_2026-10-29 22:07": {
+        "source": "Bloomberg Markets",
+        "titre": "Asia Stocks Under Pressure, Haven Bid Boosts Bonds: Markets Wrap",
+        "date": "2026-10-29 22:07",
+        "note": 80,
+        "categorie": "Stocks"
     }
 }
