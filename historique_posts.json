@@ -1299,5 +1299,19 @@
         "date": "2026-10-28 03:31",
         "note": 80,
         "categorie": "Central banks"
+    },
+    "Bloomberg Markets_Lynas Expects One-Month Shutdown at Malaysian Rare-Earths Plant_2026-10-29 01:58": {
+        "source": "Bloomberg Markets",
+        "titre": "Lynas Expects One-Month Shutdown at Malaysian Rare-Earths Plant",
+        "date": "2026-10-29 01:58",
+        "note": 80,
+        "categorie": "Stocks"
+    },
+    "Bloomberg Markets_Tech Stocks Drop as Alphabet, Samsung Disappoint: Markets Wrap_2026-10-28 22:11": {
+        "source": "Bloomberg Markets",
+        "titre": "Tech Stocks Drop as Alphabet, Samsung Disappoint: Markets Wrap",
+        "date": "2026-10-28 22:11",
+        "note": 80,
+        "categorie": "Stocks"
     }
 }
