@@ -2132,5 +2132,47 @@
         "date": "2026-10-29 15:02",
         "note": 85,
         "categorie": "Bonds"
+    },
+    "Bloomberg Markets_Air Canada Reduces Profit Outlook Again on Jet Fuel Costs_2026-10-29 21:03": {
+        "source": "Bloomberg Markets",
+        "titre": "Air Canada Reduces Profit Outlook Again on Jet Fuel Costs",
+        "date": "2026-10-29 21:03",
+        "note": 80,
+        "categorie": "Stocks"
+    },
+    "Bloomberg Markets_Starbucks Foot Traffic Outpaces the Competition, Says Hottovy_2026-10-29 21:00": {
+        "source": "Bloomberg Markets",
+        "titre": "Starbucks Foot Traffic Outpaces the Competition, Says Hottovy",
+        "date": "2026-10-29 21:00",
+        "note": 80,
+        "categorie": "Stocks"
+    },
+    "OilPrice_Trump's Russian Diesel Is a Legal Hot Potato With a Five-Year Fuse_2026-10-29 21:00": {
+        "source": "OilPrice",
+        "titre": "Trump's Russian Diesel Is a Legal Hot Potato With a Five-Year Fuse",
+        "date": "2026-10-29 21:00",
+        "note": 80,
+        "categorie": "Oil"
+    },
+    "Bloomberg Markets_Moving Down in High-Grade Quality: Goldman's Lynam_2026-10-29 20:40": {
+        "source": "Bloomberg Markets",
+        "titre": "Moving Down in High-Grade Quality: Goldman's Lynam",
+        "date": "2026-10-29 20:40",
+        "note": 80,
+        "categorie": "Bonds"
+    },
+    "Bloomberg Markets_Coinbase Returns to Profitability While Posting Another Revenue Drop_2026-10-29 20:32": {
+        "source": "Bloomberg Markets",
+        "titre": "Coinbase Returns to Profitability While Posting Another Revenue Drop",
+        "date": "2026-10-29 20:32",
+        "note": 80,
+        "categorie": "Crypto"
+    },
+    "Bloomberg Markets_Issuers Come to Market When Window Opens: CreditSights' Cisar_2026-10-29 20:27": {
+        "source": "Bloomberg Markets",
+        "titre": "Issuers Come to Market When Window Opens: CreditSights' Cisar",
+        "date": "2026-10-29 20:27",
+        "note": 85,
+        "categorie": "Bonds"
     }
 }
