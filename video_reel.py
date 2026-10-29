@@ -35,8 +35,8 @@ VIDEO_HASHTAGS = "#الأسواق_المالية #فوركس #الذهب #الب
 
 # Renseignés à chaque appel par publier_video_reel()
 C = None
-VIDEO_DIR = None
-MUSIC_DIR = None
+VIDEO_DIR = "video_SIMPLE"
+MUSIC_DIR = "music_NEWS"
 
 
 def _log(*args, **kwargs):
