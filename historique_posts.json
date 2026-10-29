@@ -1362,5 +1362,19 @@
         "date": "2026-10-29 03:38",
         "note": 80,
         "categorie": "Bonds"
+    },
+    "Seeking Alpha_Commodities: European Gas Tops EUR100 As Supply Fears Grow_2026-10-29 04:35": {
+        "source": "Seeking Alpha",
+        "titre": "Commodities: European Gas Tops EUR100 As Supply Fears Grow",
+        "date": "2026-10-29 04:35",
+        "note": 90,
+        "categorie": "Oil"
+    },
+    "Bloomberg Markets_Chinese Tech Stocks Sink Even as Chipmaker Sales Surge 1,800%_2026-10-29 04:29": {
+        "source": "Bloomberg Markets",
+        "titre": "Chinese Tech Stocks Sink Even as Chipmaker Sales Surge 1,800%",
+        "date": "2026-10-29 04:29",
+        "note": 80,
+        "categorie": "Stocks"
     }
 }
