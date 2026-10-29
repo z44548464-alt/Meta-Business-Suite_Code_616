@@ -1,1 +1,233 @@
+name: Agent Facebook Instagram (money impact)
 
+on:
+  schedule:
+    - cron: "0 * * * *"      # toutes les heures (heure UTC)
+  workflow_dispatch:           # lancement manuel depuis l'onglet Actions
+
+permissions:
+  contents: write              # nécessaire pour sauvegarder les historiques JSON
+
+concurrency:
+  group: agent-facebook-money-impact
+  cancel-in-progress: false    # évite deux exécutions en même temps
+
+env:
+  PYTHONUNBUFFERED: "1"
+  PYTHONIOENCODING: "utf-8"
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+
+jobs:
+  publier:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      # Installé UNE SEULE FOIS, puis restauré depuis le cache GitHub (quelques secondes)
+      - name: Dépendances système (Raqm + polices + ffmpeg) avec cache
+        uses: awalsh128/cache-apt-pkgs-action@v1
+        timeout-minutes: 15
+        with:
+          packages: libraqm0 libfribidi0 libharfbuzz0b fonts-dejavu-core fonts-noto-core ffmpeg
+          version: v2
+
+      - name: Installer les dépendances Python
+        timeout-minutes: 8
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt --progress-bar off
+          echo "---- Versions installées ----"
+          pip list 2>/dev/null | grep -i -E "groq|langchain|huggingface|pillow|arabic|bidi|cloudinary|feedparser|beautifulsoup|requests" || true
+          ffmpeg -version | head -n 1
+
+      - name: Vérifier la version du script
+        run: |
+          ls -la
+          ls -la fonts imgs music 2>/dev/null || echo "Dossiers fonts/, imgs/ ou music/ absents"
+          echo "Musiques trouvées : $(ls music/news_musique*.mp3 2>/dev/null | wc -l)"
+          grep -c "def banner" Agnet_fb_money_impact_2.py || echo ">>> ANCIENNE VERSION du script <<<"
+          python -m py_compile Agnet_fb_money_impact_2.py video_reel.py && echo "Syntaxe OK"
+
+      - name: Lancer l'agent
+        timeout-minutes: 45
+        run: |
+          set -o pipefail
+          python -u Agnet_fb_money_impact_2.py 2>&1 | tee agent.log
+        env:
+          # comptes pour générer les images / le texte
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CF_ACCOUNT_ID1: ${{ secrets.CF_ACCOUNT_ID1 }}
+          CF_API_TOKEN1: ${{ secrets.CF_API_TOKEN1 }}
+          CF_ACCOUNT_ID2: ${{ secrets.CF_ACCOUNT_ID2 }}
+          CF_API_TOKEN2: ${{ secrets.CF_API_TOKEN2 }}
+          CF_ACCOUNT_ID3: ${{ secrets.CF_ACCOUNT_ID3 }}
+          CF_API_TOKEN3: ${{ secrets.CF_API_TOKEN3 }}
+          CF_ACCOUNT_ID4: ${{ secrets.CF_ACCOUNT_ID4 }}
+          CF_API_TOKEN4: ${{ secrets.CF_API_TOKEN4 }}
+          CF_ACCOUNT_ID5: ${{ secrets.CF_ACCOUNT_ID5 }}
+          CF_API_TOKEN5: ${{ secrets.CF_API_TOKEN5 }}
+          CF_ACCOUNT_ID6: ${{ secrets.CF_ACCOUNT_ID6 }}
+          CF_API_TOKEN6: ${{ secrets.CF_API_TOKEN6 }}
+          CF_ACCOUNT_ID7: ${{ secrets.CF_ACCOUNT_ID7 }}
+          CF_API_TOKEN7: ${{ secrets.CF_API_TOKEN7 }}
+          CF_ACCOUNT_ID8: ${{ secrets.CF_ACCOUNT_ID8 }}
+          CF_API_TOKEN8: ${{ secrets.CF_API_TOKEN8 }}
+          CF_ACCOUNT_ID9: ${{ secrets.CF_ACCOUNT_ID9 }}
+          CF_API_TOKEN9: ${{ secrets.CF_API_TOKEN9 }}
+          CF_ACCOUNT_ID10: ${{ secrets.CF_ACCOUNT_ID10 }}
+          CF_API_TOKEN10: ${{ secrets.CF_API_TOKEN10 }}
+
+          # informations de la page
+          PAGE_ID: ${{ secrets.PAGE_ID_MONEY_IMPAC }}
+          PAGE_ACCESS_TOKEN: ${{ secrets.PAGE_ACCESS_TOKEN_MONEY_IMPAC }}
+          INSTAGRAM_BUSINESS_ID: ${{ secrets.INSTAGRAM_BUSINESS_ID_MONEY_IMPAC }}
+          CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
+          CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
+          CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
+          TOKEN_AI_DESCRYB_IMG: ${{ secrets.TOKEN_AI_DESCRYB_IMG }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          TOGETHER_API_KEY: ${{ secrets.TOGETHER_API_KEY }}
+          POLLINATIONS_API_KEY: ${{ secrets.POLLINATIONS_API_KEY }}
+
+          # vidéo Reels (mettre "0" pour la désactiver)
+          VIDEO_ENABLED: "1"
+
+      - name: Garder le log complet
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: agent-log
+          path: agent.log
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Sauvegarder les historiques (posts + vidéos)
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          FILES=("historique_posts.json" "historique_videos.json")
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          for FILE in "${FILES[@]}"; do
+            if [ ! -f "$FILE" ]; then
+              printf '{}\n' > "$FILE"
+            fi
+          done
+
+          for i in 1 2 3 4 5; do
+            echo "Tentative $i/5 : récupération de origin/main..."
+
+            git fetch origin main
+
+            for FILE in "${FILES[@]}"; do
+              REMOTE_FILE="$(mktemp)"
+
+              if git show "origin/main:$FILE" > "$REMOTE_FILE" 2>/dev/null; then
+                :
+              else
+                printf '{}\n' > "$REMOTE_FILE"
+              fi
+
+              python - "$FILE" "$REMOTE_FILE" <<'PY'
+          import json
+          import os
+          import sys
+          import tempfile
+
+          local_path, remote_path = sys.argv[1:3]
+          is_video = "videos" in os.path.basename(local_path)
+
+          def load_json(path, label):
+              try:
+                  with open(path, "r", encoding="utf-8") as f:
+                      data = json.load(f)
+              except (OSError, json.JSONDecodeError) as exc:
+                  raise SystemExit(f"ERREUR : {label} JSON illisible : {exc}")
+
+              if not isinstance(data, dict):
+                  raise SystemExit(f"ERREUR : {label} doit être un objet JSON.")
+
+              return data
+
+          local_data = load_json(local_path, "Historique local")
+          remote_data = load_json(remote_path, "Historique distant")
+
+          if is_video:
+              # Historique vidéos : union des post_id utilisés + union des vidéos (clé = date).
+              used = []
+              for pid in list(remote_data.get("used_post_ids", [])) + list(local_data.get("used_post_ids", [])):
+                  if pid not in used:
+                      used.append(pid)
+              videos, seen = [], set()
+              for v in list(remote_data.get("videos", [])) + list(local_data.get("videos", [])):
+                  key = v.get("date") if isinstance(v, dict) else json.dumps(v, sort_keys=True)
+                  if key not in seen:
+                      seen.add(key)
+                      videos.append(v)
+              merged = {"used_post_ids": used, "videos": videos}
+              resume = f"{len(used)} images utilisées, {len(videos)} vidéos"
+          else:
+              # Historique posts : conserve les entrées distantes, ajoute/met à jour les locales.
+              merged = dict(remote_data)
+              merged.update(local_data)
+              resume = f"{len(merged)} entrées"
+
+          directory = os.path.dirname(os.path.abspath(local_path))
+          fd, temp_path = tempfile.mkstemp(
+              prefix="historique_",
+              suffix=".json",
+              dir=directory
+          )
+
+          try:
+              with os.fdopen(fd, "w", encoding="utf-8") as f:
+                  json.dump(merged, f, ensure_ascii=False, indent=4)
+                  f.write("\n")
+              os.replace(temp_path, local_path)
+          finally:
+              if os.path.exists(temp_path):
+                  os.remove(temp_path)
+
+          print(f"Fusion terminée ({os.path.basename(local_path)}) : {resume}.")
+          PY
+
+              rm -f "$REMOTE_FILE"
+            done
+
+            # Aligne HEAD sur main sans rebase ; conserve les fichiers fusionnés.
+            git reset --mixed origin/main
+            git add -- "${FILES[@]}"
+
+            if git diff --cached --quiet; then
+              echo "Aucun changement dans les historiques."
+              exit 0
+            fi
+
+            git commit -m "Update publication history [skip ci]"
+
+            if git push origin HEAD:main; then
+              echo "Historiques poussés avec succès."
+              exit 0
+            fi
+
+            echo "Push refusé ; nouvelle tentative dans 5 secondes..."
+            sleep 5
+          done
+
+          echo "Échec du push après 5 tentatives."
+          exit 1
