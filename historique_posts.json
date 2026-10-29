@@ -2195,5 +2195,32 @@
         "date": "2026-10-29 22:07",
         "note": 80,
         "categorie": "Stocks"
+    },
+    "Bloomberg Markets_Vale Iron Ore Output Trails Forecast on Serra Norte Challenges_2026-10-29 22:29": {
+        "source": "Bloomberg Markets",
+        "titre": "Vale Iron Ore Output Trails Forecast on Serra Norte Challenges",
+        "date": "2026-10-29 22:29",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793316170/actualites_financieres/ei9hufxrylijxybtlnat.jpg",
+        "publie_le": "2026-10-29T23:23:03.345176+00:00"
+    },
+    "Bloomberg Economics_Colombia ‘Rescue’ Bill Would Broaden VAT Base, Curb Spending_2026-10-29 22:13": {
+        "source": "Bloomberg Economics",
+        "titre": "Colombia ‘Rescue’ Bill Would Broaden VAT Base, Curb Spending",
+        "date": "2026-10-29 22:13",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793316204/actualites_financieres/ugiuz5mwmho4jyasctw8.jpg",
+        "publie_le": "2026-10-29T23:23:41.187635+00:00"
+    },
+    "Bloomberg Markets_Nasdaq Futures Fall as Tech Struggles, Bonds Gain: Markets Wrap_2026-10-29 22:07": {
+        "source": "Bloomberg Markets",
+        "titre": "Nasdaq Futures Fall as Tech Struggles, Bonds Gain: Markets Wrap",
+        "date": "2026-10-29 22:07",
+        "note": 80,
+        "categorie": "Indices",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793316237/actualites_financieres/fvxo2d0koz0y4nit2cjl.jpg",
+        "publie_le": "2026-10-29T23:24:05.698639+00:00"
     }
 }
