@@ -39,6 +39,7 @@ VIDEO_HASHTAGS = "#الأسواق_المالية #فوركس #الذهب #الب
 C = None
 VIDEO_DIR = None
 MUSIC_DIR = None
+FFMPEG = "ffmpeg"
 
 
 def _log(*args, **kwargs):
@@ -175,6 +176,30 @@ def _composer_cadre(src, dst, size):
     fond.save(dst)
 
 
+def _trouver_ffmpeg():
+    """Retourne un ffmpeg qui DÉMARRE réellement (ffmpeg système, sinon binaire statique
+    imageio-ffmpeg). Évite l'erreur « error while loading shared libraries »."""
+    candidats = []
+    exe = shutil.which("ffmpeg")
+    if exe:
+        candidats.append(exe)
+    try:
+        import imageio_ffmpeg
+        candidats.append(imageio_ffmpeg.get_ffmpeg_exe())
+    except Exception:
+        pass
+    for c in candidats:
+        try:
+            r = subprocess.run([c, "-version"], capture_output=True, text=True, timeout=30)
+            if r.returncode == 0:
+                _log(f"ffmpeg utilisable : {c} | {(r.stdout or '').splitlines()[0][:60]}")
+                return c
+            _log(f"ffmpeg inutilisable ({c}) : {(r.stderr or '')[-160:]}", level="WARN")
+        except Exception as e:
+            _log(f"ffmpeg inutilisable ({c}) : {type(e).__name__} {str(e)[:120]}", level="WARN")
+    return None
+
+
 def _trouver_dossier_musique():
     base = Path(C.base_dir)
     env = os.getenv("MUSIC_DIR", "").strip()
@@ -199,7 +224,7 @@ def _choisir_musique():
 # ----------------------------------------------------------------------
 # Montage ffmpeg
 # ----------------------------------------------------------------------
-def _rendre_video(items, size, duration, music, plan, sortie):
+def _rendre_video(items, size, duration, music, plan, sortie, simple=False):
     w, h = size
     n = len(items)
     fps, T = VIDEO_FPS, VIDEO_TRANSITION_S
@@ -212,9 +237,12 @@ def _rendre_video(items, size, duration, music, plan, sortie):
         _composer_cadre(src, dst, size)
         frames.append(dst)
 
-    cmd = ["ffmpeg", "-y", "-hide_banner", "-loglevel", "error"]
+    cmd = [FFMPEG, "-y", "-hide_banner", "-loglevel", "error"]
     for f in frames:
-        cmd += ["-i", str(f)]
+        if simple:      # mode de secours : images fixes (sans zoom)
+            cmd += ["-loop", "1", "-framerate", str(fps), "-t", f"{L:.3f}", "-i", str(f)]
+        else:
+            cmd += ["-i", str(f)]
     if music:
         cmd += ["-stream_loop", "-1", "-i", str(music)]
     else:
@@ -224,6 +252,10 @@ def _rendre_video(items, size, duration, music, plan, sortie):
     big_w, big_h = int(w * 1.5) // 2 * 2, int(h * 1.5) // 2 * 2
     fc = []
     for i in range(n):
+        if simple:
+            fc.append(f"[{i}:v]scale={w}:{h}:flags=lanczos,setsar=1,fps={fps},"
+                      f"format=yuv420p[v{i}]")
+            continue
         if plan["zooms"][i] == "in":
             z = f"1+{amt / N:.7f}*on"
         else:
@@ -250,7 +282,7 @@ def _rendre_video(items, size, duration, music, plan, sortie):
 
     t = time.time()
     _log(f"ffmpeg : montage {w}x{h} | {n} images | {duration:.1f}s | "
-         f"transitions={plan['transitions']}")
+         f"mode={'simple' if simple else 'zoom'} | transitions={plan['transitions']}")
     res = subprocess.run(cmd, capture_output=True, text=True, timeout=1500)
     if res.returncode != 0 or not Path(sortie).is_file():
         _log("ffmpeg ÉCHEC : " + (res.stderr or "")[-700:], level="ERROR")
@@ -406,7 +438,7 @@ def _reel_facebook(chemin, caption, page_id, token):
 def publier_video_reel(historique, ctx):
     """Images de la Page (12 h) jamais utilisées -> vidéo Reel -> Facebook + Instagram.
     Ne lève jamais d'exception."""
-    global C, VIDEO_DIR, MUSIC_DIR
+    global C, VIDEO_DIR, MUSIC_DIR, FFMPEG
     C = ctx
     VIDEO_DIR = Path(C.output_dir) / "video"
     MUSIC_DIR = _trouver_dossier_musique()
@@ -416,8 +448,9 @@ def publier_video_reel(historique, ctx):
         return
     try:
         _log("━━ Vidéo Reel : diaporama des images de la Page ━━", level="STEP")
-        if not shutil.which("ffmpeg"):
-            _log("ffmpeg introuvable : vidéo ignorée.", level="ERROR")
+        FFMPEG = _trouver_ffmpeg()
+        if not FFMPEG:
+            _log("Aucun ffmpeg utilisable : vidéo ignorée.", level="ERROR")
             return
 
         token, page_id, ig_id = (C.menv("PAGE_ACCESS_TOKEN"), C.menv("PAGE_ID"),
@@ -472,7 +505,12 @@ def publier_video_reel(historique, ctx):
         for plateforme, size in VIDEO_FORMATS.items():
             if size not in rendus:
                 sortie = VIDEO_DIR / f"reel_{size[0]}x{size[1]}.mp4"
-                if not _rendre_video(items, size, duree, musique, plan, sortie):
+                ok = _rendre_video(items, size, duree, musique, plan, sortie)
+                if not ok:
+                    _log("Montage avec zoom échoué : nouvel essai en mode simple (sans zoom).",
+                         level="WARN")
+                    ok = _rendre_video(items, size, duree, musique, plan, sortie, simple=True)
+                if not ok:
                     _log("Montage échoué : vidéo annulée (images non marquées).", level="ERROR")
                     return
                 rendus[size] = sortie
