@@ -1,6 +1,6 @@
 import sys
 import faulthandler
-SCRIPT_VERSION = "2026-10-29-money-impact-video-page12h"
+SCRIPT_VERSION = "2026-10-30-money-impact-video-independante"
 print(f"▶ Python démarré (version {SCRIPT_VERSION}), chargement des modules…", flush=True)
 faulthandler.enable()
 faulthandler.dump_traceback_later(90, repeat=True, file=sys.stderr)
@@ -1466,7 +1466,9 @@ class Extract_post:
             return False, "titre de type appel de résultats / promotionnel / hors sujet"
         if _BAD_BODY_RE.search(head):
             return False, "texte de type transcription d'appel de résultats ou contenu sponsorisé"
-        if len(body) < 250 and len(rss) < 150:
+        # Beaucoup de flux (Fed, FT, CNBC, Bloomberg) ne donnent qu'un court extrait :
+        # seuil bas, le LLM juge ensuite (note >= MIN_NEWS_SCORE).
+        if len(body) < 100 and len(rss) < 60:
             return False, "contenu trop mince pour établir un fait financier"
         return True, ""
 
@@ -1825,8 +1827,19 @@ def ecrire_resume(statut):
     step_summary("\n".join(lignes))
 
 
+_VIDEO_DONE = False
+
+
 def terminer(code, statut):
+    """Point de sortie unique du script.
+
+    La vidéo Reel est INDÉPENDANTE des news : elle est lancée ici, une seule fois, quel que
+    soit le résultat des news (publiées, rejetées, rien de nouveau, panne LLM...)."""
+    global _VIDEO_DONE
     faulthandler.cancel_dump_traceback_later()
+    if not _VIDEO_DONE:
+        _VIDEO_DONE = True
+        publier_video_reel({})
     banner(6, TOTAL_STEPS, "RÉSUMÉ")
     log(f"Flux OK : {STATS['flux_ok']} | Flux en échec : {STATS['flux_ko']} | "
         f"News : {STATS['news_total']} | Déjà publiées : {STATS['deja']} | "
@@ -1845,7 +1858,7 @@ def terminer(code, statut):
 
 
 def publier_video_reel(historique):
-    """Dernière étape du run : appelle le module séparé video_reel.py.
+    """Appelle le module séparé video_reel.py (lit uniquement la Page Facebook).
     Ne lève jamais d'exception et ne change pas le code de sortie du script."""
     try:
         from video_reel import publier_video_reel as _run
@@ -1934,8 +1947,7 @@ def main():
         elif STATS["anciennes"]:
             log(f"Toutes les news non publiées ont plus de {MAX_NEWS_AGE_HOURS} h : "
                 "augmente MAX_NEWS_AGE_HOURS si tu veux les publier.", level="WARN")
-        publier_video_reel(historique)      # dernière étape même sans nouvelle news
-        terminer(0, "RIEN À PUBLIER")
+        terminer(0, "RIEN À PUBLIER")      # la vidéo est lancée dans terminer()
 
     # Titres déjà connus : historique + news acceptées pendant ce run (anti-doublons).
     titres_connus = [v.get("titre", "") for v in historique.values()
@@ -2026,9 +2038,7 @@ def main():
             STATS["echecs"].append((title, raison))
             log(f"NON PUBLIÉ : {raison}", level="ERROR")
 
-    # DERNIÈRE ÉTAPE : vidéo Reel avec les 3 à 5 images de la page (12 dernières heures) jamais utilisées.
-    publier_video_reel(historique)
-
+    # La vidéo Reel (images de la Page, 12 dernières heures) est lancée dans terminer().
     if STATS["publies"] > 0:
         terminer(0, "SUCCÈS")
     if STATS["rejetees"] > 0 and STATS["rejetees"] >= STATS["tentatives"]:
