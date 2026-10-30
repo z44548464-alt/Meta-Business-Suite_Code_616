@@ -2996,5 +2996,59 @@
         "categorie": "Economic news",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793347626/actualites_financieres/xalcutinsfix5wmfbm6k.jpg",
         "publie_le": "2026-10-30T08:07:19.124128+00:00"
+    },
+    "Seeking Alpha_Bank of Japan Hits 2% Price Target_2026-10-30 10:16": {
+        "source": "Seeking Alpha",
+        "titre": "Bank of Japan Hits 2% Price Target",
+        "date": "2026-10-30 10:16",
+        "note": 90,
+        "categorie": "Central banks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793355643/actualites_financieres/scpsfltpqcpokmjhjyet.jpg",
+        "publie_le": "2026-10-30T10:21:00.178254+00:00"
+    },
+    "Financial Times Markets_French economy shrinks 0.1% in third quarter_2026-10-30 10:07": {
+        "source": "Financial Times Markets",
+        "titre": "French economy shrinks 0.1% in third quarter",
+        "date": "2026-10-30 10:07",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793355686/actualites_financieres/ljspvioqzo6yp7qsciuf.jpg",
+        "publie_le": "2026-10-30T10:21:37.824034+00:00"
+    },
+    "Financial Times Markets_Big Tech sheds nearly $900bn in rout over soaring AI spending_2026-10-30 10:00": {
+        "source": "Financial Times Markets",
+        "titre": "Big Tech sheds nearly $900bn in rout over soaring AI spending",
+        "date": "2026-10-30 10:00",
+        "note": 85,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793355749/actualites_financieres/u61vhsnauxs30s4ifq7a.jpg",
+        "publie_le": "2026-10-30T10:22:42.741775+00:00"
+    },
+    "OilPrice_Wall Street Banks Raise Oil Price Forecasts as Supply Fears Deepen_2026-10-30 10:00": {
+        "source": "OilPrice",
+        "titre": "Wall Street Banks Raise Oil Price Forecasts as Supply Fears Deepen",
+        "date": "2026-10-30 10:00",
+        "note": 80,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793355796/actualites_financieres/thfnoxru6m9y3pbyy9i9.jpg",
+        "publie_le": "2026-10-30T10:23:25.766155+00:00"
+    },
+    "Bloomberg Economics_BOE Agents See Little Sign of Energy Shock Feeding Into Pay_2026-10-30 09:53": {
+        "source": "Bloomberg Economics",
+        "titre": "BOE Agents See Little Sign of Energy Shock Feeding Into Pay",
+        "date": "2026-10-30 09:53",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793355849/actualites_financieres/py53pj9tedevnzflwuc8.jpg",
+        "publie_le": "2026-10-30T10:24:23.782819+00:00"
+    },
+    "MarketWatch_Here’s when Binance plans to reopen after what’s believed to be the largest-ever $6.3 billion hack_2026-10-30 09:50": {
+        "source": "MarketWatch",
+        "titre": "Here’s when Binance plans to reopen after what’s believed to be the largest-ever $6.3 billion hack",
+        "date": "2026-10-30 09:50",
+        "note": 90,
+        "categorie": "Crypto",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793355884/actualites_financieres/affhuzivdp3wovkiw4h0.jpg",
+        "publie_le": "2026-10-30T10:24:58.759023+00:00"
     }
 }
