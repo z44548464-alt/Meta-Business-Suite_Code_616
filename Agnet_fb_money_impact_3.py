@@ -1,6 +1,6 @@
 import sys
 import faulthandler
-SCRIPT_VERSION = "2026-10-30-money-impact-video-independante"
+SCRIPT_VERSION = "2026-10-30-money-impact-video-v2"
 print(f"▶ Python démarré (version {SCRIPT_VERSION}), chargement des modules…", flush=True)
 faulthandler.enable()
 faulthandler.dump_traceback_later(90, repeat=True, file=sys.stderr)
@@ -1685,7 +1685,7 @@ Use relevant=false and financial_event="" when there is no clear financial event
 # ======================================================================
 # MAIN
 # ======================================================================
-TOTAL_STEPS = 6
+TOTAL_STEPS = 7
 
 
 def charger_historique(fichier_json):
@@ -1830,17 +1830,23 @@ def ecrire_resume(statut):
 _VIDEO_DONE = False
 
 
+def lancer_video_une_fois():
+    """Lance la vidéo Reel une seule fois par run (indépendante des news)."""
+    global _VIDEO_DONE
+    if _VIDEO_DONE:
+        return
+    _VIDEO_DONE = True
+    publier_video_reel({})
+
+
 def terminer(code, statut):
     """Point de sortie unique du script.
 
     La vidéo Reel est INDÉPENDANTE des news : elle est lancée ici, une seule fois, quel que
     soit le résultat des news (publiées, rejetées, rien de nouveau, panne LLM...)."""
-    global _VIDEO_DONE
     faulthandler.cancel_dump_traceback_later()
-    if not _VIDEO_DONE:
-        _VIDEO_DONE = True
-        publier_video_reel({})
-    banner(6, TOTAL_STEPS, "RÉSUMÉ")
+    lancer_video_une_fois()      # filet de sécurité si elle n'a pas encore été lancée
+    banner(7, TOTAL_STEPS, "RÉSUMÉ")
     log(f"Flux OK : {STATS['flux_ok']} | Flux en échec : {STATS['flux_ko']} | "
         f"News : {STATS['news_total']} | Déjà publiées : {STATS['deja']} | "
         f"Trop anciennes : {STATS['anciennes']} | À examiner : {STATS['candidates']}")
@@ -1905,10 +1911,15 @@ def main():
         STATS["echecs"].append(("Meta", "token/ID refusés par l'API Graph"))
         terminer(1, "ÉCHEC (Meta)")
 
+    # VIDÉO REEL : lancée AVANT les news, donc indépendante de leur durée, de leurs rejets
+    # et d'un éventuel dépassement de délai. Elle utilise les photos déjà publiées sur la Page.
+    banner(3, TOTAL_STEPS, "Vidéo Reel (images de la Page, 12 dernières heures)")
+    lancer_video_une_fois()
+
     extract_post = Extract_post()
     text_post = TextPost()
 
-    banner(3, TOTAL_STEPS, "Lecture des flux RSS")
+    banner(4, TOTAL_STEPS, "Lecture des flux RSS")
     all_news = extract_post.fetch_all_news()
     STATS["news_total"] = len(all_news)
     if not all_news:
@@ -1917,7 +1928,7 @@ def main():
         STATS["echecs"].append(("Flux RSS", "aucune news récupérée"))
         terminer(1, "ÉCHEC (aucune news)")
 
-    banner(4, TOTAL_STEPS, "Sélection des news à examiner")
+    banner(5, TOTAL_STEPS, "Sélection des news à examiner")
     historique = charger_historique(fichier_json)
     now = datetime.now(timezone.utc)
     candidates = []
@@ -1953,7 +1964,7 @@ def main():
     titres_connus = [v.get("titre", "") for v in historique.values()
                      if isinstance(v, dict) and v.get("titre")]
 
-    banner(5, TOTAL_STEPS, "Filtrage, traduction, image et publication")
+    banner(6, TOTAL_STEPS, "Filtrage, traduction, image et publication")
     for k, (news, post_id) in enumerate(candidates, 1):
         if STATS["publies"] >= MAX_POSTS_PER_RUN:
             log(f"Limite atteinte ({MAX_POSTS_PER_RUN} publication(s) par exécution).")
@@ -2038,7 +2049,7 @@ def main():
             STATS["echecs"].append((title, raison))
             log(f"NON PUBLIÉ : {raison}", level="ERROR")
 
-    # La vidéo Reel (images de la Page, 12 dernières heures) est lancée dans terminer().
+    # (La vidéo Reel a déjà été lancée avant les news ; terminer() sert de filet de sécurité.)
     if STATS["publies"] > 0:
         terminer(0, "SUCCÈS")
     if STATS["rejetees"] > 0 and STATS["rejetees"] >= STATS["tentatives"]:
