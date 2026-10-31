@@ -4238,5 +4238,32 @@
         "categorie": "Stocks",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793442853/actualites_financieres/mzjxerhbake25cpmegaq.jpg",
         "publie_le": "2026-10-31T10:34:28.373877+00:00"
+    },
+    "Seeking Alpha_What Moved Markets This Week_2026-10-31 10:38": {
+        "source": "Seeking Alpha",
+        "titre": "What Moved Markets This Week",
+        "date": "2026-10-31 10:38",
+        "note": 90,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793446093/actualites_financieres/johkdoxi171vb4gmazsr.jpg",
+        "publie_le": "2026-10-31T11:28:23.495818+00:00"
+    },
+    "Financial Times Markets_Crypto exchanges rush to tighten security after $6.3bn Binance heist_2026-10-31 10:38": {
+        "source": "Financial Times Markets",
+        "titre": "Crypto exchanges rush to tighten security after $6.3bn Binance heist",
+        "date": "2026-10-31 10:38",
+        "note": 80,
+        "categorie": "Crypto",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793446118/actualites_financieres/rv6ymxwbzlsn2joc6o6j.jpg",
+        "publie_le": "2026-10-31T11:28:46.534005+00:00"
+    },
+    "Bloomberg Economics_Shipping Strikes In Hormuz Leave Both Sides With Economic Pain_2026-10-31 10:30": {
+        "source": "Bloomberg Economics",
+        "titre": "Shipping Strikes In Hormuz Leave Both Sides With Economic Pain",
+        "date": "2026-10-31 10:30",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793446142/actualites_financieres/b6qo04taf6n7tqxin6xq.jpg",
+        "publie_le": "2026-10-31T11:29:11.792043+00:00"
     }
 }
