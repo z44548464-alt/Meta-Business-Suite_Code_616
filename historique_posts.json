@@ -4076,5 +4076,32 @@
         "categorie": "Stocks",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793407282/actualites_financieres/bxcuqpydzxuulz7wgcq8.jpg",
         "publie_le": "2026-10-31T00:41:42.628172+00:00"
+    },
+    "ActionForex Fundamental_The Weekly Bottom Line: BoC Fears Spectre of Inflation_2026-10-31 02:15": {
+        "source": "ActionForex Fundamental",
+        "titre": "The Weekly Bottom Line: BoC Fears Spectre of Inflation",
+        "date": "2026-10-31 02:15",
+        "note": 90,
+        "categorie": "Central banks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793414527/actualites_financieres/tavpfrk3r8mv3qclbrwj.jpg",
+        "publie_le": "2026-10-31T02:42:31.021771+00:00"
+    },
+    "Bloomberg Markets_Rubio and Brazil Foreign Minister to Meet After Election Tension_2026-10-31 02:13": {
+        "source": "Bloomberg Markets",
+        "titre": "Rubio and Brazil Foreign Minister to Meet After Election Tension",
+        "date": "2026-10-31 02:13",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793414569/actualites_financieres/nidzllkhn23qv4n3blby.jpg",
+        "publie_le": "2026-10-31T02:43:06.585923+00:00"
+    },
+    "Bloomberg Economics_China Factory Activity Eases Into Decline as Growth Wobbles_2026-10-31 01:42": {
+        "source": "Bloomberg Economics",
+        "titre": "China Factory Activity Eases Into Decline as Growth Wobbles",
+        "date": "2026-10-31 01:42",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793414604/actualites_financieres/wmdcr9pkpswoagxcd8yn.jpg",
+        "publie_le": "2026-10-31T02:43:34.095649+00:00"
     }
 }
