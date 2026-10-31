@@ -1,6 +1,6 @@
 import sys
 import faulthandler
-SCRIPT_VERSION = "2026-10-30-money-impact-video-v2"
+SCRIPT_VERSION = "2026-10-31-money-impact-video-v3-hashtags-baseline"
 print(f"▶ Python démarré (version {SCRIPT_VERSION}), chargement des modules…", flush=True)
 faulthandler.enable()
 faulthandler.dump_traceback_later(90, repeat=True, file=sys.stderr)
@@ -88,6 +88,21 @@ MIN_NEWS_SCORE = 75
 ACCEPTED_ARTICLE_TYPES = ("market_news", "macro_data", "central_bank", "company_market_event")
 # Seuil de similarité (0-1) au-delà duquel deux titres sont considérés comme doublons.
 DUPLICATE_TITLE_SIMILARITY = 0.70
+
+# Hashtags ajoutés après la ligne « المصدر » (de base + selon la catégorie validée).
+HASHTAGS_BASE = "#الأسواق_المالية #اقتصاد #أخبار_اقتصادية #استثمار #تداول #money_impact"
+HASHTAGS_CATEGORIE = {
+    "Forex": "#فوركس #forex #العملات #الدولار #fx",
+    "Gold": "#الذهب #gold #XAUUSD #المعادن_الثمينة",
+    "Indices": "#البورصة #المؤشرات #wallstreet #stockmarket",
+    "Crypto": "#بيتكوين #العملات_الرقمية #bitcoin #crypto",
+    "Central banks": "#البنوك_المركزية #الفيدرالي #أسعار_الفائدة #fed",
+    "Economic news": "#الاقتصاد_العالمي #التضخم #economy #macro",
+    "Stocks": "#الأسهم #stocks #وول_ستريت #nasdaq",
+    "Oil": "#النفط #oil #برنت #الطاقة",
+    "Bonds": "#السندات #bonds #treasury #العوائد",
+    "Market impact": "#الأسواق #markets #trading #تحليل_السوق",
+}
 
 # ---------------------------------------------------------------------
 # COMPTES MULTIPLES : même nom de secret + suffixe 1, 2, 3, 4, 5
@@ -254,7 +269,8 @@ SECRET_ENV_NAMES = tuple(
     [n + s for n in ("TOKEN_AI_DESCRYB_IMG", "HF_TOKEN", "CF_API_TOKEN", "CF_ACCOUNT_ID")
      for s in KEY_SUFFIXES]
     + ["CLOUDINARY_API_KEY", "CLOUDINARY_API_SECRET",
-       "PAGE_ACCESS_TOKEN", "PAGE_ACCESS_TOKEN_MONEY_IMPAC"]
+       "PAGE_ACCESS_TOKEN", "PAGE_ACCESS_TOKEN_MONEY_IMPAC",
+       "ID_CLIENT_FB", "CODE_SECRET_DU_CLIENT_FB", "YOUTUBE_REFRESH_TOKEN"]
 )
 _ICONS = {"INFO": "  ", "STEP": "➡️ ", "OK": "✅", "WARN": "⚠️ ", "ERROR": "❌"}
 
@@ -483,7 +499,7 @@ def llm_chat(messages, temperature=0.2, max_tokens=1800, order=None):
 # GÉNÉRATION DE POST (image + publication)
 # ======================================================================
 class _FontPair:
-    """Police arabe + police latine de secours (même taille).
+    """Police arabe + police latine de secours (même taille visuelle).
 
     Beaucoup de polices arabes (ex. Noto Sans Arabic) n'ont PAS les lettres latines :
     « DoorDash » s'affichait alors en carrés □□□□. Les mots non arabes sont donc
@@ -878,7 +894,8 @@ class TextPost:
     @classmethod
     def _load_arabic_font(cls, size):
         mode = cls._detect_ar_mode()
-        latin = TextPost._load_font(size)   # DejaVu / Liberation Bold : contient le latin
+        # Police latine un peu plus petite : même taille visuelle que l'arabe (Cairo/Noto).
+        latin = TextPost._load_font(int(size * 0.92))
         try:
             return _FontPair(cls._open_ar_font(size, mode), latin)
         except Exception:
@@ -973,14 +990,16 @@ class TextPost:
         return total + space * max(0, len(runs) - 1)
 
     def _draw_rtl_line(self, draw, right_x, y, text, font, fill):
+        """Tous les mots (arabes, latins, chiffres) sont posés sur la MÊME ligne de base."""
         space = draw.textlength(" ", font=font.ar)
+        baseline = y + font.ar.getmetrics()[0]       # ascent de la police arabe = ligne de base commune
         x = right_x
         for run, is_ar in self._ar_runs(text):
             s, kw = self._run_args(run, is_ar)
             f = font.pick(is_ar)
             rw = draw.textlength(s, font=f, **kw)
             x -= rw
-            draw.text((x, y), s, font=f, fill=fill, **kw)
+            draw.text((x, baseline), s, font=f, fill=fill, anchor="ls", **kw)
             x -= space
 
     def _wrap(self, draw, text, font, max_w):
@@ -1611,15 +1630,21 @@ Use relevant=false and financial_event="" when there is no clear financial event
         raise ValueError("Aucun objet JSON valide trouvé dans la réponse du modèle")
 
     @staticmethod
-    def ajouter_source(caption, source):
-        """Ajoute « المصدر: <source> » à la fin de la légende, en gardant la source
-        même si la légende dépasse la limite Instagram."""
+    def hashtags_pour(category):
+        """Hashtags de base + hashtags propres à la catégorie validée."""
+        return (HASHTAGS_BASE + " " + HASHTAGS_CATEGORIE.get(category, "")).strip()
+
+    @staticmethod
+    def ajouter_source(caption, source, hashtags=""):
+        """Légende + « المصدر: <source> » + hashtags, sans jamais dépasser la limite Instagram."""
         caption = (caption or "").strip()
-        ligne = f"المصدر: {source}"
-        # retire une éventuelle mention de source déjà écrite par le LLM
-        caption = re.sub(r"\n*\s*(?:المصدر|المصدر\s*:|Source)\s*[:：].*$", "", caption,
+        # retire une source / des hashtags déjà écrits par le LLM
+        caption = re.sub(r"\n*\s*(?:المصدر|Source)\s*[:：].*$", "", caption,
                          flags=re.I | re.S).rstrip()
-        suffixe = "\n\n" + ligne
+        caption = re.sub(r"(?:\s*#\S+)+\s*$", "", caption).rstrip()
+        suffixe = f"\n\nالمصدر: {source}"
+        if hashtags:
+            suffixe += f"\n\n{hashtags}"
         place = IG_CAPTION_LIMIT - len(suffixe) - 1
         if len(caption) > place:
             caption = caption[:place].rstrip(" ،,.\n") + "…"
@@ -1752,6 +1777,16 @@ def diagnostic_environnement():
     for label, _ in groq_keys():
         log(f"Groq clé {label:<2} présente (TOKEN_AI_DESCRYB_IMG{'' if label == '0' else label})",
             level="OK")
+
+    # YouTube (optionnel : sert seulement pour les Shorts, géré dans publie_video_youtub.py)
+    yt = [n for n in ("ID_CLIENT_FB", "CODE_SECRET_DU_CLIENT_FB", "YOUTUBE_REFRESH_TOKEN")
+          if not os.getenv(n, "")]
+    if yt:
+        log("YouTube Shorts : secret(s) absent(s) -> " + ", ".join(yt) + " (YouTube sera ignoré)",
+            level="WARN")
+    else:
+        log("YouTube Shorts : secrets présents (ID_CLIENT_FB, CODE_SECRET_DU_CLIENT_FB, "
+            "YOUTUBE_REFRESH_TOKEN)", level="OK")
 
     if not (cf_accounts() or hf_tokens() or groq_keys()):
         log("Aucun service LLM configuré (Cloudflare, Hugging Face ou Groq).", level="ERROR")
@@ -2024,11 +2059,12 @@ def main():
             headline = " ".join(caption.split()[:14])
             log("Pas de titre court renvoyé : début de la légende utilisé.", level="WARN")
 
-        # Nom de la source ajouté à chaque publication (en arabe : « المصدر: ... »).
-        caption = extract_post.ajouter_source(caption, src)
+        # Nom de la source (« المصدر: ... ») puis hashtags, ajoutés à chaque publication.
+        caption = extract_post.ajouter_source(
+            caption, src, extract_post.hashtags_pour(editorial_category))
 
         log(f"Titre arabe : {headline}")
-        log(f"Légende     : {len(caption)} caractères (source incluse : {src})")
+        log(f"Légende     : {len(caption)} caractères (source + hashtags inclus : {src})")
 
         resultat = text_post.publier_texte_partout(text_original, caption, headline)
 
