@@ -4058,5 +4058,23 @@
         "categorie": "Stocks",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793400197/actualites_financieres/vmb9q5a3onfij5lsmqwl.jpg",
         "publie_le": "2026-10-30T22:43:23.261327+00:00"
+    },
+    "Seeking Alpha_Tech Selloff Wipes Out $1 Trillion In Value_2026-10-31 00:10": {
+        "source": "Seeking Alpha",
+        "titre": "Tech Selloff Wipes Out $1 Trillion In Value",
+        "date": "2026-10-31 00:10",
+        "note": 90,
+        "categorie": "Indices",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793407248/actualites_financieres/nqtktddfl7bqswrz7geb.jpg",
+        "publie_le": "2026-10-31T00:41:02.754088+00:00"
+    },
+    "Financial Times_OpenAI slashes funding target by $10bn as tech anxieties mount_2026-10-31 00:05": {
+        "source": "Financial Times",
+        "titre": "OpenAI slashes funding target by $10bn as tech anxieties mount",
+        "date": "2026-10-31 00:05",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793407282/actualites_financieres/bxcuqpydzxuulz7wgcq8.jpg",
+        "publie_le": "2026-10-31T00:41:42.628172+00:00"
     }
 }
