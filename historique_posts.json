@@ -4121,5 +4121,23 @@
         "categorie": "Stocks",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793421379/actualites_financieres/v97povfqssey5qbnxuh3.jpg",
         "publie_le": "2026-10-31T04:36:34.557617+00:00"
+    },
+    "Financial Times Markets_Bank of England explores easing key limit on riskier mortgage lending_2026-10-31 05:00": {
+        "source": "Financial Times Markets",
+        "titre": "Bank of England explores easing key limit on riskier mortgage lending",
+        "date": "2026-10-31 05:00",
+        "note": 80,
+        "categorie": "Central banks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793424937/actualites_financieres/aklfkxymqpvoxnmmsimf.jpg",
+        "publie_le": "2026-10-31T05:35:47.081400+00:00"
+    },
+    "Bloomberg Markets_HK’s Chan Says 2026 Growth May Be Strongest in Five Years: RTHK_2026-10-31 04:50": {
+        "source": "Bloomberg Markets",
+        "titre": "HK’s Chan Says 2026 Growth May Be Strongest in Five Years: RTHK",
+        "date": "2026-10-31 04:50",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793424970/actualites_financieres/eov6dbhp6xfpnqiygkgv.jpg",
+        "publie_le": "2026-10-31T05:36:27.032476+00:00"
     }
 }
