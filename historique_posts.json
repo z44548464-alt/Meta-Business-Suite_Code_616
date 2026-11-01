@@ -4544,5 +4544,23 @@
         "categorie": "Oil",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793540782/actualites_financieres/eyaaf8k6el3wdubl6l8b.jpg",
         "publie_le": "2026-11-01T13:46:36.796020+00:00"
+    },
+    "Financial Times_Junk debt rout sparks ‘bloodbath’ for credit investors_2026-11-01 14:54": {
+        "source": "Financial Times",
+        "titre": "Junk debt rout sparks ‘bloodbath’ for credit investors",
+        "date": "2026-11-01 14:54",
+        "note": 80,
+        "categorie": "Bonds",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793546910/actualites_financieres/h7dczkzlpab44jfuxbpd.jpg",
+        "publie_le": "2026-11-01T15:28:41.707447+00:00"
+    },
+    "Seeking Alpha_Wall Street Brunch: Midterms, Jobs And Apple_2026-11-01 14:45": {
+        "source": "Seeking Alpha",
+        "titre": "Wall Street Brunch: Midterms, Jobs And Apple",
+        "date": "2026-11-01 14:45",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793546979/actualites_financieres/wbck9vvkm8t2yfj7iiep.jpg",
+        "publie_le": "2026-11-01T15:29:49.313691+00:00"
     }
 }
