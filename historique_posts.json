@@ -4373,5 +4373,41 @@
         "categorie": "Economic news",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793508191/actualites_financieres/hcz7xm6bcnzniyfc2zth.jpg",
         "publie_le": "2026-11-01T04:43:25.767217+00:00"
+    },
+    "Bloomberg Markets_Macau Gaming Revenue Decline Extends Despite Golden Week Boost_2026-11-01 05:14": {
+        "source": "Bloomberg Markets",
+        "titre": "Macau Gaming Revenue Decline Extends Despite Golden Week Boost",
+        "date": "2026-11-01 05:14",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793511504/actualites_financieres/mjqmecxxs1f3vl5rxtej.jpg",
+        "publie_le": "2026-11-01T05:38:34.620184+00:00"
+    },
+    "Financial Times_Oil majors resist pressure to invest in new refineries as fuel prices keep rising_2026-11-01 05:00": {
+        "source": "Financial Times",
+        "titre": "Oil majors resist pressure to invest in new refineries as fuel prices keep rising",
+        "date": "2026-11-01 05:00",
+        "note": 80,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793511534/actualites_financieres/vylskpofddedbpeycaba.jpg",
+        "publie_le": "2026-11-01T05:39:04.785113+00:00"
+    },
+    "Financial Times_Germany fails to meet Winter gas storage target_2026-11-01 05:00": {
+        "source": "Financial Times",
+        "titre": "Germany fails to meet Winter gas storage target",
+        "date": "2026-11-01 05:00",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793511559/actualites_financieres/l6rlzzloxubsmhet775i.jpg",
+        "publie_le": "2026-11-01T05:39:30.831243+00:00"
+    },
+    "Financial Times_Russia forced to ship grain via Arctic as Black Sea battles rage_2026-11-01 05:00": {
+        "source": "Financial Times",
+        "titre": "Russia forced to ship grain via Arctic as Black Sea battles rage",
+        "date": "2026-11-01 05:00",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793511589/actualites_financieres/qo6f2ze8hix3avspzixe.jpg",
+        "publie_le": "2026-11-01T05:40:00.802933+00:00"
     }
 }
