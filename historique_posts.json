@@ -4625,5 +4625,23 @@
         "categorie": "Stocks",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793568498/actualites_financieres/yo9bgfbk38pjjiftoqb4.jpg",
         "publie_le": "2026-11-01T21:28:32.496458+00:00"
+    },
+    "Bloomberg Markets_Indonesia’s MSCI Crisis Driven By Wash Trades and 5,000% Rallies_2026-11-01 22:00": {
+        "source": "Bloomberg Markets",
+        "titre": "Indonesia’s MSCI Crisis Driven By Wash Trades and 5,000% Rallies",
+        "date": "2026-11-01 22:00",
+        "note": 80,
+        "categorie": "Indices",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793572220/actualites_financieres/ydhepxcfrxxsopve6wpq.jpg",
+        "publie_le": "2026-11-01T22:30:34.487782+00:00"
+    },
+    "Bloomberg Markets_Asian Stocks to Fall as Tech Rout Fuels AI Fears: Markets Wrap_2026-11-01 21:28": {
+        "source": "Bloomberg Markets",
+        "titre": "Asian Stocks to Fall as Tech Rout Fuels AI Fears: Markets Wrap",
+        "date": "2026-11-01 21:28",
+        "note": 80,
+        "categorie": "Indices",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793572253/actualites_financieres/qlw50upa9ofrxios39bm.jpg",
+        "publie_le": "2026-11-01T22:31:03.044936+00:00"
     }
 }
