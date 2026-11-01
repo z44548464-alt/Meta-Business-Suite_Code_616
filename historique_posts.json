@@ -4598,5 +4598,23 @@
         "categorie": "Economic news",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793557976/actualites_financieres/sb6ipdxhtygdxbu5nak8.jpg",
         "publie_le": "2026-11-01T18:33:10.039354+00:00"
+    },
+    "Bloomberg Markets_Wall Street Braces for Biggest Treasury Sales Overhaul in Years_2026-11-01 20:00": {
+        "source": "Bloomberg Markets",
+        "titre": "Wall Street Braces for Biggest Treasury Sales Overhaul in Years",
+        "date": "2026-11-01 20:00",
+        "note": 80,
+        "categorie": "Bonds",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793564720/actualites_financieres/c1ld8xqjaccu7lrcwkof.jpg",
+        "publie_le": "2026-11-01T20:25:29.595059+00:00"
+    },
+    "Bloomberg Economics_Australia Set for Fifth Rate Hike as Inflation Fight Intensifies_2026-11-01 20:00": {
+        "source": "Bloomberg Economics",
+        "titre": "Australia Set for Fifth Rate Hike as Inflation Fight Intensifies",
+        "date": "2026-11-01 20:00",
+        "note": 90,
+        "categorie": "Central banks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793564747/actualites_financieres/utr4ojzv5czqads0maqv.jpg",
+        "publie_le": "2026-11-01T20:25:57.308904+00:00"
     }
 }
