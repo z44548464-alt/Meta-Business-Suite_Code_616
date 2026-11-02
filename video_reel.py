@@ -1,10 +1,11 @@
 """Module vidéo Reels (Facebook + Instagram + YouTube Shorts) pour Money.impact.
 
 Lit UNIQUEMENT la Page Facebook : photos publiées dans les dernières VIDEO_LOOKBACK_HOURS heures,
-écarte celles déjà utilisées dans une vidéo (historique_videos.json), et s'il en reste au moins 3,
-crée un diaporama 9:16 (Ken Burns + transitions aléatoires + musique aléatoire news_musique*.mp3)
-avec 3 à 5 images, puis le publie en Reel sur Facebook et Instagram, et en Short sur YouTube.
-Appelé par Agnet_fb_money_impact_3.py : publier_video_reel(historique, ctx).
+écarte celles déjà utilisées dans une vidéo (historique_videos.json) ET les cartes éducatives /
+sondages (hashtags dans la légende de la photo), et s'il en reste au moins 3, crée un diaporama
+9:16 (Ken Burns + transitions aléatoires + musique aléatoire news_musique*.mp3) avec 3 à 5 images,
+puis le publie en Reel sur Facebook et Instagram, et en Short sur YouTube.
+Appelé par Agnet_fb_money_impact_4.py : publier_video_reel(historique, ctx).
 """
 import io
 import json
@@ -43,6 +44,10 @@ VIDEO_TRANSITION_S = 0.8
 VIDEO_TRANSITIONS = ("fade", "slideleft", "slideright", "slideup", "slidedown")
 VIDEO_ZOOM_AMOUNT = 0.12
 VIDEO_HASHTAGS = "#الأسواق_المالية #فوركس #الذهب #البورصة #اقتصاد #forex #trading #money_impact"
+
+# Photos de la Page qui ne sont PAS des actualités : cartes éducatives et sondages.
+# Leurs légendes contiennent ces hashtags (voir _preparer_edu / _preparer_sondage).
+EXCLURE_TAGS = ("#اشرحها_لي_كأني_مبتدئ", "#استفتاء")
 
 C = None
 VIDEO_DIR = None
@@ -100,14 +105,21 @@ def _parse_date(s):
     return None
 
 
+def _est_carte(nom):
+    """True si la légende de la photo correspond à une carte éducative / un sondage."""
+    return any(tag in (nom or "") for tag in EXCLURE_TAGS)
+
+
 def _candidats_facebook(page_id, token):
-    """Photos publiées sur la Page dans les VIDEO_LOOKBACK_HOURS dernières heures.
+    """Photos d'ACTUALITÉ publiées sur la Page dans les VIDEO_LOOKBACK_HOURS dernières heures
+    (cartes éducatives et sondages exclus).
     Liste (éventuellement vide) ou None si l'API Facebook échoue."""
     limite = datetime.now(timezone.utc) - timedelta(hours=VIDEO_LOOKBACK_HOURS)
     url = f"{C.graph_url}/{page_id}/photos"
     params = {"type": "uploaded", "fields": "id,created_time,name,images",
               "limit": 50, "access_token": token}
     out = []
+    cartes = 0
     try:
         for _ in range(6):
             r = requests.get(url, params=params, timeout=40)
@@ -124,6 +136,9 @@ def _candidats_facebook(page_id, token):
                 if created < limite:
                     stop = True
                     continue
+                if _est_carte(p.get("name")):
+                    cartes += 1
+                    continue        # carte éducative / sondage : jamais dans les vidéos
                 best = max(p.get("images") or [], key=lambda i: i.get("width", 0), default=None)
                 if best and best.get("source"):
                     out.append({"id": str(p["id"]), "created": created, "url": best["source"],
@@ -132,6 +147,8 @@ def _candidats_facebook(page_id, token):
             if stop or not nxt:
                 break
             url, params = nxt, None
+        if cartes:
+            _log(f"{cartes} carte(s) éducative(s)/sondage(s) ignorée(s) pour la vidéo.")
         return out
     except Exception as e:
         _log(f"Lecture des photos de la Page : {type(e).__name__} {str(e)[:150]}", level="WARN")
@@ -465,8 +482,8 @@ def _short_youtube(chemin, titres, caption):
 # Point d'entrée
 # ----------------------------------------------------------------------
 def publier_video_reel(historique, ctx):
-    """Images de la Page (12 h) jamais utilisées -> vidéo -> Facebook + Instagram + YouTube.
-    Ne lève jamais d'exception."""
+    """Images d'actualité de la Page (12 h) jamais utilisées -> vidéo -> Facebook + Instagram
+    + YouTube. Ne lève jamais d'exception."""
     global C, VIDEO_DIR, MUSIC_DIR, FFMPEG
     C = ctx
     VIDEO_DIR = Path(C.output_dir) / "video"
@@ -496,7 +513,7 @@ def publier_video_reel(historique, ctx):
         hv = _charger_hist_videos()
         deja = set(str(x) for x in hv["used_post_ids"])
 
-        # 1) photos publiées sur la Page dans la fenêtre
+        # 1) photos d'actualité publiées sur la Page dans la fenêtre (cartes exclues)
         candidats = _candidats_facebook(page_id, token)
         source = "page Facebook"
         if candidats is None:
@@ -504,9 +521,9 @@ def publier_video_reel(historique, ctx):
                  "pas de vidéo pour ce run.", level="ERROR")
             return
         deja_dans_fenetre = sum(1 for c in candidats if c["id"] in deja)
-        _log(f"Images publiées dans les {VIDEO_LOOKBACK_HOURS} dernières heures ({source}) : "
-             f"{len(candidats)} | déjà utilisées dans une vidéo : {deja_dans_fenetre} | "
-             f"libres : {len(candidats) - deja_dans_fenetre}")
+        _log(f"Images d'actualité publiées dans les {VIDEO_LOOKBACK_HOURS} dernières heures "
+             f"({source}) : {len(candidats)} | déjà utilisées dans une vidéo : "
+             f"{deja_dans_fenetre} | libres : {len(candidats) - deja_dans_fenetre}")
 
         # 2) sélection de 3 à 5 images libres
         choisies, nb_libres = _choisir_images(candidats, deja)
