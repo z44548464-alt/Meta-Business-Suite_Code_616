@@ -5966,5 +5966,75 @@
         "categorie": "Stocks",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793649322/actualites_financieres/qjlrgwmirjeckzcdos6u.jpg",
         "publie_le": "2026-11-02T19:55:33.399588+00:00"
+    },
+    "edu_2026-11-02": {
+        "source": "Money.impact",
+        "titre": "هل يمكن وقف الخسارة من إنقاذ حسابك؟",
+        "date": "2026-11-02",
+        "type": "edu",
+        "publie_le": "2026-11-02T20:58:13.412852+00:00"
+    },
+    "OilPrice_Sanctioned Iranian Tanker Slips Past U.S. Blockade, Delivers Cargo to China_2026-11-02 20:00": {
+        "source": "OilPrice",
+        "titre": "Sanctioned Iranian Tanker Slips Past U.S. Blockade, Delivers Cargo to China",
+        "date": "2026-11-02 20:00",
+        "note": 80,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793653147/actualites_financieres/k4mraizwwigovhbqaslk.jpg",
+        "publie_le": "2026-11-02T20:59:18.332570+00:00"
+    },
+    "Bloomberg Economics_Lagarde Wants to Start New Career Phase, ECB’s Moulin Says_2026-11-02 15:40": {
+        "source": "Bloomberg Economics",
+        "titre": "Lagarde Wants to Start New Career Phase, ECB’s Moulin Says",
+        "date": "2026-11-02 15:40",
+        "note": 80,
+        "categorie": "Central banks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793653227/actualites_financieres/bngiu3jdshxpbmzpf5cj.jpg",
+        "publie_le": "2026-11-02T21:00:32.730495+00:00"
+    },
+    "OilPrice_ADNOC Chief Says World Has “Eroded Its Supply Buffers”_2026-11-02 13:30": {
+        "source": "OilPrice",
+        "titre": "ADNOC Chief Says World Has “Eroded Its Supply Buffers”",
+        "date": "2026-11-02 13:30",
+        "note": 80,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793653271/actualites_financieres/qriz1f0gndr763l1m3co.jpg",
+        "publie_le": "2026-11-02T21:01:16.772702+00:00"
+    },
+    "Bloomberg Economics_South Africa Must Reform Now to Grow Faster, Kganyago Says_2026-11-02 13:15": {
+        "source": "Bloomberg Economics",
+        "titre": "South Africa Must Reform Now to Grow Faster, Kganyago Says",
+        "date": "2026-11-02 13:15",
+        "note": 80,
+        "categorie": "Central banks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793653306/actualites_financieres/v3vmtabuu56ltuaepwxn.jpg",
+        "publie_le": "2026-11-02T21:01:57.483773+00:00"
+    },
+    "Bloomberg Markets_US Tech Stocks Hover Near Correction on Middle East Tensions_2026-11-02 13:08": {
+        "source": "Bloomberg Markets",
+        "titre": "US Tech Stocks Hover Near Correction on Middle East Tensions",
+        "date": "2026-11-02 13:08",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793653333/actualites_financieres/fy0hhtecgakgzt2wymls.jpg",
+        "publie_le": "2026-11-02T21:02:24.212610+00:00"
+    },
+    "CNBC Finance_Binance’s $6.3 billion hack raises questions about crypto wallet safety_2026-10-31 12:47": {
+        "source": "CNBC Finance",
+        "titre": "Binance’s $6.3 billion hack raises questions about crypto wallet safety",
+        "date": "2026-10-31 12:47",
+        "note": 80,
+        "categorie": "Crypto",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793653429/actualites_financieres/c2q03gxm9fxgkeblzu40.jpg",
+        "publie_le": "2026-11-02T21:04:01.441962+00:00"
+    },
+    "CNBC Finance_Fed officials are already saying they’ll need to get back to hiking rates_2026-10-30 21:53": {
+        "source": "CNBC Finance",
+        "titre": "Fed officials are already saying they’ll need to get back to hiking rates",
+        "date": "2026-10-30 21:53",
+        "note": 85,
+        "categorie": "Central banks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793653486/actualites_financieres/oy58rc5kdaemfzylr5ml.jpg",
+        "publie_le": "2026-11-02T21:04:57.342642+00:00"
     }
 }
