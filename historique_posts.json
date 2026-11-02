@@ -5651,5 +5651,77 @@
         "categorie": "Stocks",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793635445/actualites_financieres/e2ewfvuuunjt1bgmhnut.jpg",
         "publie_le": "2026-11-02T16:04:13.259651+00:00"
+    },
+    "OilPrice_Oil Prices Plunge 7% as U.S. and Iran Signal Room for Diplomacy_2026-11-02 16:36": {
+        "source": "OilPrice",
+        "titre": "Oil Prices Plunge 7% as U.S. and Iran Signal Room for Diplomacy",
+        "date": "2026-11-02 16:36",
+        "note": 90,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793638592/actualites_financieres/czklrj4je1cod1fbrqqh.jpg",
+        "publie_le": "2026-11-02T16:56:38.332606+00:00"
+    },
+    "OilPrice_U.S.-Backed Consortium Proposes $4.4 Billion LNG Terminal in Pakistan_2026-11-02 16:30": {
+        "source": "OilPrice",
+        "titre": "U.S.-Backed Consortium Proposes $4.4 Billion LNG Terminal in Pakistan",
+        "date": "2026-11-02 16:30",
+        "note": 80,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793638629/actualites_financieres/yrfuoqhvlotufrip7ohd.jpg",
+        "publie_le": "2026-11-02T16:57:16.924965+00:00"
+    },
+    "MarketWatch_Behind Anthropic’s 1,127% revenue surge — and the computing bill that erased its profit_2026-11-02 16:22": {
+        "source": "MarketWatch",
+        "titre": "Behind Anthropic’s 1,127% revenue surge — and the computing bill that erased its profit",
+        "date": "2026-11-02 16:22",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793638656/actualites_financieres/rourpoardyqbtwb9wbyd.jpg",
+        "publie_le": "2026-11-02T16:57:43.252416+00:00"
+    },
+    "Seeking Alpha_October FOMC Meeting: See You In December_2026-11-02 16:10": {
+        "source": "Seeking Alpha",
+        "titre": "October FOMC Meeting: See You In December",
+        "date": "2026-11-02 16:10",
+        "note": 90,
+        "categorie": "Central banks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793638694/actualites_financieres/j0glx3duxaxupvelb7fs.jpg",
+        "publie_le": "2026-11-02T16:58:21.759804+00:00"
+    },
+    "Bloomberg Markets_EchoStar Gains on SpaceX Talks; Lumentum, Marvell Reach Deal | Stock Movers_2026-11-02 16:08": {
+        "source": "Bloomberg Markets",
+        "titre": "EchoStar Gains on SpaceX Talks; Lumentum, Marvell Reach Deal | Stock Movers",
+        "date": "2026-11-02 16:08",
+        "note": 90,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793638720/actualites_financieres/jjazfk16hgikksbfrjvo.jpg",
+        "publie_le": "2026-11-02T16:58:46.487609+00:00"
+    },
+    "Seeking Alpha_October ECB Meeting: A Measured Approach To Policy Remains Appropriate_2026-11-02 16:00": {
+        "source": "Seeking Alpha",
+        "titre": "October ECB Meeting: A Measured Approach To Policy Remains Appropriate",
+        "date": "2026-11-02 16:00",
+        "note": 80,
+        "categorie": "Central banks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793638758/actualites_financieres/vlfnfpp2v4ubvezbdivm.jpg",
+        "publie_le": "2026-11-02T16:59:25.143238+00:00"
+    },
+    "OilPrice_How Iran Just Broke the U.S. Oil Shield In Saudi Arabia Yet Again_2026-11-02 16:00": {
+        "source": "OilPrice",
+        "titre": "How Iran Just Broke the U.S. Oil Shield In Saudi Arabia Yet Again",
+        "date": "2026-11-02 16:00",
+        "note": 80,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793638782/actualites_financieres/pb1pmncgbhev9okijtsk.jpg",
+        "publie_le": "2026-11-02T16:59:48.658118+00:00"
+    },
+    "MarketWatch_Booming U.S. manufacturers can’t keep up with demand — and high inflation isn’t helping_2026-11-02 15:59": {
+        "source": "MarketWatch",
+        "titre": "Booming U.S. manufacturers can’t keep up with demand — and high inflation isn’t helping",
+        "date": "2026-11-02 15:59",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793638806/actualites_financieres/cd9qve8xubz5xxvjwg78.jpg",
+        "publie_le": "2026-11-02T17:00:12.239955+00:00"
     }
 }
