@@ -6063,5 +6063,41 @@
         "categorie": "Bonds",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793655757/actualites_financieres/rcnsuzpuweeckjn65tot.jpg",
         "publie_le": "2026-11-02T21:42:44.709729+00:00"
+    },
+    "MarketWatch_Traders rushing into a leveraged ETF to make a bullish bet on the Nasdaq-100 just got burned_2026-11-02 22:03": {
+        "source": "MarketWatch",
+        "titre": "Traders rushing into a leveraged ETF to make a bullish bet on the Nasdaq-100 just got burned",
+        "date": "2026-11-02 22:03",
+        "note": 80,
+        "categorie": "Indices",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793658899/actualites_financieres/y1lttr0sj0pxlmftacjp.jpg",
+        "publie_le": "2026-11-02T22:35:07.785178+00:00"
+    },
+    "Bloomberg Economics_US Inflation: Millions of Data Points Show Some Price Pressures Easing_2026-11-02 22:00": {
+        "source": "Bloomberg Economics",
+        "titre": "US Inflation: Millions of Data Points Show Some Price Pressures Easing",
+        "date": "2026-11-02 22:00",
+        "note": 85,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793658931/actualites_financieres/nenor1njwci9paukwnz9.jpg",
+        "publie_le": "2026-11-02T22:35:46.400122+00:00"
+    },
+    "Bloomberg Markets_Leaked File Put Lenders in Bind Before Acrisure’s Earnings Win_2026-11-02 21:56": {
+        "source": "Bloomberg Markets",
+        "titre": "Leaked File Put Lenders in Bind Before Acrisure’s Earnings Win",
+        "date": "2026-11-02 21:56",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793658977/actualites_financieres/qnpmicrmjou9o7fp8l46.jpg",
+        "publie_le": "2026-11-02T22:36:32.227867+00:00"
+    },
+    "Financial Times_Apple’s strong iPhone and Mac sales offset weaker performance in China_2026-11-02 21:30": {
+        "source": "Financial Times",
+        "titre": "Apple’s strong iPhone and Mac sales offset weaker performance in China",
+        "date": "2026-11-02 21:30",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793659036/actualites_financieres/rvy378f6rli2rmef6zot.jpg",
+        "publie_le": "2026-11-02T22:37:33.041844+00:00"
     }
 }
