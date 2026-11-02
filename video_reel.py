@@ -1,10 +1,10 @@
-"""Module vidéo Reels (Facebook + Instagram) pour Money.impact.
+"""Module vidéo Reels (Facebook + Instagram + YouTube Shorts) pour Money.impact.
 
 Lit UNIQUEMENT la Page Facebook : photos publiées dans les dernières VIDEO_LOOKBACK_HOURS heures,
 écarte celles déjà utilisées dans une vidéo (historique_videos.json), et s'il en reste au moins 3,
 crée un diaporama 9:16 (Ken Burns + transitions aléatoires + musique aléatoire news_musique*.mp3)
-avec 3 à 5 images, puis le publie en Reel sur Facebook et Instagram.
-Appelé par video_only.py : publier_video_reel(historique, ctx).
+avec 3 à 5 images, puis le publie en Reel sur Facebook et Instagram, et en Short sur YouTube.
+Appelé par Agnet_fb_money_impact_3.py : publier_video_reel(historique, ctx).
 """
 import io
 import json
@@ -22,6 +22,14 @@ import requests
 import cloudinary
 import cloudinary.uploader
 from PIL import Image, ImageEnhance, ImageFilter, ImageOps
+
+# >>> AJOUT YOUTUBE : import du module d'upload (ne plante jamais le script s'il échoue)
+try:
+    from publie_video_youtub import publier_short_youtube
+    _YT_IMPORT_ERR = None
+except Exception as _e:
+    publier_short_youtube = None
+    _YT_IMPORT_ERR = f"{type(_e).__name__}: {str(_e)[:200]}"
 
 # ----------------------------------------------------------------------
 # Réglages
@@ -432,11 +440,28 @@ def _reel_facebook(chemin, caption, page_id, token):
     return None
 
 
+# >>> AJOUT YOUTUBE : fonction dédiée, ne lève jamais d'exception
+def _short_youtube(chemin, titres, caption):
+    if publier_short_youtube is None:
+        _log(f"Module publie_video_youtub.py indisponible ({_YT_IMPORT_ERR}) : YouTube ignoré.",
+             level="ERROR")
+        return None
+    try:
+        vid = publier_short_youtube(chemin, titres, caption, C)
+        if not vid:
+            _log("YouTube : aucun ID renvoyé (voir les messages « YouTube : » ci-dessus).",
+                 level="WARN")
+        return vid
+    except Exception as e:
+        _log(f"YouTube vidéo : {type(e).__name__} {str(e)[:300]}", level="ERROR")
+        return None
+
+
 # ----------------------------------------------------------------------
 # Point d'entrée
 # ----------------------------------------------------------------------
 def publier_video_reel(historique, ctx):
-    """Images de la Page (12 h) jamais utilisées -> vidéo Reel -> Facebook + Instagram.
+    """Images de la Page (12 h) jamais utilisées -> vidéo -> Facebook + Instagram + YouTube.
     Ne lève jamais d'exception."""
     global C, VIDEO_DIR, MUSIC_DIR, FFMPEG
     C = ctx
@@ -515,11 +540,12 @@ def publier_video_reel(historique, ctx):
                     return
                 rendus[size] = sortie
 
-        caption = _legende_video([t for _, _, t in items])
+        titres = [t for _, _, t in items]
+        caption = _legende_video(titres)
         _log(f"Légende vidéo : {len(caption)} caractères")
 
         # 6) publication
-        fb_id = ig_post_id = None
+        fb_id = ig_post_id = yt_id = None
         fb_id = _reel_facebook(rendus[VIDEO_FORMATS["facebook"]], caption, page_id, token)
         if ig_id:
             try:
@@ -528,22 +554,28 @@ def publier_video_reel(historique, ctx):
             except Exception as e:
                 _log(f"Instagram vidéo : {type(e).__name__} {str(e)[:300]}", level="ERROR")
 
+        # >>> AJOUT YOUTUBE : Short (même fichier 9:16 que Facebook)
+        yt_id = _short_youtube(rendus[VIDEO_FORMATS["facebook"]], titres, caption)
+
         # 7) suivi
-        if fb_id or ig_post_id:
+        if fb_id or ig_post_id or yt_id:
             hv["used_post_ids"].extend(pid for pid, _, _ in items)
             hv["videos"].append({
                 "date": datetime.now(timezone.utc).isoformat(),
                 "post_ids": [pid for pid, _, _ in items],
                 "facebook_video_id": fb_id, "instagram_media_id": ig_post_id,
+                "youtube_video_id": yt_id,
                 "duree_s": duree, "musique": musique.name if musique else None,
                 "transitions": plan["transitions"], "source": source,
             })
             _sauver_hist_videos(hv)
             _log(f"VIDÉO PUBLIÉE (Facebook : {'oui' if fb_id else 'non'} | "
-                 f"Instagram : {'oui' if ig_post_id else 'non'}) -> IDs des images enregistrés",
+                 f"Instagram : {'oui' if ig_post_id else 'non'} | "
+                 f"YouTube : {'oui' if yt_id else 'non'}) -> IDs des images enregistrés",
                  level="OK")
             C.step_summary(f"**Vidéo Reel** : {n} images, {duree}s — "
-                           f"FB={'✅' if fb_id else '❌'} IG={'✅' if ig_post_id else '❌'}")
+                           f"FB={'✅' if fb_id else '❌'} IG={'✅' if ig_post_id else '❌'} "
+                           f"YT={'✅' if yt_id else '❌'}")
         else:
             _log("Vidéo NON publiée sur aucune plateforme : images conservées pour le prochain run.",
                  level="ERROR")
