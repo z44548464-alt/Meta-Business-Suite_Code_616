@@ -4679,5 +4679,32 @@
         "categorie": "Stocks",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793575807/actualites_financieres/eg1mq4zwgtymkel5lx3u.jpg",
         "publie_le": "2026-11-01T23:30:23.824014+00:00"
+    },
+    "Bloomberg Markets_Japanese Stocks Fall on Tech Selloff, Kioxia’s Profit Outlook_2026-11-02 00:15": {
+        "source": "Bloomberg Markets",
+        "titre": "Japanese Stocks Fall on Tech Selloff, Kioxia’s Profit Outlook",
+        "date": "2026-11-02 00:15",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793580115/actualites_financieres/nmhf0pit1sepjsmwargo.jpg",
+        "publie_le": "2026-11-02T00:42:09.009757+00:00"
+    },
+    "Bloomberg Markets_Gold Climbs Back From One-Year Low as Dip Buyers Arrest Slide_2026-11-02 00:03": {
+        "source": "Bloomberg Markets",
+        "titre": "Gold Climbs Back From One-Year Low as Dip Buyers Arrest Slide",
+        "date": "2026-11-02 00:03",
+        "note": 80,
+        "categorie": "Gold",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793580141/actualites_financieres/vlinrzuoniqbtfcsubom.jpg",
+        "publie_le": "2026-11-02T00:42:35.031508+00:00"
+    },
+    "Bloomberg Markets_Latest Oil Market News and Analysis for Nov. 2_2026-11-01 23:11": {
+        "source": "Bloomberg Markets",
+        "titre": "Latest Oil Market News and Analysis for Nov. 2",
+        "date": "2026-11-01 23:11",
+        "note": 80,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793580189/actualites_financieres/eprhna38eri7vxyebz4q.jpg",
+        "publie_le": "2026-11-02T00:43:24.544614+00:00"
     }
 }
