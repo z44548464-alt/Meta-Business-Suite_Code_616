@@ -6099,5 +6099,50 @@
         "categorie": "Stocks",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793659036/actualites_financieres/rvy378f6rli2rmef6zot.jpg",
         "publie_le": "2026-11-02T22:37:33.041844+00:00"
+    },
+    "Seeking Alpha_October AAII Asset Allocation Survey: Bond Allocations Rise_2026-11-02 23:27": {
+        "source": "Seeking Alpha",
+        "titre": "October AAII Asset Allocation Survey: Bond Allocations Rise",
+        "date": "2026-11-02 23:27",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793662342/actualites_financieres/wjurpjjijmtvigtoxmdr.jpg",
+        "publie_le": "2026-11-02T23:32:31.700323+00:00"
+    },
+    "Bloomberg Economics_Korea Inflation Holds Firm, Bolstering Case for More Hikes_2026-11-02 23:00": {
+        "source": "Bloomberg Economics",
+        "titre": "Korea Inflation Holds Firm, Bolstering Case for More Hikes",
+        "date": "2026-11-02 23:00",
+        "note": 85,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793662403/actualites_financieres/dzd7foviz7aco6gneg0j.jpg",
+        "publie_le": "2026-11-02T23:33:31.288439+00:00"
+    },
+    "OilPrice_Africa Launches Its Own Oil Bank as Western Lenders Retreat_2026-11-02 23:00": {
+        "source": "OilPrice",
+        "titre": "Africa Launches Its Own Oil Bank as Western Lenders Retreat",
+        "date": "2026-11-02 23:00",
+        "note": 80,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793662427/actualites_financieres/pgkhqmohbafklnrcmfin.jpg",
+        "publie_le": "2026-11-02T23:33:59.995715+00:00"
+    },
+    "Financial Times_Apple warns on rising costs from memory chip shortage_2026-11-02 22:58": {
+        "source": "Financial Times",
+        "titre": "Apple warns on rising costs from memory chip shortage",
+        "date": "2026-11-02 22:58",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793662455/actualites_financieres/chjyd8ca4p9swtyscoyp.jpg",
+        "publie_le": "2026-11-02T23:34:27.158936+00:00"
+    },
+    "Bloomberg Markets_Nasdaq Slide Clouds Asian Open, Oil Holds Losses: Markets Wrap_2026-11-02 22:25": {
+        "source": "Bloomberg Markets",
+        "titre": "Nasdaq Slide Clouds Asian Open, Oil Holds Losses: Markets Wrap",
+        "date": "2026-11-02 22:25",
+        "note": 80,
+        "categorie": "Indices",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793662491/actualites_financieres/cdiezjzwocubh2h9nfk7.jpg",
+        "publie_le": "2026-11-02T23:34:58.798886+00:00"
     }
 }
