@@ -23,7 +23,7 @@ import cloudinary
 import cloudinary.uploader
 from PIL import Image, ImageEnhance, ImageFilter, ImageOps
 
-# >>> AJOUT YOUTUBE : import du module d'upload (ne plante jamais le script s'il échoue)
+# >>> YOUTUBE : import du module d'upload (ne plante jamais le script s'il échoue)
 try:
     from publie_video_youtub import publier_short_youtube
     _YT_IMPORT_ERR = None
@@ -440,13 +440,17 @@ def _reel_facebook(chemin, caption, page_id, token):
     return None
 
 
-# >>> AJOUT YOUTUBE : fonction dédiée, ne lève jamais d'exception
+# >>> YOUTUBE : fonction dédiée, ne lève jamais d'exception, logs à chaque étape
 def _short_youtube(chemin, titres, caption):
+    _log("YouTube : tentative d'upload du Short…")
     if publier_short_youtube is None:
         _log(f"Module publie_video_youtub.py indisponible ({_YT_IMPORT_ERR}) : YouTube ignoré.",
              level="ERROR")
         return None
     try:
+        _log(f"YouTube : fichier {Path(chemin).name} "
+             f"({Path(chemin).stat().st_size // 1024} Ko) | "
+             f"YOUTUBE_ENABLED={os.getenv('YOUTUBE_ENABLED', '1')}")
         vid = publier_short_youtube(chemin, titres, caption, C)
         if not vid:
             _log("YouTube : aucun ID renvoyé (voir les messages « YouTube : » ci-dessus).",
@@ -554,7 +558,7 @@ def publier_video_reel(historique, ctx):
             except Exception as e:
                 _log(f"Instagram vidéo : {type(e).__name__} {str(e)[:300]}", level="ERROR")
 
-        # >>> AJOUT YOUTUBE : Short (même fichier 9:16 que Facebook)
+        # >>> YOUTUBE : Short (même fichier 9:16 que Facebook)
         yt_id = _short_youtube(rendus[VIDEO_FORMATS["facebook"]], titres, caption)
 
         # 7) suivi
