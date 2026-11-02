@@ -1318,6 +1318,24 @@
                 "slideleft"
             ],
             "source": "page Facebook"
+        },
+        {
+            "date": "2026-11-02T20:41:51.692137+00:00",
+            "post_ids": [
+                "122205779360988135",
+                "122205779606988135",
+                "122205779876988135"
+            ],
+            "facebook_video_id": "29793485430275291",
+            "instagram_media_id": null,
+            "youtube_video_id": "PyezL-Au1uk",
+            "duree_s": 13.5,
+            "musique": "news_musique3.mp3.mp3",
+            "transitions": [
+                "slideup",
+                "slideup"
+            ],
+            "source": "page Facebook"
         }
     ]
 }
