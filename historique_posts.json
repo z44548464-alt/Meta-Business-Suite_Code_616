@@ -6045,5 +6045,23 @@
         "categorie": "Stocks",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793654964/actualites_financieres/rtgkpeomtitcyt3lwjyj.jpg",
         "publie_le": "2026-11-02T21:29:33.617392+00:00"
+    },
+    "MarketWatch_Palantir earnings reveal a major AI turning point_2026-11-02 21:09": {
+        "source": "MarketWatch",
+        "titre": "Palantir earnings reveal a major AI turning point",
+        "date": "2026-11-02 21:09",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793655587/actualites_financieres/pinhnkqlnhjltjf79tjq.jpg",
+        "publie_le": "2026-11-02T21:39:59.804205+00:00"
+    },
+    "Bloomberg Markets_Romania Raises €4.5 Billion in New Government’s First Bond Sale_2026-11-02 11:49": {
+        "source": "Bloomberg Markets",
+        "titre": "Romania Raises €4.5 Billion in New Government’s First Bond Sale",
+        "date": "2026-11-02 11:49",
+        "note": 80,
+        "categorie": "Bonds",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793655757/actualites_financieres/rcnsuzpuweeckjn65tot.jpg",
+        "publie_le": "2026-11-02T21:42:44.709729+00:00"
     }
 }
