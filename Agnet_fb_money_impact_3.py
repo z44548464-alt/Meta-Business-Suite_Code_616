@@ -111,7 +111,7 @@ HASHTAGS_CATEGORIE = {
 #   Groq : TOKEN_AI_DESCRYB_IMG, TOKEN_AI_DESCRYB_IMG1, ...
 # Si un compte est épuisé / refusé, le script passe automatiquement au suivant.
 # ---------------------------------------------------------------------
-KEY_SUFFIXES = ("", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10")
+KEY_SUFFIXES = ("", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10","11","12","13")
 
 
 def _csv_env(name, default):
