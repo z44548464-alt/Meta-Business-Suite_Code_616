@@ -5066,5 +5066,59 @@
         "categorie": "Stocks",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793608770/actualites_financieres/eurozpi1ukllj164qvq7.jpg",
         "publie_le": "2026-11-02T08:39:46.315635+00:00"
+    },
+    "Bloomberg Economics_South African Factory Mood Remains Downbeat as Price Pressures Build_2026-11-02 09:00": {
+        "source": "Bloomberg Economics",
+        "titre": "South African Factory Mood Remains Downbeat as Price Pressures Build",
+        "date": "2026-11-02 09:00",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793613324/actualites_financieres/gifba9hasohij7tgwnkr.jpg",
+        "publie_le": "2026-11-02T09:55:34.816086+00:00"
+    },
+    "OilPrice_Goldman Sachs Raises December Brent Oil Price Forecast to $105_2026-11-02 09:00": {
+        "source": "OilPrice",
+        "titre": "Goldman Sachs Raises December Brent Oil Price Forecast to $105",
+        "date": "2026-11-02 09:00",
+        "note": 80,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793613351/actualites_financieres/eyndg0u02pcr2kwmrqnk.jpg",
+        "publie_le": "2026-11-02T09:56:00.287848+00:00"
+    },
+    "Bloomberg Markets_Nordic Investment Bank Mulls SRTs After Adding Defense Focus_2026-11-02 08:15": {
+        "source": "Bloomberg Markets",
+        "titre": "Nordic Investment Bank Mulls SRTs After Adding Defense Focus",
+        "date": "2026-11-02 08:15",
+        "note": 80,
+        "categorie": "Bonds",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793613382/actualites_financieres/d5g1srrmbjua9ticrymw.jpg",
+        "publie_le": "2026-11-02T09:56:34.285462+00:00"
+    },
+    "Bloomberg Markets_Alphabet Tests Bond Market’s AI Faith With Second Euro Sale_2026-11-02 07:17": {
+        "source": "Bloomberg Markets",
+        "titre": "Alphabet Tests Bond Market’s AI Faith With Second Euro Sale",
+        "date": "2026-11-02 07:17",
+        "note": 80,
+        "categorie": "Bonds",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793613422/actualites_financieres/cwp9caecjv1yjnkkizov.jpg",
+        "publie_le": "2026-11-02T09:57:13.153381+00:00"
+    },
+    "Bloomberg Markets_US Stocks Halt Selloff as Oil Prices Retreat: Markets Wrap_2026-11-01 21:28": {
+        "source": "Bloomberg Markets",
+        "titre": "US Stocks Halt Selloff as Oil Prices Retreat: Markets Wrap",
+        "date": "2026-11-01 21:28",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793613475/actualites_financieres/vsuxb7p5xzfm64sec8m4.jpg",
+        "publie_le": "2026-11-02T09:58:06.422830+00:00"
+    },
+    "Bloomberg Markets_Chinese Stock Selloff Halts on Expectation of Support Measures_2026-11-01 10:08": {
+        "source": "Bloomberg Markets",
+        "titre": "Chinese Stock Selloff Halts on Expectation of Support Measures",
+        "date": "2026-11-01 10:08",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793613514/actualites_financieres/udyxdshuotr6kl1sesdt.jpg",
+        "publie_le": "2026-11-02T09:58:43.674764+00:00"
     }
 }
