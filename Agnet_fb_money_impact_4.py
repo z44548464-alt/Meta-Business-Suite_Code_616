@@ -1,6 +1,6 @@
 import sys
 import faulthandler
-SCRIPT_VERSION = "2026-11-02-money-impact-v5-engagement-youtube"
+SCRIPT_VERSION = "2026-11-02-money-impact-v6-cartes-dynamiques"
 print(f"▶ Python démarré (version {SCRIPT_VERSION}), chargement des modules…", flush=True)
 faulthandler.enable()
 faulthandler.dump_traceback_later(90, repeat=True, file=sys.stderr)
@@ -14,6 +14,8 @@ import json
 import re
 import time
 import random
+import zlib
+from collections import Counter
 from pathlib import Path
 from datetime import datetime, timezone
 from types import SimpleNamespace
@@ -112,7 +114,7 @@ HASHTAGS_CATEGORIE = {
 #   Groq : TOKEN_AI_DESCRYB_IMG, TOKEN_AI_DESCRYB_IMG1, ...
 # Si un compte est épuisé / refusé, le script passe automatiquement au suivant.
 # ---------------------------------------------------------------------
-KEY_SUFFIXES = ("", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10","11","12","13")
+KEY_SUFFIXES = ("", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13")
 
 
 def _csv_env(name, default):
@@ -529,6 +531,7 @@ class TextPost:
     def __init__(self):
         # URL Cloudinary de la dernière image publiée (conservée dans l'historique des posts).
         self.last_image_url = None
+        self.carte_metrics = {}
 
     # ------------------------------------------------------------------
     # 1) Prompt d'image
@@ -1299,45 +1302,268 @@ class TextPost:
         return False
 
     # ------------------------------------------------------------------
-    # Cartes de contenu (sans API d'image) : éducatif + sondage
+    # CARTES ÉDUCATIVES + SONDAGE (sans API d'image) — DYNAMIQUES
+    #   La palette dépend de la catégorie de la news, le motif de fond du titre.
     # ------------------------------------------------------------------
+    _CARTE_PALETTES = (
+        {"top": (5, 14, 46), "bottom": (14, 52, 120), "accent": (255, 196, 0), "ink": (5, 12, 30)},      # bleu / or
+        {"top": (4, 30, 24), "bottom": (12, 84, 62), "accent": (205, 214, 224), "ink": (4, 20, 16)},     # vert / argent
+        {"top": (28, 8, 52), "bottom": (82, 34, 120), "accent": (222, 140, 72), "ink": (26, 8, 40)},     # violet / cuivre
+    )
+    _CAT_PALETTE = {"Gold": 0, "Forex": 0, "Central banks": 0, "Market impact": 0,
+                    "Indices": 1, "Stocks": 1, "Economic news": 1,
+                    "Oil": 2, "Crypto": 2, "Bonds": 2}
+    _CARTE_BOTTOM = 1226          # bas de la zone de contenu (le pied de carte est en dessous)
+
     @staticmethod
-    def _fond_carte():
-        w, h = OUT_W, OUT_H
-        img = Image.new("RGB", (w, h), (4, 10, 28))
-        d = ImageDraw.Draw(img)
-        for y in range(h):
-            t = y / h
-            d.line([(0, y), (w, y)], fill=(int(4 + 14 * t), int(10 + 26 * t), int(28 + 60 * t)))
-        return img
+    def _vcenter(font, cy):
+        a, d = font.ar.getmetrics()
+        return int(cy - (a + d) / 2)
 
-    def generer_carte(self, kicker, headline, body=None):
+    @classmethod
+    def _carte_palette(cls, categorie=None):
+        i = cls._CAT_PALETTE.get(categorie)
+        if i is None:
+            i = datetime.now(timezone.utc).timetuple().tm_yday % len(cls._CARTE_PALETTES)
+        return cls._CARTE_PALETTES[i]
+
+    @staticmethod
+    def _carte_fond(pal, seed):
+        """Dégradé diagonal + grille fine + courbe de chandeliers (opacité ~8 %)."""
         w, h = OUT_W, OUT_H
-        img = self._add_branding(self._fond_carte(), None)
-        draw = ImageDraw.Draw(img)
-        margin = int(w * 0.08)
+        v = Image.linear_gradient("L").resize((w, h), Image.BILINEAR)
+        hz = Image.linear_gradient("L").transpose(Image.Transpose.ROTATE_90).resize((w, h), Image.BILINEAR)
+        diag = Image.blend(v, hz, 0.45)
+        img = Image.composite(Image.new("RGB", (w, h), pal["bottom"]),
+                              Image.new("RGB", (w, h), pal["top"]), diag)
+        ov = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+        d = ImageDraw.Draw(ov)
+        for x in range(0, w, 90):
+            d.line([(x, 0), (x, h)], fill=(255, 255, 255, 12), width=1)
+        for y in range(0, h, 90):
+            d.line([(0, y), (w, y)], fill=(255, 255, 255, 12), width=1)
+        rnd = random.Random(seed)
+        y, x, step = rnd.randint(780, 900), -10, 66
+        accent = pal["accent"]
+        while x < w + step:
+            o = y
+            c = max(330, min(1120, y + rnd.uniform(-52, 38)))
+            hi = min(o, c) - rnd.randint(8, 40)
+            lo = max(o, c) + rnd.randint(8, 40)
+            col = accent + (24,) if c < o else (255, 255, 255, 18)
+            d.line([(x + 16, hi), (x + 16, lo)], fill=col, width=3)
+            d.rectangle([x, min(o, c), x + 32, max(o, c) + 2], fill=col)
+            y, x = c, x + step
+        return Image.alpha_composite(img.convert("RGBA"), ov).convert("RGB")
+
+    def _carte_cadre(self, kicker, headline, pal, seed):
+        """Fond + logo + badge pilule + gros titre. Retourne (img, draw, margin, right, max_w, top)."""
+        w, h = OUT_W, OUT_H
+        img = self._add_branding(self._carte_fond(pal, seed), None).convert("RGB")
+        draw = ImageDraw.Draw(img, "RGBA")      # mode RGBA sur image RGB = transparence réelle
+        margin = int(w * 0.07)
         right, max_w = w - margin, w - 2 * margin
-        y = int(h * 0.18)
+        accent, ink = pal["accent"], pal["ink"]
 
-        f_k = self._load_arabic_font(int(w * 0.045))
-        self._draw_rtl_line(draw, right, y, kicker, f_k, BRAND_ACCENT)
-        y += int(w * 0.045 * 1.7)
+        # Badge pilule
+        f_k = self._load_arabic_font(40)
+        kw = int(self._line_width(draw, kicker, f_k))
+        pad_x, bh, by0 = 42, 78, 62
+        draw.rounded_rectangle([right - kw - 2 * pad_x, by0, right, by0 + bh],
+                               radius=bh // 2, fill=accent + (255,))
+        self._draw_rtl_line(draw, right - pad_x, self._vcenter(f_k, by0 + bh // 2),
+                            kicker, f_k, ink + (255,))
 
-        font, lines, line_h = self._fit_headline(draw, headline, max_w, int(h * 0.26), w)
+        # Titre : 2 lignes >= 84 px si possible, sinon 3 lignes
+        choix = None
+        for max_l, smin in ((2, 84), (3, 76)):
+            for size in range(100, smin - 1, -4):
+                font = self._load_arabic_font(size)
+                lines = self._wrap(draw, headline, font, max_w)
+                if len(lines) <= max_l:
+                    choix = (size, font, lines)
+                    break
+            if choix:
+                break
+        truncated = False
+        if choix is None:
+            size = 76
+            font = self._load_arabic_font(size)
+            lines = self._wrap(draw, headline, font, max_w)
+            if len(lines) > 3:
+                truncated = True
+                lines = lines[:3]
+                lines[-1] = lines[-1].rstrip(" ،,.") + "…"
+            choix = (size, font, lines)
+        size, font, lines = choix
+        lh = int(size * 1.22)
+        y = 190
         for ln in lines:
-            self._draw_rtl_line(draw, right, y, ln, font, (255, 255, 255))
-            y += line_h
+            self._draw_rtl_line(draw, right, y + 4, ln, font, (0, 0, 0, 150))
+            self._draw_rtl_line(draw, right, y, ln, font, (255, 255, 255, 255))
+            y += lh
+        draw.rounded_rectangle([right - 200, y + 6, right, y + 16], radius=5, fill=accent + (255,))
+        top = y + 16 + 22
+        self.carte_metrics = {"title_size": size, "body_size": 0, "truncated": truncated,
+                              "extra_max": 0}
+        return img, draw, margin, right, max_w, top
 
-        draw.rectangle([right - int(w * 0.18), y + 10, right, y + 16], fill=BRAND_ACCENT)
-        y += 50
+    def _carte_pied(self, draw, pal, margin, right):
+        accent = pal["accent"]
+        draw.line([(margin, 1250), (right, 1250)], fill=accent + (90,), width=2)
+        f = self._load_arabic_font(34)
+        cy = 1291
+        x0, x1, y0, y1 = right - 26, right, cy - 19, cy + 19
+        draw.polygon([(x0, y0), (x1, y0), (x1, y1), ((x0 + x1) // 2, y1 - 12), (x0, y1)],
+                     fill=accent + (255,))
+        self._draw_rtl_line(draw, x0 - 14, self._vcenter(f, cy), "احفظ المنشور وشاركه",
+                            f, (235, 240, 248, 255))
 
-        if body:
-            f_b = self._load_arabic_font(int(w * 0.042))
-            lh = int(w * 0.042 * 1.55)
-            for ln in self._wrap(draw, body, f_b, max_w)[:5]:
-                self._draw_rtl_line(draw, right, y, ln, f_b, (225, 230, 240))
-                y += lh
-        return img
+    def _carte_blocs(self, draw, pal, blocs, margin, right, max_w, top):
+        n = len(blocs)
+        if n == 0:
+            return
+        accent, ink = pal["accent"], pal["ink"]
+        x0, x1 = margin, right
+        text_w = max_w - 74
+        gap, pad_v, hh = 16, 20, 56
+        bottom = self._CARTE_BOTTOM
+        avail = bottom - top - gap * (n - 1)
+        fixed = n * (2 * pad_v + hh)
+
+        chosen = None
+        for size in range(58, 37, -2):
+            f = self._load_arabic_font(size)
+            lh = int(size * 1.45)
+            wrapped = [self._wrap(draw, txt, f, text_w) for _, txt in blocs]
+            if sum(len(l) for l in wrapped) * lh + fixed <= avail:
+                chosen = (size, f, lh, wrapped)
+                break
+        truncated = False
+        if chosen is None:           # dernier recours : taille mini + coupe propre (jamais de débordement)
+            size = 38
+            f = self._load_arabic_font(size)
+            lh = int(size * 1.45)
+            wrapped = [self._wrap(draw, txt, f, text_w) for _, txt in blocs]
+            while sum(len(l) for l in wrapped) * lh + fixed > avail:
+                i = max(range(n), key=lambda k: len(wrapped[k]))
+                if len(wrapped[i]) <= 1:
+                    break
+                wrapped[i] = wrapped[i][:-1]
+                wrapped[i][-1] = wrapped[i][-1].rstrip(" ،,.") + "…"
+                truncated = True
+            chosen = (size, f, lh, wrapped)
+        size, f_body, lh, wrapped = chosen
+
+        need = sum(len(l) for l in wrapped) * lh
+        total_extra = max(0, avail - fixed - need)
+        extras = [total_extra // n] * n
+        extras[-1] += total_extra - sum(extras)
+
+        f_lab = self._load_arabic_font(34)
+        f_num = self._load_font(30)
+        y = top
+        for i, ((label, _), lines) in enumerate(zip(blocs, wrapped)):
+            e = extras[i]
+            hbox = 2 * pad_v + hh + len(lines) * lh + e
+            draw.rounded_rectangle([x0, y, x1, y + hbox], radius=28,
+                                   fill=(4, 10, 28, 175), outline=accent + (70,), width=2)
+            draw.rounded_rectangle([x1 - 22, y + 22, x1 - 10, y + hbox - 22], radius=6,
+                                   fill=accent + (255,))
+            cy = y + pad_v + e // 2 + hh // 2
+            cx = x1 - 44 - 24
+            draw.ellipse([cx - 24, cy - 24, cx + 24, cy + 24], fill=accent + (255,))
+            draw.text((cx, cy), str(i + 1), font=f_num, fill=ink + (255,), anchor="mm")
+            self._draw_rtl_line(draw, cx - 24 - 16, self._vcenter(f_lab, cy), label, f_lab,
+                                accent + (255,))
+            by = y + pad_v + e // 2 + hh
+            for ln in lines:
+                self._draw_rtl_line(draw, x1 - 44, by, ln, f_body, (240, 244, 250, 255))
+                by += lh
+            y += hbox + gap
+        self.carte_metrics.update({"body_size": size, "truncated": truncated,
+                                   "extra_max": max(extras)})
+
+    def generer_carte(self, kicker, headline, blocs, categorie=None):
+        """Carte éducative. blocs = liste de 3 (titre, texte). Palette selon la catégorie."""
+        pal = self._carte_palette(categorie)
+        seed = zlib.crc32((headline or "").encode("utf-8"))
+        img, draw, margin, right, max_w, top = self._carte_cadre(kicker, headline, pal, seed)
+        blocs = [(t, s) for t, s in (blocs or []) if s and str(s).strip()][:3]
+        self._carte_blocs(draw, pal, blocs, margin, right, max_w, top)
+        self._carte_pied(draw, pal, margin, right)
+        return img.convert("RGB")
+
+    def generer_carte_sondage(self, kicker, headline, sous, options, categorie=None):
+        """Sondage : titre + 2 grands boutons dessinés (vert / rouge)."""
+        pal = self._carte_palette(categorie)
+        seed = zlib.crc32((headline or "").encode("utf-8"))
+        img, draw, margin, right, max_w, top = self._carte_cadre(kicker, headline, pal, seed)
+        bottom = self._CARTE_BOTTOM
+        f_s = self._load_arabic_font(46)
+        y = top
+        if sous:
+            for ln in self._wrap(draw, sous, f_s, max_w)[:2]:
+                self._draw_rtl_line(draw, right, y, ln, f_s, (225, 232, 242, 255))
+                y += int(46 * 1.5)
+            y += 14
+        gap = 36
+        bh = (bottom - y - gap) // 2
+        specs = ((options[0], (18, 128, 66), (70, 220, 130), "up"),
+                 (options[1], (176, 36, 52), (255, 105, 110), "down"))
+        for i, (label, c_dark, c_light, sens) in enumerate(specs):
+            y0 = y + i * (bh + gap)
+            y1 = y0 + bh
+            draw.rounded_rectangle([margin, y0, right, y1], radius=44, fill=c_dark + (255,),
+                                   outline=c_light + (255,), width=4)
+            draw.rounded_rectangle([margin + 8, y0 + 8, right - 8, y0 + bh // 2], radius=36,
+                                   fill=(255, 255, 255, 26))
+            r = int(bh * 0.30)
+            cx, cy = right - 60 - r, (y0 + y1) // 2
+            draw.ellipse([cx - r, cy - r, cx + r, cy + r], fill=(255, 255, 255, 255))
+            t = r * 0.5
+            if sens == "up":
+                pts = [(cx, cy - t), (cx - t, cy + t * 0.7), (cx + t, cy + t * 0.7)]
+            else:
+                pts = [(cx, cy + t), (cx - t, cy - t * 0.7), (cx + t, cy - t * 0.7)]
+            draw.polygon(pts, fill=c_dark + (255,))
+            lim = (cx - r - 40) - (margin + 40)
+            ls = 120
+            while True:
+                lf = self._load_arabic_font(ls)
+                if self._line_width(draw, label, lf) <= lim or ls <= 56:
+                    break
+                ls -= 6
+            self._draw_rtl_line(draw, cx - r - 40, self._vcenter(lf, cy), label, lf,
+                                (255, 255, 255, 255))
+        self._carte_pied(draw, pal, margin, right)
+        self.carte_metrics["body_size"] = 46
+        return img.convert("RGB")
+
+    def _evaluer_carte(self):
+        """Auto-évaluation /100 (5 critères x 20), écrite dans les logs."""
+        m = self.carte_metrics or {}
+        title, body = m.get("title_size", 0), m.get("body_size", 0)
+        pts, notes = 0, []
+        lis = (10 if title >= 84 else 5 if title >= 76 else 0) + \
+              (10 if body >= 46 else 5 if body >= 42 else 0)
+        pts += lis
+        notes.append(f"lisibilité {lis}/20 (titre {title}px, corps {body}px)")
+        vide = 20 if m.get("extra_max", 0) <= 135 else 10
+        pts += vide
+        notes.append(f"zones vides {vide}/20")
+        coupe = 0 if m.get("truncated") else 20
+        pts += coupe
+        notes.append(f"texte non coupé {coupe}/20")
+        hier = 20 if body and title >= 1.6 * body else 10
+        pts += hier
+        notes.append(f"hiérarchie {hier}/20")
+        marque = 20 if LOGO_PATH.is_file() else 15
+        pts += marque
+        notes.append(f"marque {marque}/20")
+        log(f"Évaluation carte : {pts}/100 | " + " | ".join(notes),
+            level="OK" if pts == 100 else "WARN")
+        return pts
 
     def _diffuser(self, chemin, caption):
         res = {"facebook": False, "instagram": False, "erreur": None}
@@ -1354,9 +1580,16 @@ class TextPost:
             res["instagram"] = self._publier_instagram(chemin, caption, ig_id, token, cloud)
         return res
 
-    def publier_carte(self, kicker, headline, body, caption):
+    def publier_carte(self, kicker, headline, contenu, caption, categorie=None):
+        """contenu = liste de 3 (titre, texte) -> carte éducative ;
+        dict {"options", "sous"} -> sondage."""
         try:
-            img = self.generer_carte(kicker, headline, body)
+            if isinstance(contenu, dict):
+                img = self.generer_carte_sondage(kicker, headline, contenu.get("sous", ""),
+                                                 contenu["options"], categorie)
+            else:
+                img = self.generer_carte(kicker, headline, contenu, categorie)
+            self._evaluer_carte()
             chemin = OUTPUT_DIR / "carte.jpg"
             img.save(chemin, format="JPEG", quality=95, optimize=True, subsampling=0)
             return self._diffuser(chemin, caption)
@@ -2027,12 +2260,22 @@ def publier_video_reel(historique):
 
 
 # ======================================================================
-# CONTENU D'ENGAGEMENT : « اشرحها لي كأني مبتدئ » (1/jour) + sondage (vendredi)
+# CONTENU D'ENGAGEMENT DYNAMIQUE
+#   - « اشرحها لي كأني مبتدئ » (1/jour) : explique le CONCEPT d'une news déjà publiée
+#     (la mieux notée des dernières EDU_NEWS_MAX_AGE_HOURS heures, jamais réutilisée).
+#     Repli : sujet intemporel de EDU_TOPICS s'il n'y a aucune news récente.
+#   - Sondage du vendredi : porte sur la catégorie dominante des news publiées
+#     pendant les POLL_LOOKBACK_HOURS dernières heures (repli : rotation hebdomadaire).
+#   Les légendes contiennent #اشرحها_لي_كأني_مبتدئ / #استفتاء : video_reel.py
+#   s'en sert pour ne JAMAIS mettre ces cartes dans les vidéos.
 # ======================================================================
 ENGAGEMENT_ENABLED = os.getenv("ENGAGEMENT_ENABLED", "1") == "1"
 EDU_HOUR_UTC = int(os.getenv("EDU_HOUR_UTC", "9"))      # Maroc = UTC+1
 POLL_HOUR_UTC = int(os.getenv("POLL_HOUR_UTC", "15"))
+EDU_NEWS_MAX_AGE_HOURS = int(os.getenv("EDU_NEWS_MAX_AGE_HOURS", "36"))
+POLL_LOOKBACK_HOURS = int(os.getenv("POLL_LOOKBACK_HOURS", "168"))
 
+# Sujets intemporels (repli uniquement)
 EDU_TOPICS = (
     "تقرير الوظائف الأمريكي NFP ولماذا يحرك السوق",
     "التضخم CPI وما علاقته بسعر الذهب والدولار",
@@ -2056,46 +2299,116 @@ EDU_TOPICS = (
     "ما هي الشموع اليابانية وكيف تقرأها",
 )
 
-POLLS = (
-    ("الذهب الأسبوع القادم: يصعد أم ينزل؟", "اكتب في التعليق: صعود أو نزول",
-     "🥇 تتوقع الذهب الأسبوع القادم؟\n🟢 صعود\n🔴 نزول"),
-    ("الدولار الأسبوع القادم: أقوى أم أضعف؟", "اكتب في التعليق: أقوى أو أضعف",
-     "💵 كيف ترى الدولار الأسبوع القادم؟\n🟢 أقوى\n🔴 أضعف"),
-    ("البيتكوين الأسبوع القادم: صعود أم هبوط؟", "اكتب في التعليق: صعود أو هبوط",
-     "₿ ما توقعك للبيتكوين الأسبوع القادم؟\n🟢 صعود\n🔴 هبوط"),
-    ("النفط الأسبوع القادم: يرتفع أم ينخفض؟", "اكتب في التعليق: يرتفع أو ينخفض",
-     "🛢️ ما توقعك لسعر النفط الأسبوع القادم؟\n🟢 يرتفع\n🔴 ينخفض"),
-)
+# Modèles de sondage par catégorie : (question, (option_a, option_b), emoji de légende)
+POLL_TEMPLATES = {
+    "Gold": ("الذهب الأسبوع القادم: يصعد أم ينزل؟", ("صعود", "نزول"), "🥇"),
+    "Forex": ("الدولار الأسبوع القادم: أقوى أم أضعف؟", ("أقوى", "أضعف"), "💵"),
+    "Crypto": ("البيتكوين الأسبوع القادم: صعود أم هبوط؟", ("صعود", "هبوط"), "₿"),
+    "Oil": ("النفط الأسبوع القادم: يرتفع أم ينخفض؟", ("يرتفع", "ينخفض"), "🛢️"),
+    "Indices": ("وول ستريت الأسبوع القادم: صعود أم هبوط؟", ("صعود", "هبوط"), "📈"),
+    "Stocks": ("أسهم التكنولوجيا الأسبوع القادم: صعود أم هبوط؟", ("صعود", "هبوط"), "💻"),
+    "Central banks": ("هل يخفض الفيدرالي الفائدة قريباً؟", ("نعم", "لا"), "🏦"),
+    "Economic news": ("التضخم الأسبوع القادم: يرتفع أم ينخفض؟", ("يرتفع", "ينخفض"), "📊"),
+    "Bonds": ("عوائد السندات الأمريكية: ترتفع أم تنخفض؟", ("ترتفع", "تنخفض"), "🏛️"),
+}
 
 
-def _preparer_edu(now):
-    sujet = EDU_TOPICS[now.timetuple().tm_yday % len(EDU_TOPICS)]
+def _coupe(texte, n):
+    """Coupe proprement à la limite d'un mot (la carte ne doit jamais déborder)."""
+    t = " ".join(str(texte or "").split())
+    if len(t) <= n:
+        return t
+    return t[:n].rsplit(" ", 1)[0].rstrip(" ،,.:;") + "…"
+
+
+def _parse_iso(s):
+    try:
+        d = datetime.fromisoformat(str(s))
+        return d if d.tzinfo else d.replace(tzinfo=timezone.utc)
+    except Exception:
+        return None
+
+
+def _news_recentes(historique, heures, now):
+    """News (pas les cartes) publiées dans les `heures` dernières heures.
+    Retourne [(post_id, entrée, âge_en_heures)] du plus récent au plus ancien."""
+    out = []
+    for pid, v in historique.items():
+        if not isinstance(v, dict) or v.get("type") or not v.get("titre"):
+            continue
+        d = _parse_iso(v.get("publie_le"))
+        if not d:
+            continue
+        age = (now - d).total_seconds() / 3600
+        if 0 <= age <= heures:
+            out.append((pid, v, age))
+    out.sort(key=lambda t: t[2])
+    return out
+
+
+def _llm_edu(entree, avec_actu):
     system = (
         "You are an Arabic financial educator writing for complete beginners (Moroccan / Arab "
-        "retail audience). Explain the given topic in simple Modern Standard Arabic, no jargon. "
-        "Do NOT state real current prices, statistics or dates. Any example must be clearly "
-        "hypothetical with small round numbers. No investment advice. "
-        'Return ONLY one JSON object: {"headline": "hook title, 6-12 words, a question or a '
-        'warning", "definition": "1-2 simple sentences, max 220 characters", "example": '
-        '"one short hypothetical example, max 200 characters", "why_it_matters": "one sentence '
-        'for an ordinary person, may mention the dirham if relevant", "cta": "one short question '
-        'inviting comments"}. No emojis, no hashtags, no Markdown.')
+        "retail audience). Explain in simple Modern Standard Arabic, no jargon. "
+        + ("The user gives the headline of a financial news item ALREADY published on the page. "
+           "Choose the ONE key concept a beginner must understand to follow this news, explain "
+           "that concept (not the whole news), and make the hook headline clearly related to the "
+           "news topic. Use ONLY facts present in the headline; never invent figures, prices or "
+           "dates. " if avec_actu else
+           "Do NOT state real current prices, statistics or dates. ")
+        + "Any example must be clearly hypothetical with small round numbers. No investment advice. "
+        'Return ONLY one JSON object: {"headline": "hook title, 5-9 words, a question or a '
+        'warning", "definition": "1 simple sentence, STRICT max 85 characters", "example": '
+        '"one short hypothetical example, STRICT max 65 characters", "why_it_matters": "one short '
+        'sentence for an ordinary person, STRICT max 65 characters, may mention the dirham if '
+        'relevant", "cta": "one short question inviting comments", "news_ar": "'
+        + ("one Arabic sentence, max 80 characters, restating the news headline faithfully"
+           if avec_actu else "") +
+        '"}. No emojis, no hashtags, no Markdown.')
     raw = llm_chat([{"role": "system", "content": system},
-                    {"role": "user", "content": f"TOPIC: {sujet}"}],
+                    {"role": "user", "content": entree}],
                    temperature=0.3, max_tokens=900)
     if not raw:
-        log("Contenu éducatif : aucun LLM disponible, reporté.", level="WARN")
         return None
     try:
-        d = Extract_post._extract_json(raw)
+        return Extract_post._extract_json(raw)
     except Exception as e:
         log(f"Contenu éducatif : JSON invalide ({e}).", level="WARN")
         return None
+
+
+def _preparer_edu(now, historique):
+    """Retourne (kicker, headline, blocs, caption, categorie, base_id) ou None."""
+    deja = {v.get("base") for v in historique.values()
+            if isinstance(v, dict) and v.get("type") == "edu" and v.get("base")}
+    cands = [t for t in _news_recentes(historique, EDU_NEWS_MAX_AGE_HOURS, now)
+             if t[0] not in deja]
+    d, categorie, base_id = None, None, None
+    if cands:
+        pid, v, _ = max(cands, key=lambda t: ((t[1].get("note") or 0), -t[2]))
+        log(f"Carte éducative basée sur la news : {v.get('titre', '')[:90]} "
+            f"[{v.get('categorie')}]")
+        d = _llm_edu(f"PUBLISHED NEWS HEADLINE: {v.get('titre')}\n"
+                     f"CATEGORY: {v.get('categorie')}", True)
+        if d:
+            categorie, base_id = v.get("categorie"), pid
+    if not d:
+        sujet = EDU_TOPICS[now.timetuple().tm_yday % len(EDU_TOPICS)]
+        log("Carte éducative : aucune news exploitable, sujet intemporel utilisé.", level="WARN")
+        d = _llm_edu(f"TOPIC: {sujet}", False)
+        categorie, base_id = None, None
+    if not d:
+        log("Contenu éducatif : aucun LLM disponible, reporté.", level="WARN")
+        return None
+
     g = lambda k: str(d.get(k) or "").strip()
     headline, definition = g("headline"), g("definition")
     if not (headline and definition):
         return None
-    parts = [headline, definition]
+    parts = [headline]
+    if base_id and g("news_ar"):
+        parts.append(f"📰 مرتبط بخبر اليوم: {g('news_ar')}")
+    parts.append(definition)
     if g("example"):
         parts.append(f"📌 مثال توضيحي: {g('example')}")
     if g("why_it_matters"):
@@ -2104,17 +2417,93 @@ def _preparer_edu(now):
         parts.append(f"❓ {g('cta')}")
     parts.append("💾 احفظ المنشور وشاركه مع صديق يتعلم التداول.\n"
                  "⚠️ محتوى تعليمي وليس نصيحة استثمارية.")
-    caption = ("\n\n".join(parts) + "\n\n" + HASHTAGS_BASE
+    tags = (HASHTAGS_BASE + " " + HASHTAGS_CATEGORIE.get(categorie, "")).strip()
+    caption = ("\n\n".join(parts) + "\n\n" + tags
                + " #تعلم_التداول #اشرحها_لي_كأني_مبتدئ")[:IG_CAPTION_LIMIT]
-    return "اشرحها لي كأني مبتدئ", headline, definition, caption
+    blocs = [("التعريف", _coupe(definition, 90)),
+             ("مثال", _coupe(g("example"), 70)),
+             ("لماذا يهمك؟", _coupe(g("why_it_matters"), 70))]
+    blocs = [(t, s) for t, s in blocs if s]
+    return "اشرحها لي كأني مبتدئ", _coupe(headline, 60), blocs, caption, categorie, base_id
 
 
-def _preparer_sondage(now):
-    titre, corps, texte = POLLS[now.isocalendar()[1] % len(POLLS)]
-    caption = (f"{titre}\n\n{texte}\n\n💬 شارك توقعك في التعليق 👇\n"
+def _choisir_categorie_sondage(historique, now):
+    """Catégorie dominante des news publiées récemment + leurs titres (du plus récent)."""
+    recentes = _news_recentes(historique, POLL_LOOKBACK_HOURS, now)
+    cats = Counter(v.get("categorie") for _, v, _ in recentes
+                   if v.get("categorie") in POLL_TEMPLATES)
+    if cats:
+        top = max(cats.values())
+        for _, v, _ in recentes:                       # égalité : la plus récente gagne
+            if cats.get(v.get("categorie"), 0) == top:
+                cat = v["categorie"]
+                titres = [x["titre"] for _, x, _ in recentes if x.get("categorie") == cat][:3]
+                return cat, titres
+    cles = tuple(POLL_TEMPLATES)
+    return cles[now.isocalendar()[1] % len(cles)], []
+
+
+def _llm_sondage(categorie, titres):
+    system = (
+        "You write ONE audience poll in Modern Standard Arabic for a financial-markets page. "
+        f"The poll is about the {categorie} market and where it goes NEXT WEEK, inspired by the "
+        "recent headlines given by the user. Never invent figures or prices. No advice. "
+        'Return ONLY one JSON object: {"title": "poll question, 20-60 characters, ends with ؟", '
+        '"option_a": "1-2 words, the bullish/yes answer", "option_b": "1-2 words, the '
+        'bearish/no answer"}. No emojis, no hashtags, no Markdown.')
+    raw = llm_chat([{"role": "system", "content": system},
+                    {"role": "user", "content": "RECENT HEADLINES:\n" + "\n".join(f"- {t}" for t in titres)}],
+                   temperature=0.4, max_tokens=300)
+    if not raw:
+        return None
+    try:
+        d = Extract_post._extract_json(raw)
+    except Exception:
+        return None
+    titre = " ".join(str(d.get("title") or "").split())
+    a = " ".join(str(d.get("option_a") or "").split())
+    b = " ".join(str(d.get("option_b") or "").split())
+    if not (12 <= len(titre) <= 70 and 1 <= len(a) <= 12 and 1 <= len(b) <= 12 and a != b):
+        log("Sondage LLM hors limites : modèle fixe utilisé.", level="WARN")
+        return None
+    return titre, (a, b)
+
+
+def _preparer_sondage(now, historique):
+    """Retourne (kicker, headline, contenu, caption, categorie, None)."""
+    categorie, titres = _choisir_categorie_sondage(historique, now)
+    modele_titre, modele_opts, emoji = POLL_TEMPLATES[categorie]
+    titre, (a, b) = modele_titre, modele_opts
+    if titres:
+        log(f"Sondage basé sur la catégorie dominante : {categorie} ({len(titres)} news)")
+        res = _llm_sondage(categorie, titres)
+        if res:
+            titre, (a, b) = res
+    else:
+        log(f"Sondage : pas de news récentes, modèle {categorie}.", level="WARN")
+    tags = (HASHTAGS_BASE + " " + HASHTAGS_CATEGORIE.get(categorie, "")).strip()
+    caption = (f"{emoji} {titre}\n\n🟢 {a}\n🔴 {b}\n\n💬 شارك توقعك في التعليق 👇\n"
                "⚠️ توقعات للتفاعل فقط وليست نصيحة استثمارية.\n\n"
-               + HASHTAGS_BASE + " #استفتاء")[:IG_CAPTION_LIMIT]
-    return "استفتاء الجمعة", titre, corps, caption
+               + tags + " #استفتاء")[:IG_CAPTION_LIMIT]
+    contenu = {"sous": f"اكتب في التعليق: {a} أو {b}", "options": (a, b)}
+    return "استفتاء الجمعة", _coupe(titre, 70), contenu, caption, categorie, None
+
+
+def apercu_cartes():
+    """Rendu local sans réseau :  CARTE_PREVIEW=1 python Agnet_fb_money_impact_4.py"""
+    tp = TextPost()
+    blocs = [("التعريف", "الفائدة هي ثمن اقتراض المال أو مكافأة ادخاره."),
+             ("مثال", "قرض 1000 درهم بفائدة 5% يعني 50 درهماً إضافية."),
+             ("لماذا يهمك؟", "ترتفع أقساط قرضك عندما ترفع البنوك المركزية الفائدة.")]
+    for cat in ("Gold", "Indices", "Crypto"):
+        tp.generer_carte("اشرحها لي كأني مبتدئ", "ما معنى رفع سعر الفائدة؟", blocs, cat) \
+            .save(OUTPUT_DIR / f"apercu_edu_{cat}.jpg", quality=95)
+        tp._evaluer_carte()
+    tp.generer_carte_sondage("استفتاء الجمعة", "الذهب الأسبوع القادم: يصعد أم ينزل؟",
+                             "اكتب في التعليق: صعود أو نزول", ("صعود", "نزول"), "Gold") \
+        .save(OUTPUT_DIR / "apercu_sondage.jpg", quality=95)
+    tp._evaluer_carte()
+    log("Aperçus enregistrés dans output/ (apercu_edu_*.jpg, apercu_sondage.jpg)", level="OK")
 
 
 def publier_contenu_engagement(text_post, historique, fichier_json):
@@ -2131,15 +2520,17 @@ def publier_contenu_engagement(text_post, historique, fichier_json):
     for tache in taches:
         try:
             log(f"── Contenu d'engagement : {tache} ──", level="STEP")
-            carte = _preparer_edu(now) if tache == "edu" else _preparer_sondage(now)
+            carte = (_preparer_edu(now, historique) if tache == "edu"
+                     else _preparer_sondage(now, historique))
             if not carte:
                 continue
-            kicker, headline, body, caption = carte
-            res = text_post.publier_carte(kicker, headline, body, caption)
+            kicker, headline, contenu, caption, categorie, base_id = carte
+            res = text_post.publier_carte(kicker, headline, contenu, caption, categorie)
             if res.get("facebook") or res.get("instagram"):
                 historique[f"{tache}_{jour}"] = {
                     "source": "Money.impact", "titre": headline, "date": jour,
-                    "type": tache, "publie_le": now.isoformat()}
+                    "type": tache, "categorie": categorie, "base": base_id,
+                    "publie_le": now.isoformat()}
                 with open(fichier_json, "w", encoding="utf-8") as f:
                     json.dump(historique, f, ensure_ascii=False, indent=4)
                 log(f"Contenu {tache} PUBLIÉ -> historique mis à jour", level="OK")
@@ -2177,7 +2568,8 @@ def main():
         terminer(1, "ÉCHEC (Meta)")
 
     # VIDÉO REEL : lancée AVANT les news, donc indépendante de leur durée, de leurs rejets
-    # et d'un éventuel dépassement de délai. Elle utilise les photos déjà publiées sur la Page.
+    # et d'un éventuel dépassement de délai. Elle utilise les photos déjà publiées sur la Page
+    # (les cartes éducatives / sondages en sont exclues par leurs hashtags).
     banner(3, TOTAL_STEPS, "Vidéo Reel (images de la Page, 12 dernières heures)")
     lancer_video_une_fois()
 
@@ -2196,7 +2588,7 @@ def main():
     banner(5, TOTAL_STEPS, "Sélection des news à examiner")
     historique = charger_historique(fichier_json)
 
-    # Contenu d'engagement (éducatif quotidien + sondage du vendredi) : sans API d'image.
+    # Contenu d'engagement DYNAMIQUE (basé sur les news déjà publiées) : sans API d'image.
     publier_contenu_engagement(text_post, historique, fichier_json)
 
     now = datetime.now(timezone.utc)
@@ -2229,9 +2621,9 @@ def main():
                 "augmente MAX_NEWS_AGE_HOURS si tu veux les publier.", level="WARN")
         terminer(0, "RIEN À PUBLIER")      # la vidéo est lancée dans terminer()
 
-    # Titres déjà connus : historique + news acceptées pendant ce run (anti-doublons).
+    # Titres déjà connus : historique (news uniquement) + news acceptées pendant ce run.
     titres_connus = [v.get("titre", "") for v in historique.values()
-                     if isinstance(v, dict) and v.get("titre")]
+                     if isinstance(v, dict) and v.get("titre") and not v.get("type")]
 
     banner(6, TOTAL_STEPS, "Filtrage, traduction, image et publication")
     for k, (news, post_id) in enumerate(candidates, 1):
@@ -2329,6 +2721,9 @@ def main():
 
 
 if __name__ == "__main__":
+    if os.getenv("CARTE_PREVIEW") == "1":      # aperçu local des cartes, sans réseau
+        apercu_cartes()
+        sys.exit(0)
     try:
         main()
     except SystemExit:
