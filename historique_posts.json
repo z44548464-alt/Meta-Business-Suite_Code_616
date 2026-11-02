@@ -5723,5 +5723,77 @@
         "categorie": "Economic news",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793638806/actualites_financieres/cd9qve8xubz5xxvjwg78.jpg",
         "publie_le": "2026-11-02T17:00:12.239955+00:00"
+    },
+    "Bloomberg Markets_Treasury Yields Extend Past Month’s Slide as Oil Prices Tumble_2026-11-02 17:44": {
+        "source": "Bloomberg Markets",
+        "titre": "Treasury Yields Extend Past Month’s Slide as Oil Prices Tumble",
+        "date": "2026-11-02 17:44",
+        "note": 85,
+        "categorie": "Bonds",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793641916/actualites_financieres/pl1gacarlq4d6eud0ccr.jpg",
+        "publie_le": "2026-11-02T17:52:03.065861+00:00"
+    },
+    "MarketWatch_Oracle wants $20 billion to fund its AI future — and its stock is paying the price_2026-11-02 17:31": {
+        "source": "MarketWatch",
+        "titre": "Oracle wants $20 billion to fund its AI future — and its stock is paying the price",
+        "date": "2026-11-02 17:31",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793641944/actualites_financieres/g3vwvy8mgfw0fiigsfhm.jpg",
+        "publie_le": "2026-11-02T17:52:30.515107+00:00"
+    },
+    "OilPrice_TotalEnergies Now Sees Oil Demand Peaking Between 2035 and 2040_2026-11-02 17:30": {
+        "source": "OilPrice",
+        "titre": "TotalEnergies Now Sees Oil Demand Peaking Between 2035 and 2040",
+        "date": "2026-11-02 17:30",
+        "note": 80,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793641968/actualites_financieres/hv8a5mulf6bjsd8vxall.jpg",
+        "publie_le": "2026-11-02T17:53:00.529327+00:00"
+    },
+    "Bloomberg Markets_Gulf Arab Oil Giants Are Exporting Crude at Pre-War Rates Again_2026-11-02 17:25": {
+        "source": "Bloomberg Markets",
+        "titre": "Gulf Arab Oil Giants Are Exporting Crude at Pre-War Rates Again",
+        "date": "2026-11-02 17:25",
+        "note": 80,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793641996/actualites_financieres/zdn97mtmng8csbpzevm3.jpg",
+        "publie_le": "2026-11-02T17:53:28.268525+00:00"
+    },
+    "Bloomberg Markets_Hedge Funds Back SEC Push to Ease US Access to EU Bond Futures_2026-11-02 17:08": {
+        "source": "Bloomberg Markets",
+        "titre": "Hedge Funds Back SEC Push to Ease US Access to EU Bond Futures",
+        "date": "2026-11-02 17:08",
+        "note": 80,
+        "categorie": "Bonds",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793642037/actualites_financieres/ws43ia7bb6yepmkrwnvv.jpg",
+        "publie_le": "2026-11-02T17:54:09.120311+00:00"
+    },
+    "Bloomberg Economics_South Africa, Rwanda Lose Access to US’s AGOA Trade Pact_2026-11-02 17:04": {
+        "source": "Bloomberg Economics",
+        "titre": "South Africa, Rwanda Lose Access to US’s AGOA Trade Pact",
+        "date": "2026-11-02 17:04",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793642068/actualites_financieres/ioyedlprsrxvwjosyji8.jpg",
+        "publie_le": "2026-11-02T17:54:34.371538+00:00"
+    },
+    "Financial Times_Anthropic reveals $900bn AI spending commitments ahead of IPO_2026-11-02 16:31": {
+        "source": "Financial Times",
+        "titre": "Anthropic reveals $900bn AI spending commitments ahead of IPO",
+        "date": "2026-11-02 16:31",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793642106/actualites_financieres/ar23061vg7qice6wtgnt.jpg",
+        "publie_le": "2026-11-02T17:55:19.611276+00:00"
+    },
+    "Bloomberg Markets_Chilean, Mexican Peso Lead EM Currencies Higher as Oil Sinks_2026-11-02 03:56": {
+        "source": "Bloomberg Markets",
+        "titre": "Chilean, Mexican Peso Lead EM Currencies Higher as Oil Sinks",
+        "date": "2026-11-02 03:56",
+        "note": 80,
+        "categorie": "Forex",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793642201/actualites_financieres/pmavbnopng6xou9ht3wl.jpg",
+        "publie_le": "2026-11-02T17:56:54.992830+00:00"
     }
 }
