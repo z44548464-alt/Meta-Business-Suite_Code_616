@@ -67,15 +67,15 @@ jobs:
           ls -la
           ls -la fonts imgs music music_NEWS 2>/dev/null || echo "Dossiers fonts/, imgs/, music/ ou music_NEWS/ absents"
           echo "Musiques trouvées : $(ls music/news_musique*.mp3 music_NEWS/news_musique*.mp3 2>/dev/null | wc -l)"
-          grep -c "def banner" Agnet_fb_money_impact_3.py || echo ">>> ANCIENNE VERSION du script <<<"
-          grep -m1 "SCRIPT_VERSION =" Agnet_fb_money_impact_3.py
-          python -m py_compile Agnet_fb_money_impact_3.py video_reel.py publie_video_youtub.py && echo "Syntaxe OK"
+          grep -c "def banner" Agnet_fb_money_impact_4.py || echo ">>> ANCIENNE VERSION du script <<<"
+          grep -m1 "SCRIPT_VERSION =" Agnet_fb_money_impact_4.py
+          python -m py_compile Agnet_fb_money_impact_4.py video_reel.py publie_video_youtub.py && echo "Syntaxe OK"
 
       - name: Lancer l'agent
         timeout-minutes: 80
         run: |
           set -o pipefail
-          python -u Agnet_fb_money_impact_3.py 2>&1 | tee agent.log
+          python -u Agnet_fb_money_impact_4.py 2>&1 | tee agent.log
         env:
                     # YouTube Shorts
           ID_CLIENT_FB: ${{ secrets.ID_CLIENT_FB }}
