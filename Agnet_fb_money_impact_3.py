@@ -1,6 +1,6 @@
 import sys
 import faulthandler
-SCRIPT_VERSION = "2026-10-31-money-impact-video-v3-hashtags-baseline"
+SCRIPT_VERSION = "2026-11-02-money-impact-video-v4-youtube"
 print(f"▶ Python démarré (version {SCRIPT_VERSION}), chargement des modules…", flush=True)
 faulthandler.enable()
 faulthandler.dump_traceback_later(90, repeat=True, file=sys.stderr)
