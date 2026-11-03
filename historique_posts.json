@@ -7143,5 +7143,95 @@
         "categorie": "Stocks",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793721388/actualites_financieres/qfmlustdlxzzgtrbvzqu.jpg",
         "publie_le": "2026-11-03T15:56:39.779481+00:00"
+    },
+    "OilPrice_Trump Bombs Iran, Talks Peace, and Sends Oil Prices Tumbling_2026-11-03 16:43": {
+        "source": "OilPrice",
+        "titre": "Trump Bombs Iran, Talks Peace, and Sends Oil Prices Tumbling",
+        "date": "2026-11-03 16:43",
+        "note": 90,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793724473/actualites_financieres/pitjc91oxtsbfga884lj.jpg",
+        "publie_le": "2026-11-03T16:48:01.292830+00:00"
+    },
+    "Bloomberg Markets_UK Government to Charge Builders 4% of Your First Home Sales_2026-11-03 16:37": {
+        "source": "Bloomberg Markets",
+        "titre": "UK Government to Charge Builders 4% of Your First Home Sales",
+        "date": "2026-11-03 16:37",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793724506/actualites_financieres/ho5vgbfqdvbfntewlitv.jpg",
+        "publie_le": "2026-11-03T16:48:33.833564+00:00"
+    },
+    "Bloomberg Markets_Treasuries Fall Amid Oil Price Swings, Strong Job Openings Data_2026-11-03 16:30": {
+        "source": "Bloomberg Markets",
+        "titre": "Treasuries Fall Amid Oil Price Swings, Strong Job Openings Data",
+        "date": "2026-11-03 16:30",
+        "note": 85,
+        "categorie": "Bonds",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793724543/actualites_financieres/z7fuxpuukuijzmm2kn11.jpg",
+        "publie_le": "2026-11-03T16:49:10.470281+00:00"
+    },
+    "OilPrice_IEA Warns Global Gas Crunch Could Last Well into 2027_2026-11-03 16:30": {
+        "source": "OilPrice",
+        "titre": "IEA Warns Global Gas Crunch Could Last Well into 2027",
+        "date": "2026-11-03 16:30",
+        "note": 80,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793724573/actualites_financieres/sxxso4pwiejxbbgxksaf.jpg",
+        "publie_le": "2026-11-03T16:49:40.926178+00:00"
+    },
+    "Bloomberg Markets_Shopify Revenue Miss; Yum Brands Jumps on Taco Bell Sales | Stock Movers_2026-11-03 16:11": {
+        "source": "Bloomberg Markets",
+        "titre": "Shopify Revenue Miss; Yum Brands Jumps on Taco Bell Sales | Stock Movers",
+        "date": "2026-11-03 16:11",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793724610/actualites_financieres/hin7k4dfsoqynomxkfdo.jpg",
+        "publie_le": "2026-11-03T16:50:23.355870+00:00"
+    },
+    "Bloomberg Markets_Trading on US Stock Perpetuals Contracts Is Approved by CFTC_2026-11-03 15:50": {
+        "source": "Bloomberg Markets",
+        "titre": "Trading on US Stock Perpetuals Contracts Is Approved by CFTC",
+        "date": "2026-11-03 15:50",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793724644/actualites_financieres/navpxrjtqbdsyvuxyycg.jpg",
+        "publie_le": "2026-11-03T16:50:56.878372+00:00"
+    },
+    "Bloomberg Markets_Technology Stocks Lead S&P 500 Higher With Midterm Vote Underway_2026-11-03 13:15": {
+        "source": "Bloomberg Markets",
+        "titre": "Technology Stocks Lead S&P 500 Higher With Midterm Vote Underway",
+        "date": "2026-11-03 13:15",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793724699/actualites_financieres/hekwrvq0divjj03bls56.jpg",
+        "publie_le": "2026-11-03T16:51:46.818989+00:00"
+    },
+    "Financial Times_Italy’s ‘exit tax’ plan spooks rich expats_2026-11-03 05:00": {
+        "source": "Financial Times",
+        "titre": "Italy’s ‘exit tax’ plan spooks rich expats",
+        "date": "2026-11-03 05:00",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793724762/actualites_financieres/jzjkwjacnfyecfg9ar7q.jpg",
+        "publie_le": "2026-11-03T16:52:49.945999+00:00"
+    },
+    "Bloomberg Markets_Gold Declines as Traders Weigh US-Iran Diplomacy Prospects_2026-11-03 00:20": {
+        "source": "Bloomberg Markets",
+        "titre": "Gold Declines as Traders Weigh US-Iran Diplomacy Prospects",
+        "date": "2026-11-03 00:20",
+        "note": 80,
+        "categorie": "Gold",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793724791/actualites_financieres/ymato3aklq1i4wdgskou.jpg",
+        "publie_le": "2026-11-03T16:53:23.999339+00:00"
+    },
+    "Bloomberg Markets_Chip Rally Powers Stock Gains on US Election Day: Markets Wrap_2026-11-02 22:25": {
+        "source": "Bloomberg Markets",
+        "titre": "Chip Rally Powers Stock Gains on US Election Day: Markets Wrap",
+        "date": "2026-11-02 22:25",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793724822/actualites_financieres/qcrx71g7sk7xkrhzwjaj.jpg",
+        "publie_le": "2026-11-03T16:53:54.453278+00:00"
     }
 }
