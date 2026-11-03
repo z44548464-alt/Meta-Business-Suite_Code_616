@@ -6234,5 +6234,32 @@
         "categorie": "Stocks",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793671059/actualites_financieres/s2ih7awwsb0ydysn2r1o.jpg",
         "publie_le": "2026-11-03T01:58:00.241690+00:00"
+    },
+    "Bloomberg Markets_Reliance’s Record $19 Billion Surge Lifts Nifty, Keeps India Bulls in the Game_2026-11-03 02:30": {
+        "source": "Bloomberg Markets",
+        "titre": "Reliance’s Record $19 Billion Surge Lifts Nifty, Keeps India Bulls in the Game",
+        "date": "2026-11-03 02:30",
+        "note": 85,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793673900/actualites_financieres/ngnndhceqoah8ez6yqdy.jpg",
+        "publie_le": "2026-11-03T02:45:06.129977+00:00"
+    },
+    "Bloomberg Markets_China Vows to Boost Yuan Liquidity, Back Hong Kong Markets_2026-11-03 01:22": {
+        "source": "Bloomberg Markets",
+        "titre": "China Vows to Boost Yuan Liquidity, Back Hong Kong Markets",
+        "date": "2026-11-03 01:22",
+        "note": 80,
+        "categorie": "Central banks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793673953/actualites_financieres/tqgbizyxdahmfao1v28i.jpg",
+        "publie_le": "2026-11-03T02:46:07.424627+00:00"
+    },
+    "Bloomberg Markets_Onshore Yuan Snaps Winning Streak as PBOC Lifts FX Reserve Ratio_2026-11-03 01:06": {
+        "source": "Bloomberg Markets",
+        "titre": "Onshore Yuan Snaps Winning Streak as PBOC Lifts FX Reserve Ratio",
+        "date": "2026-11-03 01:06",
+        "note": 90,
+        "categorie": "Forex",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793673991/actualites_financieres/re6frvbfk9drwb83hr94.jpg",
+        "publie_le": "2026-11-03T02:46:42.942694+00:00"
     }
 }
