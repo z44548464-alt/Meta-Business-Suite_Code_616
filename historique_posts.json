@@ -9042,5 +9042,77 @@
         "categorie": "Stocks",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793814920/actualites_financieres/zfd5fuoaqyhqdzzc2w7d.jpg",
         "publie_le": "2026-11-04T17:55:27.177438+00:00"
+    },
+    "OilPrice_Oil Crashes 9% as Trump and Vance Blame Iran War for Midterm Rout_2026-11-04 18:30": {
+        "source": "OilPrice",
+        "titre": "Oil Crashes 9% as Trump and Vance Blame Iran War for Midterm Rout",
+        "date": "2026-11-04 18:30",
+        "note": 90,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793818161/actualites_financieres/p5h8csqsgzpmkllqricm.jpg",
+        "publie_le": "2026-11-04T18:49:34.153511+00:00"
+    },
+    "MarketWatch_These stocks have soared the most today after the Democrats trounced Trump_2026-11-04 18:29": {
+        "source": "MarketWatch",
+        "titre": "These stocks have soared the most today after the Democrats trounced Trump",
+        "date": "2026-11-04 18:29",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793818203/actualites_financieres/abjo1oiolcl5zx3j9lm0.jpg",
+        "publie_le": "2026-11-04T18:50:17.127149+00:00"
+    },
+    "Bloomberg Markets_North Sea Oil Plunge Deepens as Traders Weigh Iran De-Escalation_2026-11-04 17:43": {
+        "source": "Bloomberg Markets",
+        "titre": "North Sea Oil Plunge Deepens as Traders Weigh Iran De-Escalation",
+        "date": "2026-11-04 17:43",
+        "note": 85,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793818251/actualites_financieres/a1cjg4zxrermq1drxpgr.jpg",
+        "publie_le": "2026-11-04T18:51:05.548165+00:00"
+    },
+    "Financial Times_Vance blames Iran war for crushing Republican midterms defeat_2026-11-04 16:27": {
+        "source": "Financial Times",
+        "titre": "Vance blames Iran war for crushing Republican midterms defeat",
+        "date": "2026-11-04 16:27",
+        "note": 90,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793818298/actualites_financieres/zgp2i2xrfj6mrwdnq39x.jpg",
+        "publie_le": "2026-11-04T18:51:49.727685+00:00"
+    },
+    "Bloomberg Markets_US Tweaks Debt-Sale Guidance, Spurring Auction-Forecast Changes_2026-11-04 13:34": {
+        "source": "Bloomberg Markets",
+        "titre": "US Tweaks Debt-Sale Guidance, Spurring Auction-Forecast Changes",
+        "date": "2026-11-04 13:34",
+        "note": 80,
+        "categorie": "Bonds",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793818352/actualites_financieres/ctvybv4joctu4nppldrw.jpg",
+        "publie_le": "2026-11-04T18:52:46.130235+00:00"
+    },
+    "Bloomberg Economics_US Companies Added 86,000 Jobs in October, ADP Data Show_2026-11-04 13:16": {
+        "source": "Bloomberg Economics",
+        "titre": "US Companies Added 86,000 Jobs in October, ADP Data Show",
+        "date": "2026-11-04 13:16",
+        "note": 90,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793818384/actualites_financieres/bwdrnslkvzacecwuzg7p.jpg",
+        "publie_le": "2026-11-04T18:53:12.065840+00:00"
+    },
+    "Bloomberg Markets_Dollar Slides Toward Worst Day in Two Months After US Midterms_2026-11-04 03:11": {
+        "source": "Bloomberg Markets",
+        "titre": "Dollar Slides Toward Worst Day in Two Months After US Midterms",
+        "date": "2026-11-04 03:11",
+        "note": 90,
+        "categorie": "Forex",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793818452/actualites_financieres/mhj3puh26mbje4zkyctb.jpg",
+        "publie_le": "2026-11-04T18:54:23.586026+00:00"
+    },
+    "Bloomberg Markets_Treasuries Gain as Oil Prices Tumble After Democrats Elected_2026-11-04 01:00": {
+        "source": "Bloomberg Markets",
+        "titre": "Treasuries Gain as Oil Prices Tumble After Democrats Elected",
+        "date": "2026-11-04 01:00",
+        "note": 85,
+        "categorie": "Bonds",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793818485/actualites_financieres/airmmrh6ffrmk76frbdl.jpg",
+        "publie_le": "2026-11-04T18:54:58.487910+00:00"
     }
 }
