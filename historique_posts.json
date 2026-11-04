@@ -8466,5 +8466,86 @@
         "categorie": "Stocks",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793791119/actualites_financieres/kmvjfafobsy9mozwoea1.jpg",
         "publie_le": "2026-11-04T11:18:51.639931+00:00"
+    },
+    "Seeking Alpha_Ares Capital: The Rich Grow Richer_2026-11-04 12:35": {
+        "source": "Seeking Alpha",
+        "titre": "Ares Capital: The Rich Grow Richer",
+        "date": "2026-11-04 12:35",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793796613/actualites_financieres/nbo4lxhrss681kp9qiqg.jpg",
+        "publie_le": "2026-11-04T12:50:28.792534+00:00"
+    },
+    "OilPrice_Nigeria's Oil and Gas Output Rises to 3.04 Million Boepd_2026-11-04 12:30": {
+        "source": "OilPrice",
+        "titre": "Nigeria's Oil and Gas Output Rises to 3.04 Million Boepd",
+        "date": "2026-11-04 12:30",
+        "note": 80,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793796660/actualites_financieres/ohmsywwqwj8lnp6yicoo.jpg",
+        "publie_le": "2026-11-04T12:51:16.351176+00:00"
+    },
+    "Bloomberg Markets_European Bank Stocks Bounce Back as Midterms Ease Uncertainty_2026-11-04 12:28": {
+        "source": "Bloomberg Markets",
+        "titre": "European Bank Stocks Bounce Back as Midterms Ease Uncertainty",
+        "date": "2026-11-04 12:28",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793796692/actualites_financieres/gp4gzho0rev3yp0kd6na.jpg",
+        "publie_le": "2026-11-04T12:51:49.180880+00:00"
+    },
+    "MarketWatch_Midterm elections deliver a ‘blue wave.’ The stock market sees green._2026-11-04 12:27": {
+        "source": "MarketWatch",
+        "titre": "Midterm elections deliver a ‘blue wave.’ The stock market sees green.",
+        "date": "2026-11-04 12:27",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793796733/actualites_financieres/hwwoby56qa2qd4cmzduw.jpg",
+        "publie_le": "2026-11-04T12:52:22.341408+00:00"
+    },
+    "CNBC Finance_Treasury yields fall after Democrats win House and Senate majorities_2026-11-04 12:25": {
+        "source": "CNBC Finance",
+        "titre": "Treasury yields fall after Democrats win House and Senate majorities",
+        "date": "2026-11-04 12:25",
+        "note": 85,
+        "categorie": "Bonds",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793796758/actualites_financieres/zcwbhthvw3bntbpirdho.jpg",
+        "publie_le": "2026-11-04T12:52:54.123944+00:00"
+    },
+    "Bloomberg Markets_Ukraine Bonds Jump as Democrat Win Seen Helping Defense Efforts_2026-11-04 12:24": {
+        "source": "Bloomberg Markets",
+        "titre": "Ukraine Bonds Jump as Democrat Win Seen Helping Defense Efforts",
+        "date": "2026-11-04 12:24",
+        "note": 80,
+        "categorie": "Bonds",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793796792/actualites_financieres/hzmfayelgmawqapatsrv.jpg",
+        "publie_le": "2026-11-04T12:53:22.333057+00:00"
+    },
+    "MarketWatch_CVS Health plans to split in two. Here’s what is driving the massive healthcare breakup._2026-11-04 12:21": {
+        "source": "MarketWatch",
+        "titre": "CVS Health plans to split in two. Here’s what is driving the massive healthcare breakup.",
+        "date": "2026-11-04 12:21",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793796819/actualites_financieres/anl6nsrk0mf9w2gbnkv3.jpg",
+        "publie_le": "2026-11-04T12:53:50.396271+00:00"
+    },
+    "Bloomberg Economics_Chile Central Bank Mulled a Key Rate Hike at Its Last Decision_2026-11-04 12:09": {
+        "source": "Bloomberg Economics",
+        "titre": "Chile Central Bank Mulled a Key Rate Hike at Its Last Decision",
+        "date": "2026-11-04 12:09",
+        "note": 80,
+        "categorie": "Central banks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793796866/actualites_financieres/egaymdfrqrr3ozyolvcj.jpg",
+        "publie_le": "2026-11-04T12:54:40.856081+00:00"
+    },
+    "Seeking Alpha_Blue Wave Sweeps The Nation_2026-11-04 12:07": {
+        "source": "Seeking Alpha",
+        "titre": "Blue Wave Sweeps The Nation",
+        "date": "2026-11-04 12:07",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793796906/actualites_financieres/ybtuw0n6olttgzop8txp.jpg",
+        "publie_le": "2026-11-04T12:55:15.312659+00:00"
     }
 }
