@@ -9645,5 +9645,50 @@
         "categorie": "Stocks",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793850840/actualites_financieres/jdb8yxbhdkbpdrs1mge7.jpg",
         "publie_le": "2026-11-05T03:54:12.335663+00:00"
+    },
+    "Bloomberg Markets_China Bank Funding Costs Hit Record Low on PBOC Rate Shift_2026-11-05 04:27": {
+        "source": "Bloomberg Markets",
+        "titre": "China Bank Funding Costs Hit Record Low on PBOC Rate Shift",
+        "date": "2026-11-05 04:27",
+        "note": 90,
+        "categorie": "Central banks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793854399/actualites_financieres/yont3sakqx8rva7y8bsz.jpg",
+        "publie_le": "2026-11-05T04:53:33.032493+00:00"
+    },
+    "Financial Times_Chipmakers lead Asian stocks lower on post-midterm AI fears_2026-11-05 04:13": {
+        "source": "Financial Times",
+        "titre": "Chipmakers lead Asian stocks lower on post-midterm AI fears",
+        "date": "2026-11-05 04:13",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793854434/actualites_financieres/h2vbrceckcd7xvjud6jm.jpg",
+        "publie_le": "2026-11-05T04:54:09.434799+00:00"
+    },
+    "Bloomberg Economics_Indonesia Growth Jumps to 5.5% on Stimulus, Defying Market Slump_2026-11-05 04:09": {
+        "source": "Bloomberg Economics",
+        "titre": "Indonesia Growth Jumps to 5.5% on Stimulus, Defying Market Slump",
+        "date": "2026-11-05 04:09",
+        "note": 85,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793854466/actualites_financieres/od6a6wwbrqkyguven6wt.jpg",
+        "publie_le": "2026-11-05T04:54:41.828396+00:00"
+    },
+    "Bloomberg Markets_Japan’s 10-Year Bond Auction Sees Softer Demand as Yields Drop_2026-11-05 03:39": {
+        "source": "Bloomberg Markets",
+        "titre": "Japan’s 10-Year Bond Auction Sees Softer Demand as Yields Drop",
+        "date": "2026-11-05 03:39",
+        "note": 80,
+        "categorie": "Bonds",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793854500/actualites_financieres/gb5beihzntlmjvp30jbw.jpg",
+        "publie_le": "2026-11-05T04:55:10.912020+00:00"
+    },
+    "Bloomberg Markets_Hong Kong Stocks Roar Back as Value Rotation Boosts China Tech_2026-11-05 03:35": {
+        "source": "Bloomberg Markets",
+        "titre": "Hong Kong Stocks Roar Back as Value Rotation Boosts China Tech",
+        "date": "2026-11-05 03:35",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793854526/actualites_financieres/fdcwwlrusd29yfmuueeq.jpg",
+        "publie_le": "2026-11-05T04:55:38.111887+00:00"
     }
 }
