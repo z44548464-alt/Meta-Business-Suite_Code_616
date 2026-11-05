@@ -9762,5 +9762,95 @@
         "categorie": "Stocks",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793858309/actualites_financieres/npfp5j0x9yukmpwnogvi.jpg",
         "publie_le": "2026-11-05T05:58:43.032264+00:00"
+    },
+    "Bloomberg Economics_South Africa Debt Ratios Lowered by Data Overhaul, Treasury Says_2026-11-05 06:43": {
+        "source": "Bloomberg Economics",
+        "titre": "South Africa Debt Ratios Lowered by Data Overhaul, Treasury Says",
+        "date": "2026-11-05 06:43",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793862061/actualites_financieres/smlnm5dvzpjnpe0pvwji.jpg",
+        "publie_le": "2026-11-05T07:01:11.866874+00:00"
+    },
+    "Bloomberg Markets_DIP Holding: IPO More or Less 4 Times Oversubscribed_2026-11-05 06:31": {
+        "source": "Bloomberg Markets",
+        "titre": "DIP Holding: IPO More or Less 4 Times Oversubscribed",
+        "date": "2026-11-05 06:31",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793862093/actualites_financieres/giwpngfgaqyiknsrksyk.jpg",
+        "publie_le": "2026-11-05T07:01:43.809303+00:00"
+    },
+    "OilPrice_Oil Prices Continue to Fall as Democratic Sweep Shakes Energy Markets_2026-11-05 06:30": {
+        "source": "OilPrice",
+        "titre": "Oil Prices Continue to Fall as Democratic Sweep Shakes Energy Markets",
+        "date": "2026-11-05 06:30",
+        "note": 90,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793862143/actualites_financieres/dwnnyq0rimclu1whga0x.jpg",
+        "publie_le": "2026-11-05T07:02:30.131952+00:00"
+    },
+    "Bloomberg Markets_Ascendas Firstspace Said to Consider $500 Million India IPO_2026-11-05 06:21": {
+        "source": "Bloomberg Markets",
+        "titre": "Ascendas Firstspace Said to Consider $500 Million India IPO",
+        "date": "2026-11-05 06:21",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793862168/actualites_financieres/vztppnxc8ppta6xszuyx.jpg",
+        "publie_le": "2026-11-05T07:02:55.114592+00:00"
+    },
+    "Bloomberg Markets_ArcelorMittal Sees Profit Boost From Tougher EU Steel Curbs_2026-11-05 06:14": {
+        "source": "Bloomberg Markets",
+        "titre": "ArcelorMittal Sees Profit Boost From Tougher EU Steel Curbs",
+        "date": "2026-11-05 06:14",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793862190/actualites_financieres/hotakdqdivemypkspsyd.jpg",
+        "publie_le": "2026-11-05T07:03:17.977308+00:00"
+    },
+    "Bloomberg Markets_Commerzbank Sees 45% Jump in Profit Ahead of UniCredit Deal_2026-11-05 06:08": {
+        "source": "Bloomberg Markets",
+        "titre": "Commerzbank Sees 45% Jump in Profit Ahead of UniCredit Deal",
+        "date": "2026-11-05 06:08",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793862213/actualites_financieres/dotnrnw7zkuwasckv1i0.jpg",
+        "publie_le": "2026-11-05T07:03:40.539346+00:00"
+    },
+    "Bloomberg Markets_China Mulls Dollar, Offshore Yuan Sovereign Bond Sale This Month_2026-11-05 06:02": {
+        "source": "Bloomberg Markets",
+        "titre": "China Mulls Dollar, Offshore Yuan Sovereign Bond Sale This Month",
+        "date": "2026-11-05 06:02",
+        "note": 80,
+        "categorie": "Bonds",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793862239/actualites_financieres/pv0nwrewzm2p4yd1odva.jpg",
+        "publie_le": "2026-11-05T07:04:06.328771+00:00"
+    },
+    "Bloomberg Economics_BOE Poised for First Rate Hike in Three Years: Decision Guide_2026-11-05 06:00": {
+        "source": "Bloomberg Economics",
+        "titre": "BOE Poised for First Rate Hike in Three Years: Decision Guide",
+        "date": "2026-11-05 06:00",
+        "note": 95,
+        "categorie": "Central banks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793862263/actualites_financieres/fo7hp797rpypdh0spmjj.jpg",
+        "publie_le": "2026-11-05T07:04:29.632722+00:00"
+    },
+    "Bloomberg Markets_Indonesia Faces Test in First Dollar Bond Since MSCI Threat_2026-11-05 03:26": {
+        "source": "Bloomberg Markets",
+        "titre": "Indonesia Faces Test in First Dollar Bond Since MSCI Threat",
+        "date": "2026-11-05 03:26",
+        "note": 80,
+        "categorie": "Bonds",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793862312/actualites_financieres/onqbwp6opevsztqd2exz.jpg",
+        "publie_le": "2026-11-05T07:05:19.629992+00:00"
+    },
+    "Financial Times_Democratic wave keeps US wealth taxes alive despite California loss_2026-11-05 00:52": {
+        "source": "Financial Times",
+        "titre": "Democratic wave keeps US wealth taxes alive despite California loss",
+        "date": "2026-11-05 00:52",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793862339/actualites_financieres/nt5tdi17vmawz233zp8w.jpg",
+        "publie_le": "2026-11-05T07:05:46.474715+00:00"
     }
 }
