@@ -11436,5 +11436,23 @@
         "categorie": "Stocks",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793937373/actualites_financieres/hn0qlr3zftjapzobgieq.jpg",
         "publie_le": "2026-11-06T03:56:26.849196+00:00"
+    },
+    "Seeking Alpha_Market Swims In A Sea Of Red_2026-11-06 04:15": {
+        "source": "Seeking Alpha",
+        "titre": "Market Swims In A Sea Of Red",
+        "date": "2026-11-06 04:15",
+        "note": 80,
+        "categorie": "Indices",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793940710/actualites_financieres/aqi5qsjudusgzqs2vmpc.jpg",
+        "publie_le": "2026-11-06T04:52:00.735829+00:00"
+    },
+    "Bloomberg Economics_Trump’s Trouncing Gives Warsh Room for Maneuver on Rates_2026-11-05 11:00": {
+        "source": "Bloomberg Economics",
+        "titre": "Trump’s Trouncing Gives Warsh Room for Maneuver on Rates",
+        "date": "2026-11-05 11:00",
+        "note": 80,
+        "categorie": "Central banks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793940879/actualites_financieres/eibeipmpx9mot1itwefg.jpg",
+        "publie_le": "2026-11-06T04:54:49.987236+00:00"
     }
 }
