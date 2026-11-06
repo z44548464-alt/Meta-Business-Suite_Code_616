@@ -11994,5 +11994,104 @@
         "categorie": "Stocks",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793970614/actualites_financieres/rsmytzizk0ka3z6hhjey.jpg",
         "publie_le": "2026-11-06T13:10:28.814022+00:00"
+    },
+    "CNBC Economy_U.S. economy added 165,000 jobs in October, way more than expected; unemployment rate slips to 4.1%_2026-11-06 13:58": {
+        "source": "CNBC Economy",
+        "titre": "U.S. economy added 165,000 jobs in October, way more than expected; unemployment rate slips to 4.1%",
+        "date": "2026-11-06 13:58",
+        "note": 95,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793973911/actualites_financieres/odhruovypsagflq1a9tt.jpg",
+        "publie_le": "2026-11-06T14:05:22.229896+00:00"
+    },
+    "Financial Times_US economy outstrips forecasts to add 165,000 jobs in October_2026-11-06 13:56": {
+        "source": "Financial Times",
+        "titre": "US economy outstrips forecasts to add 165,000 jobs in October",
+        "date": "2026-11-06 13:56",
+        "note": 90,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793973938/actualites_financieres/qd9dsnwour2ltu6uy6r7.jpg",
+        "publie_le": "2026-11-06T14:05:48.795927+00:00"
+    },
+    "Seeking Alpha_CVS Health: The Breakup Puts A Price On The Pharmacy_2026-11-06 13:53": {
+        "source": "Seeking Alpha",
+        "titre": "CVS Health: The Breakup Puts A Price On The Pharmacy",
+        "date": "2026-11-06 13:53",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793973972/actualites_financieres/fqj4f0dfv4amdoinjtlz.jpg",
+        "publie_le": "2026-11-06T14:06:22.093462+00:00"
+    },
+    "Seeking Alpha_Phoenix Education Partners: Timing And Operational Recovery Remain Uncertain_2026-11-06 13:50": {
+        "source": "Seeking Alpha",
+        "titre": "Phoenix Education Partners: Timing And Operational Recovery Remain Uncertain",
+        "date": "2026-11-06 13:50",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793973998/actualites_financieres/mzmtrkndmnuoybohhkz2.jpg",
+        "publie_le": "2026-11-06T14:06:49.431530+00:00"
+    },
+    "NPR Economy_Hiring jumps: The economy added 165,000 jobs last month_2026-11-06 13:49": {
+        "source": "NPR Economy",
+        "titre": "Hiring jumps: The economy added 165,000 jobs last month",
+        "date": "2026-11-06 13:49",
+        "note": 90,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793974045/actualites_financieres/mqdgbycd1oklia4l7qoc.jpg",
+        "publie_le": "2026-11-06T14:07:34.465030+00:00"
+    },
+    "Bloomberg Markets_US Treasuries Stumble as Strong Labor Market Lifts Fed-Hike Bets_2026-11-06 13:47": {
+        "source": "Bloomberg Markets",
+        "titre": "US Treasuries Stumble as Strong Labor Market Lifts Fed-Hike Bets",
+        "date": "2026-11-06 13:47",
+        "note": 90,
+        "categorie": "Bonds",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793974070/actualites_financieres/zqvlecbugbltqswzhzl6.jpg",
+        "publie_le": "2026-11-06T14:07:59.915459+00:00"
+    },
+    "Bloomberg Economics_US Adds 165,000 Jobs, Topping All Forecasts in Broad Advance_2026-11-06 13:31": {
+        "source": "Bloomberg Economics",
+        "titre": "US Adds 165,000 Jobs, Topping All Forecasts in Broad Advance",
+        "date": "2026-11-06 13:31",
+        "note": 95,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793974100/actualites_financieres/r1gkoxhx2isdew7hi6py.jpg",
+        "publie_le": "2026-11-06T14:08:30.315507+00:00"
+    },
+    "Bloomberg Markets_Canada Jobless Rate Rises to 6.7%, Employment Falls Slightly_2026-11-06 13:30": {
+        "source": "Bloomberg Markets",
+        "titre": "Canada Jobless Rate Rises to 6.7%, Employment Falls Slightly",
+        "date": "2026-11-06 13:30",
+        "note": 85,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793974131/actualites_financieres/m2c7hl0b4ujgjvfgfcxc.jpg",
+        "publie_le": "2026-11-06T14:09:08.178299+00:00"
+    },
+    "Bloomberg Markets_Anthropic IPO Investors Weigh Valuation as Low as $1.2 Trillion_2026-11-06 13:12": {
+        "source": "Bloomberg Markets",
+        "titre": "Anthropic IPO Investors Weigh Valuation as Low as $1.2 Trillion",
+        "date": "2026-11-06 13:12",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793974179/actualites_financieres/lmzjytqdcm9etq02hjbe.jpg",
+        "publie_le": "2026-11-06T14:09:49.534338+00:00"
+    },
+    "Financial Times Markets_Spanish farmers told to keep olive oil off the market after bumper harvest_2026-11-06 12:46": {
+        "source": "Financial Times Markets",
+        "titre": "Spanish farmers told to keep olive oil off the market after bumper harvest",
+        "date": "2026-11-06 12:46",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793974211/actualites_financieres/f9kjz2ly5ccjalc965a5.jpg",
+        "publie_le": "2026-11-06T14:10:20.589393+00:00"
+    },
+    "Bloomberg Markets_Stocks Selloff Pauses Rebound After Tech Rout; Jobs Report Ahead_2026-11-06 12:45": {
+        "source": "Bloomberg Markets",
+        "titre": "Stocks Selloff Pauses Rebound After Tech Rout; Jobs Report Ahead",
+        "date": "2026-11-06 12:45",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793974236/actualites_financieres/hsnqgvurywsntg6kmia4.jpg",
+        "publie_le": "2026-11-06T14:10:45.905853+00:00"
     }
 }
