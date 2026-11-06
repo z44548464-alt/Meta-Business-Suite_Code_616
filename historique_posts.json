@@ -12336,5 +12336,104 @@
         "categorie": "Economic news",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793984129/actualites_financieres/bsnfhffoab8d2kw93wrd.jpg",
         "publie_le": "2026-11-06T16:55:37.560464+00:00"
+    },
+    "OilPrice_ONGC Moves to Take Over Venezuelan Oilfields, Recover $500 Million_2026-11-06 17:30": {
+        "source": "OilPrice",
+        "titre": "ONGC Moves to Take Over Venezuelan Oilfields, Recover $500 Million",
+        "date": "2026-11-06 17:30",
+        "note": 80,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793987127/actualites_financieres/nf3mgesmxwuksgmtlwio.jpg",
+        "publie_le": "2026-11-06T17:45:42.301577+00:00"
+    },
+    "Seeking Alpha_Beyond Meat: Troubles Only Building_2026-11-06 17:26": {
+        "source": "Seeking Alpha",
+        "titre": "Beyond Meat: Troubles Only Building",
+        "date": "2026-11-06 17:26",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793987161/actualites_financieres/foozh6j1c44j76zv8g0k.jpg",
+        "publie_le": "2026-11-06T17:46:16.440356+00:00"
+    },
+    "Bloomberg Economics_BOJ’s Ueda Says Unclear How Long 2% Inflation Rate Will Remain_2026-11-06 17:16": {
+        "source": "Bloomberg Economics",
+        "titre": "BOJ’s Ueda Says Unclear How Long 2% Inflation Rate Will Remain",
+        "date": "2026-11-06 17:16",
+        "note": 80,
+        "categorie": "Central banks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793987198/actualites_financieres/kfxcusfoobc6zkc7rtad.jpg",
+        "publie_le": "2026-11-06T17:46:53.686265+00:00"
+    },
+    "CNBC Finance_The AI ‘credit card’ is getting costlier as CoreWeave bond yield tops 16%_2026-11-06 17:09": {
+        "source": "CNBC Finance",
+        "titre": "The AI ‘credit card’ is getting costlier as CoreWeave bond yield tops 16%",
+        "date": "2026-11-06 17:09",
+        "note": 80,
+        "categorie": "Bonds",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793987234/actualites_financieres/kcth99robmiqa1fuda1r.jpg",
+        "publie_le": "2026-11-06T17:47:28.660535+00:00"
+    },
+    "Bloomberg Markets_Spain Orders Olive Oil Mills to Hold Back Output to Lift Prices_2026-11-06 16:08": {
+        "source": "Bloomberg Markets",
+        "titre": "Spain Orders Olive Oil Mills to Hold Back Output to Lift Prices",
+        "date": "2026-11-06 16:08",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793987280/actualites_financieres/r2srffs24ar1bzutqume.jpg",
+        "publie_le": "2026-11-06T17:48:15.568508+00:00"
+    },
+    "Bloomberg Markets_Brookfield Raises $25 Billion Amid AI Push as Profits Rise_2026-11-06 12:09": {
+        "source": "Bloomberg Markets",
+        "titre": "Brookfield Raises $25 Billion Amid AI Push as Profits Rise",
+        "date": "2026-11-06 12:09",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793987364/actualites_financieres/enploxvbnevzicj52ftk.jpg",
+        "publie_le": "2026-11-06T17:49:37.946976+00:00"
+    },
+    "Bloomberg Markets_European Stocks Trim Weekly Gain With Milder Swings Than the US_2026-11-06 08:23": {
+        "source": "Bloomberg Markets",
+        "titre": "European Stocks Trim Weekly Gain With Milder Swings Than the US",
+        "date": "2026-11-06 08:23",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793987444/actualites_financieres/ua6qa6ghdviahekymeup.jpg",
+        "publie_le": "2026-11-06T17:50:56.930333+00:00"
+    },
+    "Bloomberg Economics_ECB Deadline to Show If Lagarde Contest Is a Two-Horse Race_2026-11-06 05:15": {
+        "source": "Bloomberg Economics",
+        "titre": "ECB Deadline to Show If Lagarde Contest Is a Two-Horse Race",
+        "date": "2026-11-06 05:15",
+        "note": 80,
+        "categorie": "Central banks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793987474/actualites_financieres/zfr3hqzyu1ufjw3vkljz.jpg",
+        "publie_le": "2026-11-06T17:51:26.895171+00:00"
+    },
+    "Bloomberg Markets_Brazil Puts Rare Earths at Heart of Critical Minerals Push_2026-11-05 22:50": {
+        "source": "Bloomberg Markets",
+        "titre": "Brazil Puts Rare Earths at Heart of Critical Minerals Push",
+        "date": "2026-11-05 22:50",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793987556/actualites_financieres/kqwt3ddwbxd8o1xekh4g.jpg",
+        "publie_le": "2026-11-06T17:52:48.792916+00:00"
+    },
+    "Bloomberg Markets_Stocks Climb in AI Trade Revival as Bonds Decline: Markets Wrap_2026-11-05 22:17": {
+        "source": "Bloomberg Markets",
+        "titre": "Stocks Climb in AI Trade Revival as Bonds Decline: Markets Wrap",
+        "date": "2026-11-05 22:17",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793987585/actualites_financieres/fljlvzgolcuu7ksczcek.jpg",
+        "publie_le": "2026-11-06T17:53:17.787843+00:00"
+    },
+    "Bloomberg Markets_DraftKings Plunges 29% After Slashing Profit Projection_2026-11-05 21:47": {
+        "source": "Bloomberg Markets",
+        "titre": "DraftKings Plunges 29% After Slashing Profit Projection",
+        "date": "2026-11-05 21:47",
+        "note": 90,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1793987619/actualites_financieres/wb56hcnp2nkcu5lrmjon.jpg",
+        "publie_le": "2026-11-06T17:53:51.421655+00:00"
     }
 }
