@@ -12885,5 +12885,50 @@
         "categorie": "Stocks",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794055051/actualites_financieres/mcobc5gfdxoygporg3ty.jpg",
         "publie_le": "2026-11-07T12:37:44.410135+00:00"
+    },
+    "MarketWatch_The AI trade is now counting on Anthropic’s IPO — but it couldn’t be happening at a worse time_2026-11-07 13:30": {
+        "source": "MarketWatch",
+        "titre": "The AI trade is now counting on Anthropic’s IPO — but it couldn’t be happening at a worse time",
+        "date": "2026-11-07 13:30",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794059087/actualites_financieres/glyrjwwgmdvv5ebxr051.jpg",
+        "publie_le": "2026-11-07T13:44:58.596893+00:00"
+    },
+    "Seeking Alpha_U.S. Government Has Borrowed $2T In 10 Months_2026-11-07 13:25": {
+        "source": "Seeking Alpha",
+        "titre": "U.S. Government Has Borrowed $2T In 10 Months",
+        "date": "2026-11-07 13:25",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794059123/actualites_financieres/w1ugs12gsupm1mv3p2el.jpg",
+        "publie_le": "2026-11-07T13:45:32.297313+00:00"
+    },
+    "Seeking Alpha_Stronger-Than-Expected Jobs Report Increases Hike Probability, But Outcome Is Not Conclusive_2026-11-07 13:15": {
+        "source": "Seeking Alpha",
+        "titre": "Stronger-Than-Expected Jobs Report Increases Hike Probability, But Outcome Is Not Conclusive",
+        "date": "2026-11-07 13:15",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794059158/actualites_financieres/qqujoms3q5o0xzmwm23f.jpg",
+        "publie_le": "2026-11-07T13:46:15.676055+00:00"
+    },
+    "Bloomberg Markets_Berkshire Hathaway’s Operating Earnings Fall, Buybacks Rise_2026-11-07 13:01": {
+        "source": "Bloomberg Markets",
+        "titre": "Berkshire Hathaway’s Operating Earnings Fall, Buybacks Rise",
+        "date": "2026-11-07 13:01",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794059202/actualites_financieres/rshkdvnl0ek7cnjkp4yo.jpg",
+        "publie_le": "2026-11-07T13:46:57.080340+00:00"
+    },
+    "Bloomberg Markets_Crypto’s Trump-Fueled Washington Boom Reaches Its Endgame_2026-11-07 13:00": {
+        "source": "Bloomberg Markets",
+        "titre": "Crypto’s Trump-Fueled Washington Boom Reaches Its Endgame",
+        "date": "2026-11-07 13:00",
+        "note": 80,
+        "categorie": "Crypto",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794059239/actualites_financieres/si0wsc2yvnezifqzfimh.jpg",
+        "publie_le": "2026-11-07T13:47:28.072270+00:00"
     }
 }
