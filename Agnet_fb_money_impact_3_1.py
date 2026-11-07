@@ -2366,9 +2366,9 @@ def publier_video_reel(historique):
     """Appelle le module séparé video_reel.py (lit uniquement la Page Facebook).
     Ne lève jamais d'exception et ne change pas le code de sortie du script."""
     try:
-        from video_reel import publier_video_reel as _run
+        from video_reel_2 import publier_video_reel as _run
     except Exception as e:
-        log(f"Module video_reel.py introuvable ou invalide ({type(e).__name__}: {str(e)[:200]}) : "
+        log(f"Module video_reel_2.py introuvable ou invalide ({type(e).__name__}: {str(e)[:200]}) : "
             "vidéo ignorée.", level="ERROR")
         return
     ctx = SimpleNamespace(
