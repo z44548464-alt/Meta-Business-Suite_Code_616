@@ -1,6 +1,6 @@
 import sys
 import faulthandler
-SCRIPT_VERSION = "2026-11-02-money-impact-v6-cartes-dynamiques"
+SCRIPT_VERSION = "2026-11-07-money-impact-video-v4-arabic-guard"
 print(f"▶ Python démarré (version {SCRIPT_VERSION}), chargement des modules…", flush=True)
 faulthandler.enable()
 faulthandler.dump_traceback_later(90, repeat=True, file=sys.stderr)
@@ -13,9 +13,6 @@ import traceback
 import json
 import re
 import time
-import random
-import zlib
-from collections import Counter
 from pathlib import Path
 from datetime import datetime, timezone
 from types import SimpleNamespace
@@ -40,6 +37,49 @@ except ImportError:
     ARABIC_OK = False
     print("ATTENTION : pip install arabic-reshaper python-bidi (sinon l'arabe sera mal affiché)")
 print("▶ Modules chargés.", flush=True)
+
+# ======================================================================
+# GARDE-FOU « 100 % ARABE » (plus de carrés □□□ sur les images)
+# ======================================================================
+_AR_LETTER = re.compile(r"[\u0621-\u064A\u066E-\u06D3\u06FA-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]")
+_LAT_LETTER = re.compile(r"[A-Za-z\u00C0-\u024F]")
+# écritures ni arabes ni latines : chinois, japonais, coréen, cyrillique, grec, hébreu, hindi, thaï...
+_FOREIGN = re.compile(
+    "[\u0370-\u03FF\u0400-\u052F\u0590-\u05FF\u0900-\u0DFF\u0E00-\u0EFF\u1100-\u11FF"
+    "\u2E80-\u2FDF\u3000-\u303F\u3040-\u30FF\u3100-\u312F\u3130-\u318F\u3400-\u4DBF"
+    "\u4E00-\u9FFF\uA960-\uA97F\uAC00-\uD7FF\uF900-\uFAFF\uFF00-\uFFEF]")
+_ALLOWED_IMG = re.compile(
+    r"[^\u0621-\u064A\u066E-\u06D3\u06FA-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF"
+    r"A-Za-z\u00C0-\u024F0-9\u0660-\u0669\s.,:;!?%$€£¥/+\-–—()'’\"«»،؛؟&@#]")
+_INVISIBLE = re.compile(r"[\u200B-\u200F\u202A-\u202E\u2066-\u2069\uFEFF]")
+_TASHKEEL = re.compile(r"[\u064B-\u065F\u0670\u06D6-\u06ED\u0640]")
+_URL_TAG = re.compile(r"https?://\S+|#\S+|@\S+")
+
+
+def est_arabe(text, min_ratio=0.6, min_letters=8):
+    """True si le texte est de l'arabe (noms propres / sigles latins tolérés), sans chinois,
+    cyrillique, etc."""
+    t = text or ""
+    if _FOREIGN.search(t):
+        return False
+    t2 = _URL_TAG.sub(" ", t)
+    ar, lat = len(_AR_LETTER.findall(t2)), len(_LAT_LETTER.findall(t2))
+    if ar < min_letters:
+        return False
+    return ar / (ar + lat) >= min_ratio
+
+
+def nettoyer_etranger(text):
+    """Retire chinois/cyrillique/etc. et caractères invisibles (garde arabe, latin, emojis)."""
+    t = _INVISIBLE.sub("", _FOREIGN.sub("", text or ""))
+    return re.sub(r"[ \t]{2,}", " ", t).strip()
+
+
+def nettoyer_pour_image(text):
+    """Texte sûr pour la police de l'image : pas d'emoji, de CJK, de voyelles ni d'invisibles."""
+    t = _TASHKEEL.sub("", _INVISIBLE.sub("", text or ""))
+    return " ".join(_ALLOWED_IMG.sub("", t).split())
+
 
 # ======================================================================
 # CONFIGURATION
@@ -90,7 +130,7 @@ MIN_NEWS_SCORE = 75
 # Types d'article acceptés (le LLM doit en choisir un).
 ACCEPTED_ARTICLE_TYPES = ("market_news", "macro_data", "central_bank", "company_market_event")
 # Seuil de similarité (0-1) au-delà duquel deux titres sont considérés comme doublons.
-DUPLICATE_TITLE_SIMILARITY = 0.50
+DUPLICATE_TITLE_SIMILARITY = 0.70
 
 # Hashtags ajoutés après la ligne « المصدر » (de base + selon la catégorie validée).
 HASHTAGS_BASE = "#الأسواق_المالية #اقتصاد #أخبار_اقتصادية #استثمار #تداول #money_impact"
@@ -215,23 +255,12 @@ def _find_logo():
 LOGO_PATH = _find_logo()
 LOGO_BACKDROP = os.getenv("LOGO_BACKDROP", "0") == "1"
 
-# Palettes variées : évite que toutes les images aient exactement la même couleur.
-PALETTES = (
-    "deep navy blue and warm gold",
-    "deep emerald green and soft silver",
-    "dark charcoal and electric teal",
-    "deep burgundy and warm amber",
-    "midnight purple and copper",
-)
-
 STYLE_SUFFIX = (
     "warm cinematic side lighting, shot on Canon EOS R5, 85mm f/1.4 lens, "
     "shallow depth of field, creamy bokeh, tack-sharp focus on the hero subject, "
     "editorial photography, professional color grading in deep navy blue and warm gold, "
-    "photorealistic, ultra detailed, 8k, hero subject in the upper 60% of the frame, "
-    "lower 40% of the frame dark, smooth and uncluttered, "
-    "all surfaces blank and smooth, no engravings, no stamps, no serial numbers, "
-    "no text, no letters, no numbers, no logos, no people"
+    "photorealistic, ultra detailed, 8k, hero subject in the upper 60% of the frame, lower 40% of the frame dark, smooth and uncluttered, "
+    "no text, no letters, no logos, no people"
 )
 
 # ---------------------------------------------------------------------
@@ -531,7 +560,6 @@ class TextPost:
     def __init__(self):
         # URL Cloudinary de la dernière image publiée (conservée dans l'historique des posts).
         self.last_image_url = None
-        self.carte_metrics = {}
 
     # ------------------------------------------------------------------
     # 1) Prompt d'image
@@ -552,29 +580,25 @@ class TextPost:
         Identify the MAIN SUBJECT of this news and write ONE photorealistic editorial
         photo description that represents it visually.
 
-        Subject mapping examples (choose objects WITHOUT any writing on them):
-        - bond yields / Treasuries -> marble columns of a neoclassical government building
-        - gold -> raw gold nuggets on dark stone, or a smooth blank gold ingot half in shadow
-        - oil -> refinery at dusk, oil pumpjack, or steel barrels with blank surfaces
-        - central bank -> neoclassical central bank facade with columns
-        - US dollar / other currency -> the US Capitol dome at dusk, or a national landmark of that country
-        - stock selloff / rally -> bronze bull statue or stock exchange facade
-        - crypto -> blank smooth metallic coin standing on edge on reflective black glass
-        - tech / AI / chips -> bare silicon wafer or processor die close-up with no markings
-        - debt / credit / bankruptcy -> closed empty factory gate, padlock on a chain
-        - elections / politics -> government building facade with flags
+        Subject mapping examples:
+        - bond yields / Treasuries -> stack of Treasury bonds on a desk
+        - gold -> gold bars in a vault
+        - oil -> refinery at dusk or oil barrels
+        - central bank -> central bank building facade
+        - US dollar / Aussie / other currency -> banknotes of that currency
+        - stock selloff / rally -> stock exchange facade
+        - crypto -> physical coin on reflective surface
 
         Rules:
         1. The FIRST WORDS must name the exact physical hero subject.
         2. Hero subject sits in the UPPER 60% of the frame, sharp focus, slightly off-center.
         3. Background: relevant but blurred (bokeh). Specific lighting.
         4. The lower 40% of the frame must be dark, smooth and uncluttered.
-        5. Do not mention colors or palette (handled separately).
+        5. Palette: deep navy blue and warm gold.
         6. FORBIDDEN: people, faces, hands, text, letters, numbers, logos, watermarks,
-           abstract shapes, 3D renders, neon, computer screens, AND any object that carries
-           writing or numbers: banknotes, inscribed coins, stamped gold bars, signs,
-           documents, labels, tickers.
+           abstract shapes, 3D renders, neon, computer screens with charts.
         7. Max 60 words. End with: photorealistic, 85mm lens, sharp focus.
+        8. Write the description in ENGLISH only.
 
         OUTPUT ONLY this format:
         POSITIVE PROMPT:
@@ -642,7 +666,8 @@ class TextPost:
 
     @staticmethod
     def _valid_positive(positive):
-        return bool(positive) and len(positive.split()) >= 6
+        # Le prompt d'image doit être en anglais : rejette tout prompt contenant du CJK/cyrillique...
+        return bool(positive) and len(positive.split()) >= 6 and not _FOREIGN.search(positive)
 
     def _build_prompt(self, news):
         orders = (
@@ -671,9 +696,7 @@ class TextPost:
             if self._valid_positive(positive):
                 log("LLM : prompt photo reçu et validé.", level="OK")
                 positive = " ".join(positive.split()[:70])
-                palette = random.choice(PALETTES)
-                suffix = STYLE_SUFFIX.replace("deep navy blue and warm gold", palette)
-                return f"{positive}, {suffix}"
+                return f"{positive}, {STYLE_SUFFIX}"
             log(f"Prompt invalide (essai {attempt + 1}). Réponse brute : "
                 f"{re.sub(chr(10), ' ', text)[:300]!r}", level="WARN")
 
@@ -866,6 +889,7 @@ class TextPost:
     def _load_font(size):
         candidates = [
             "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+            "/usr/share/fonts/truetype/noto/NotoSans-Bold.ttf",
             "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
             "/usr/share/fonts/truetype/freefont/FreeSansBold.ttf",
         ]
@@ -892,6 +916,7 @@ class TextPost:
             str(BASE_DIR / "fonts" / "Tajawal-Bold.ttf"),
             str(BASE_DIR / "fonts" / "NotoSansArabic-Bold.ttf"),
             "/usr/share/fonts/truetype/noto/NotoSansArabic-Bold.ttf",
+            "/usr/share/fonts/opentype/noto/NotoSansArabic-Bold.ttf",
             "/usr/share/fonts/truetype/noto/NotoNaskhArabic-Bold.ttf",
             "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
             "/usr/share/fonts/truetype/freefont/FreeSansBold.ttf",
@@ -1067,6 +1092,8 @@ class TextPost:
             return None
 
     def _add_branding(self, img, headline=None):
+        # Filet de sécurité : jamais de caractères que la police ne sait pas dessiner (□□□).
+        headline = nettoyer_pour_image(headline) if headline else headline
         img = img.convert("RGBA")
         w, h = img.size
         margin = int(w * 0.07)
@@ -1195,6 +1222,11 @@ class TextPost:
         img = ImageOps.fit(img, (OUT_W, OUT_H), Image.LANCZOS, centering=(0.5, 0.4))
         img = self._enhance_image(img)
 
+        # Titre : uniquement arabe/latin/chiffres. Sinon image sans titre (jamais de carrés □□□).
+        headline = nettoyer_pour_image(headline or "")
+        if headline and not est_arabe(headline, min_letters=10):
+            log("Titre non arabe/illisible : image générée sans titre.", level="WARN")
+            headline = None
         log("Image 5/5 : logo + titre arabe"
             + (f" : « {headline} »" if headline else " (aucun titre)"))
         img = self._add_branding(img, headline)
@@ -1300,302 +1332,6 @@ class TextPost:
         except Exception as e:
             log(f"Instagram : exception {type(e).__name__} : {str(e)[:300]}", level="ERROR")
         return False
-
-    # ------------------------------------------------------------------
-    # CARTES ÉDUCATIVES + SONDAGE (sans API d'image) — DYNAMIQUES
-    #   La palette dépend de la catégorie de la news, le motif de fond du titre.
-    # ------------------------------------------------------------------
-    _CARTE_PALETTES = (
-        {"top": (5, 14, 46), "bottom": (14, 52, 120), "accent": (255, 196, 0), "ink": (5, 12, 30)},      # bleu / or
-        {"top": (4, 30, 24), "bottom": (12, 84, 62), "accent": (205, 214, 224), "ink": (4, 20, 16)},     # vert / argent
-        {"top": (28, 8, 52), "bottom": (82, 34, 120), "accent": (222, 140, 72), "ink": (26, 8, 40)},     # violet / cuivre
-    )
-    _CAT_PALETTE = {"Gold": 0, "Forex": 0, "Central banks": 0, "Market impact": 0,
-                    "Indices": 1, "Stocks": 1, "Economic news": 1,
-                    "Oil": 2, "Crypto": 2, "Bonds": 2}
-    _CARTE_BOTTOM = 1226          # bas de la zone de contenu (le pied de carte est en dessous)
-
-    @staticmethod
-    def _vcenter(font, cy):
-        a, d = font.ar.getmetrics()
-        return int(cy - (a + d) / 2)
-
-    @classmethod
-    def _carte_palette(cls, categorie=None):
-        i = cls._CAT_PALETTE.get(categorie)
-        if i is None:
-            i = datetime.now(timezone.utc).timetuple().tm_yday % len(cls._CARTE_PALETTES)
-        return cls._CARTE_PALETTES[i]
-
-    @staticmethod
-    def _carte_fond(pal, seed):
-        """Dégradé diagonal + grille fine + courbe de chandeliers (opacité ~8 %)."""
-        w, h = OUT_W, OUT_H
-        v = Image.linear_gradient("L").resize((w, h), Image.BILINEAR)
-        hz = Image.linear_gradient("L").transpose(Image.Transpose.ROTATE_90).resize((w, h), Image.BILINEAR)
-        diag = Image.blend(v, hz, 0.45)
-        img = Image.composite(Image.new("RGB", (w, h), pal["bottom"]),
-                              Image.new("RGB", (w, h), pal["top"]), diag)
-        ov = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-        d = ImageDraw.Draw(ov)
-        for x in range(0, w, 90):
-            d.line([(x, 0), (x, h)], fill=(255, 255, 255, 12), width=1)
-        for y in range(0, h, 90):
-            d.line([(0, y), (w, y)], fill=(255, 255, 255, 12), width=1)
-        rnd = random.Random(seed)
-        y, x, step = rnd.randint(780, 900), -10, 66
-        accent = pal["accent"]
-        while x < w + step:
-            o = y
-            c = max(330, min(1120, y + rnd.uniform(-52, 38)))
-            hi = min(o, c) - rnd.randint(8, 40)
-            lo = max(o, c) + rnd.randint(8, 40)
-            col = accent + (24,) if c < o else (255, 255, 255, 18)
-            d.line([(x + 16, hi), (x + 16, lo)], fill=col, width=3)
-            d.rectangle([x, min(o, c), x + 32, max(o, c) + 2], fill=col)
-            y, x = c, x + step
-        return Image.alpha_composite(img.convert("RGBA"), ov).convert("RGB")
-
-    def _carte_cadre(self, kicker, headline, pal, seed):
-        """Fond + logo + badge pilule + gros titre. Retourne (img, draw, margin, right, max_w, top)."""
-        w, h = OUT_W, OUT_H
-        img = self._add_branding(self._carte_fond(pal, seed), None).convert("RGB")
-        draw = ImageDraw.Draw(img, "RGBA")      # mode RGBA sur image RGB = transparence réelle
-        margin = int(w * 0.07)
-        right, max_w = w - margin, w - 2 * margin
-        accent, ink = pal["accent"], pal["ink"]
-
-        # Badge pilule
-        f_k = self._load_arabic_font(40)
-        kw = int(self._line_width(draw, kicker, f_k))
-        pad_x, bh, by0 = 42, 78, 62
-        draw.rounded_rectangle([right - kw - 2 * pad_x, by0, right, by0 + bh],
-                               radius=bh // 2, fill=accent + (255,))
-        self._draw_rtl_line(draw, right - pad_x, self._vcenter(f_k, by0 + bh // 2),
-                            kicker, f_k, ink + (255,))
-
-        # Titre : 2 lignes >= 84 px si possible, sinon 3 lignes
-        choix = None
-        for max_l, smin in ((2, 84), (3, 76)):
-            for size in range(100, smin - 1, -4):
-                font = self._load_arabic_font(size)
-                lines = self._wrap(draw, headline, font, max_w)
-                if len(lines) <= max_l:
-                    choix = (size, font, lines)
-                    break
-            if choix:
-                break
-        truncated = False
-        if choix is None:
-            size = 76
-            font = self._load_arabic_font(size)
-            lines = self._wrap(draw, headline, font, max_w)
-            if len(lines) > 3:
-                truncated = True
-                lines = lines[:3]
-                lines[-1] = lines[-1].rstrip(" ،,.") + "…"
-            choix = (size, font, lines)
-        size, font, lines = choix
-        lh = int(size * 1.22)
-        y = 190
-        for ln in lines:
-            self._draw_rtl_line(draw, right, y + 4, ln, font, (0, 0, 0, 150))
-            self._draw_rtl_line(draw, right, y, ln, font, (255, 255, 255, 255))
-            y += lh
-        draw.rounded_rectangle([right - 200, y + 6, right, y + 16], radius=5, fill=accent + (255,))
-        top = y + 16 + 22
-        self.carte_metrics = {"title_size": size, "body_size": 0, "truncated": truncated,
-                              "extra_max": 0}
-        return img, draw, margin, right, max_w, top
-
-    def _carte_pied(self, draw, pal, margin, right):
-        accent = pal["accent"]
-        draw.line([(margin, 1250), (right, 1250)], fill=accent + (90,), width=2)
-        f = self._load_arabic_font(34)
-        cy = 1291
-        x0, x1, y0, y1 = right - 26, right, cy - 19, cy + 19
-        draw.polygon([(x0, y0), (x1, y0), (x1, y1), ((x0 + x1) // 2, y1 - 12), (x0, y1)],
-                     fill=accent + (255,))
-        self._draw_rtl_line(draw, x0 - 14, self._vcenter(f, cy), "احفظ المنشور وشاركه",
-                            f, (235, 240, 248, 255))
-
-    def _carte_blocs(self, draw, pal, blocs, margin, right, max_w, top):
-        n = len(blocs)
-        if n == 0:
-            return
-        accent, ink = pal["accent"], pal["ink"]
-        x0, x1 = margin, right
-        text_w = max_w - 74
-        gap, pad_v, hh = 16, 20, 56
-        bottom = self._CARTE_BOTTOM
-        avail = bottom - top - gap * (n - 1)
-        fixed = n * (2 * pad_v + hh)
-
-        chosen = None
-        for size in range(58, 37, -2):
-            f = self._load_arabic_font(size)
-            lh = int(size * 1.45)
-            wrapped = [self._wrap(draw, txt, f, text_w) for _, txt in blocs]
-            if sum(len(l) for l in wrapped) * lh + fixed <= avail:
-                chosen = (size, f, lh, wrapped)
-                break
-        truncated = False
-        if chosen is None:           # dernier recours : taille mini + coupe propre (jamais de débordement)
-            size = 38
-            f = self._load_arabic_font(size)
-            lh = int(size * 1.45)
-            wrapped = [self._wrap(draw, txt, f, text_w) for _, txt in blocs]
-            while sum(len(l) for l in wrapped) * lh + fixed > avail:
-                i = max(range(n), key=lambda k: len(wrapped[k]))
-                if len(wrapped[i]) <= 1:
-                    break
-                wrapped[i] = wrapped[i][:-1]
-                wrapped[i][-1] = wrapped[i][-1].rstrip(" ،,.") + "…"
-                truncated = True
-            chosen = (size, f, lh, wrapped)
-        size, f_body, lh, wrapped = chosen
-
-        need = sum(len(l) for l in wrapped) * lh
-        total_extra = max(0, avail - fixed - need)
-        extras = [total_extra // n] * n
-        extras[-1] += total_extra - sum(extras)
-
-        f_lab = self._load_arabic_font(34)
-        f_num = self._load_font(30)
-        y = top
-        for i, ((label, _), lines) in enumerate(zip(blocs, wrapped)):
-            e = extras[i]
-            hbox = 2 * pad_v + hh + len(lines) * lh + e
-            draw.rounded_rectangle([x0, y, x1, y + hbox], radius=28,
-                                   fill=(4, 10, 28, 175), outline=accent + (70,), width=2)
-            draw.rounded_rectangle([x1 - 22, y + 22, x1 - 10, y + hbox - 22], radius=6,
-                                   fill=accent + (255,))
-            cy = y + pad_v + e // 2 + hh // 2
-            cx = x1 - 44 - 24
-            draw.ellipse([cx - 24, cy - 24, cx + 24, cy + 24], fill=accent + (255,))
-            draw.text((cx, cy), str(i + 1), font=f_num, fill=ink + (255,), anchor="mm")
-            self._draw_rtl_line(draw, cx - 24 - 16, self._vcenter(f_lab, cy), label, f_lab,
-                                accent + (255,))
-            by = y + pad_v + e // 2 + hh
-            for ln in lines:
-                self._draw_rtl_line(draw, x1 - 44, by, ln, f_body, (240, 244, 250, 255))
-                by += lh
-            y += hbox + gap
-        self.carte_metrics.update({"body_size": size, "truncated": truncated,
-                                   "extra_max": max(extras)})
-
-    def generer_carte(self, kicker, headline, blocs, categorie=None):
-        """Carte éducative. blocs = liste de 3 (titre, texte). Palette selon la catégorie."""
-        pal = self._carte_palette(categorie)
-        seed = zlib.crc32((headline or "").encode("utf-8"))
-        img, draw, margin, right, max_w, top = self._carte_cadre(kicker, headline, pal, seed)
-        blocs = [(t, s) for t, s in (blocs or []) if s and str(s).strip()][:3]
-        self._carte_blocs(draw, pal, blocs, margin, right, max_w, top)
-        self._carte_pied(draw, pal, margin, right)
-        return img.convert("RGB")
-
-    def generer_carte_sondage(self, kicker, headline, sous, options, categorie=None):
-        """Sondage : titre + 2 grands boutons dessinés (vert / rouge)."""
-        pal = self._carte_palette(categorie)
-        seed = zlib.crc32((headline or "").encode("utf-8"))
-        img, draw, margin, right, max_w, top = self._carte_cadre(kicker, headline, pal, seed)
-        bottom = self._CARTE_BOTTOM
-        f_s = self._load_arabic_font(46)
-        y = top
-        if sous:
-            for ln in self._wrap(draw, sous, f_s, max_w)[:2]:
-                self._draw_rtl_line(draw, right, y, ln, f_s, (225, 232, 242, 255))
-                y += int(46 * 1.5)
-            y += 14
-        gap = 36
-        bh = (bottom - y - gap) // 2
-        specs = ((options[0], (18, 128, 66), (70, 220, 130), "up"),
-                 (options[1], (176, 36, 52), (255, 105, 110), "down"))
-        for i, (label, c_dark, c_light, sens) in enumerate(specs):
-            y0 = y + i * (bh + gap)
-            y1 = y0 + bh
-            draw.rounded_rectangle([margin, y0, right, y1], radius=44, fill=c_dark + (255,),
-                                   outline=c_light + (255,), width=4)
-            draw.rounded_rectangle([margin + 8, y0 + 8, right - 8, y0 + bh // 2], radius=36,
-                                   fill=(255, 255, 255, 26))
-            r = int(bh * 0.30)
-            cx, cy = right - 60 - r, (y0 + y1) // 2
-            draw.ellipse([cx - r, cy - r, cx + r, cy + r], fill=(255, 255, 255, 255))
-            t = r * 0.5
-            if sens == "up":
-                pts = [(cx, cy - t), (cx - t, cy + t * 0.7), (cx + t, cy + t * 0.7)]
-            else:
-                pts = [(cx, cy + t), (cx - t, cy - t * 0.7), (cx + t, cy - t * 0.7)]
-            draw.polygon(pts, fill=c_dark + (255,))
-            lim = (cx - r - 40) - (margin + 40)
-            ls = 120
-            while True:
-                lf = self._load_arabic_font(ls)
-                if self._line_width(draw, label, lf) <= lim or ls <= 56:
-                    break
-                ls -= 6
-            self._draw_rtl_line(draw, cx - r - 40, self._vcenter(lf, cy), label, lf,
-                                (255, 255, 255, 255))
-        self._carte_pied(draw, pal, margin, right)
-        self.carte_metrics["body_size"] = 46
-        return img.convert("RGB")
-
-    def _evaluer_carte(self):
-        """Auto-évaluation /100 (5 critères x 20), écrite dans les logs."""
-        m = self.carte_metrics or {}
-        title, body = m.get("title_size", 0), m.get("body_size", 0)
-        pts, notes = 0, []
-        lis = (10 if title >= 84 else 5 if title >= 76 else 0) + \
-              (10 if body >= 46 else 5 if body >= 42 else 0)
-        pts += lis
-        notes.append(f"lisibilité {lis}/20 (titre {title}px, corps {body}px)")
-        vide = 20 if m.get("extra_max", 0) <= 135 else 10
-        pts += vide
-        notes.append(f"zones vides {vide}/20")
-        coupe = 0 if m.get("truncated") else 20
-        pts += coupe
-        notes.append(f"texte non coupé {coupe}/20")
-        hier = 20 if body and title >= 1.6 * body else 10
-        pts += hier
-        notes.append(f"hiérarchie {hier}/20")
-        marque = 20 if LOGO_PATH.is_file() else 15
-        pts += marque
-        notes.append(f"marque {marque}/20")
-        log(f"Évaluation carte : {pts}/100 | " + " | ".join(notes),
-            level="OK" if pts == 100 else "WARN")
-        return pts
-
-    def _diffuser(self, chemin, caption):
-        res = {"facebook": False, "instagram": False, "erreur": None}
-        page_id, token = menv("PAGE_ID"), menv("PAGE_ACCESS_TOKEN")
-        ig_id = menv("INSTAGRAM_BUSINESS_ID")
-        cloud = (os.getenv("CLOUDINARY_CLOUD_NAME", ""), os.getenv("CLOUDINARY_API_KEY", ""),
-                 os.getenv("CLOUDINARY_API_SECRET", ""))
-        if not token:
-            res["erreur"] = "PAGE_ACCESS_TOKEN absent"
-            return res
-        if page_id:
-            res["facebook"] = self._publier_facebook(chemin, caption, page_id, token)
-        if ig_id and all(cloud):
-            res["instagram"] = self._publier_instagram(chemin, caption, ig_id, token, cloud)
-        return res
-
-    def publier_carte(self, kicker, headline, contenu, caption, categorie=None):
-        """contenu = liste de 3 (titre, texte) -> carte éducative ;
-        dict {"options", "sous"} -> sondage."""
-        try:
-            if isinstance(contenu, dict):
-                img = self.generer_carte_sondage(kicker, headline, contenu.get("sous", ""),
-                                                 contenu["options"], categorie)
-            else:
-                img = self.generer_carte(kicker, headline, contenu, categorie)
-            self._evaluer_carte()
-            chemin = OUTPUT_DIR / "carte.jpg"
-            img.save(chemin, format="JPEG", quality=95, optimize=True, subsampling=0)
-            return self._diffuser(chemin, caption)
-        except Exception as e:
-            log(f"Carte : {type(e).__name__} {str(e)[:200]}", level="ERROR")
-            return {"facebook": False, "instagram": False, "erreur": str(e)[:200]}
 
     def publier_texte_partout(self, news_original, news_translited, headline=None):
         resultats = {"image": None, "facebook": False, "instagram": False, "erreur": None}
@@ -1812,7 +1548,7 @@ class Extract_post:
     # ------------------------------------------------------------------
     # Validation éditoriale stricte par LLM (note /100, seuil MIN_NEWS_SCORE)
     # ------------------------------------------------------------------
-    def valider_actualite(self, news, article_content, recent_titles=None):
+    def valider_actualite(self, news, article_content):
         """Décision LLM stricte avant toute traduction, image ou publication.
 
         Retourne (accepte, categorie, raison, score)."""
@@ -1838,14 +1574,6 @@ REJECT (relevant=false) all of the following:
 - Articles that merely mention money, prices or a company without a meaningful market impact.
 - Articles whose text is too thin, vague or incomplete to establish the financial event.
 - Duplicated or recycled news that adds no new information.
-- Routine institutional or procedural items: meeting calendars or schedules, market-structure or
-  trading-venue news, niche crypto/regulatory stories, anything of interest only to bond or
-  banking professionals and with no explained impact on ordinary investors or savers.
-- The SAME underlying event or topic as one of the RECENTLY PUBLISHED TITLES, even with different
-  wording or an opposite direction (e.g. gold falls, then gold trims losses).
-Prefer topics that matter to Arab retail traders and savers: gold, US dollar, oil, Bitcoin, major
-indices, big tech stocks, central-bank rate decisions, inflation and jobs data. Score below 75
-anything that only professionals care about.
 Do NOT infer facts that are not in the provided text. A financial RSS source does NOT qualify an article by itself.
 
 Scoring (0-100): 90-100 = major, clear, directly market-moving event; 75-89 = solid market news with a
@@ -1856,11 +1584,9 @@ Return ONLY this JSON object, nothing else (no markdown):
 Use relevant=false and financial_event="" when there is no clear financial event.
 """
         content = (article_content or "").strip()
-        recents = "\n".join(f"- {t[:120]}" for t in (recent_titles or []) if t) or "(none)"
         user = (f"SOURCE: {news.get('source','')}\nTITLE: {news.get('title','')}\n"
                 f"DATE: {news.get('date','')}\nURL: {news.get('link','')}\n"
-                f"RSS EXCERPT: {news.get('continue','')}\nARTICLE TEXT: {content[:12000]}\n\n"
-                f"RECENTLY PUBLISHED TITLES:\n{recents}")
+                f"RSS EXCERPT: {news.get('continue','')}\nARTICLE TEXT: {content[:12000]}")
         messages = [{"role": "system", "content": prompt}, {"role": "user", "content": user}]
         raw = llm_chat(messages, temperature=0.0, max_tokens=500)
         if not raw:
@@ -1979,71 +1705,71 @@ Use relevant=false and financial_event="" when there is no clear financial event
         return caption + suffixe
 
     def tradication_of_text(self, text):
-        prompt = """
-        You are a professional Arabic financial editor writing for a Moroccan / Arab audience of
-        beginner traders and savers. Translate and adapt the news into natural, SIMPLE Modern
-        Standard Arabic. Keep every fact faithful. Do not add facts, numbers or dates that are not
-        in the source. Do not write the source name (it is added separately).
-        Caption structure (about 1300 characters max):
-        1) First line: a hook giving the key fact and why it matters (not a dry statement).
-        2) Two or three short sentences with the key facts.
-        3) A line starting with "💡 ماذا يعني لك؟" explaining in plain words the likely impact on
-           ordinary people or traders. Use cautious wording (قد / من المحتمل). Mention the dirham
-           or Morocco ONLY if the news clearly involves the US dollar, euro, oil, gold or global
-           interest rates, and never invent figures.
-        4) A last line with a short question inviting comments, for example:
-           "هل تتوقع ...؟ اكتب رأيك في التعليق 👇".
-        Explain jargon in a few simple words. No investment advice, no buy/sell recommendation.
+        """Traduit en arabe 100 % (noms d'entreprises / sigles restent en lettres latines).
+
+        Retourne : dict {"caption","headline"} validé, {"_non_arabe": True} si aucun fournisseur
+        n'a produit de l'arabe, ou None si aucun fournisseur n'a répondu."""
+        base_prompt = """
+        You are a professional Arabic translator specializing in financial news.
+        The source text may be in ANY language (English, Chinese, French, ...). You MUST output
+        Modern Standard Arabic ONLY.
+        ABSOLUTE RULES:
+        - The caption and the headline MUST be written in Arabic script. NEVER answer in Chinese,
+          English, Russian or any other language, even if the source is in that language.
+        - Only company names, tickers and acronyms (Fed, ECB, S&P 500, Nvidia...) may stay in Latin letters.
+        - No emojis, no Chinese/Japanese/Korean characters, no Arabic diacritics (tashkeel).
+        Preserve financial meaning and facts. Do not add facts. Do not write the source name.
+        Keep the caption concise: at most about 1500 characters.
         Return ONLY one valid JSON object, with double quotes around every key and string.
-        Do not use Markdown fences, comments, or text before/after the JSON.
+        No Markdown fences, no text before/after the JSON.
         Required format:
-        {"caption": "full adapted text", "headline": "short Arabic headline"}
-        Headline: 8 to 14 Arabic words. Start with a question, a number or a warning when that
-        is faithful to the facts. NEVER start with a dry verb such as انخفاض / ارتفاع / توسع /
-        يعلن / تعلن. No emojis, hashtags, quotation marks or source name.
+        {"caption": "full Arabic translation", "headline": "short Arabic news headline"}
+        The headline: 8 to 15 Arabic words, newsroom style, key fact and market impact if any,
+        no emojis, hashtags, quotation marks or source name.
         """
+        strict = ("\n\nYOUR PREVIOUS ANSWER WAS NOT IN ARABIC. Write caption and headline again, "
+                  "ENTIRELY in Arabic letters (translate every sentence).")
         t = time.time()
         log("Traduction en arabe (Cloudflare -> Hugging Face -> Groq, tous comptes)…")
-        messages = [
-            {"role": "system", "content": prompt},
-            {"role": "user", "content": f"SOURCE TEXT TO TRANSLATE:\n{text}"},
-        ]
-
-        providers = (
-            ("Cloudflare", _llm_cloudflare),
-            ("Hugging Face", _llm_hf),
-            ("Groq", _llm_groq),
-        )
-        for provider_name, provider_fn in providers:
-            try:
-                raw = provider_fn(messages, temperature=0.0, max_tokens=2500)
-            except Exception as e:
-                log(f"Traduction {provider_name} : {type(e).__name__} {str(e)[:180]}", level="WARN")
-                continue
-
-            if not raw or not str(raw).strip():
-                log(f"Traduction {provider_name} : réponse vide, fournisseur suivant.", level="WARN")
-                continue
-
-            try:
-                data = self._extract_json(raw)
-                caption = str(data.get("caption") or "").strip()
-                headline = str(data.get("headline") or "").strip()
-                if not caption:
-                    raise ValueError("champ 'caption' absent ou vide")
-                if not headline:
-                    headline = caption[:100].strip()
-                    data["headline"] = headline
-                data["caption"] = caption
-                log(f"Traduction reçue via {provider_name} en {time.time() - t:.1f}s", level="OK")
-                return data
-            except Exception as e:
-                excerpt = re.sub(r"\s+", " ", str(raw))[:350]
-                log(f"Traduction {provider_name} : JSON invalide ({e}); extrait={excerpt!r}", level="WARN")
-                log(f"Nouvel essai avec le fournisseur suivant ({provider_name} a échoué).", level="WARN")
-
-        log("Traduction ÉCHOUÉE : aucun fournisseur n'a renvoyé un JSON exploitable.", level="ERROR")
-        return None
+        providers = (("Cloudflare", _llm_cloudflare), ("Hugging Face", _llm_hf), ("Groq", _llm_groq))
+        got_text = False
+        for passe, extra in enumerate(("", strict), 1):
+            messages = [
+                {"role": "system", "content": base_prompt + extra},
+                {"role": "user", "content": f"SOURCE TEXT TO TRANSLATE:\n{text}"},
+            ]
+            for provider_name, provider_fn in providers:
+                try:
+                    raw = provider_fn(messages, temperature=0.0, max_tokens=2500)
+                except Exception as e:
+                    log(f"Traduction {provider_name} : {type(e).__name__} {str(e)[:180]}", level="WARN")
+                    continue
+                if not raw or not str(raw).strip():
+                    log(f"Traduction {provider_name} : réponse vide, fournisseur suivant.", level="WARN")
+                    continue
+                got_text = True
+                try:
+                    data = self._extract_json(raw)
+                    caption = nettoyer_etranger(str(data.get("caption") or "").strip())
+                    headline = nettoyer_pour_image(str(data.get("headline") or "").strip())
+                    if not headline:
+                        headline = nettoyer_pour_image(" ".join(caption.split()[:14]))
+                    if not est_arabe(caption, min_letters=30):
+                        raise ValueError("légende non arabe (écriture étrangère ou trop de latin)")
+                    if not est_arabe(headline, min_letters=10):
+                        raise ValueError("titre non arabe")
+                    data["caption"], data["headline"] = caption, headline
+                    log(f"Traduction arabe validée via {provider_name} (passe {passe}) "
+                        f"en {time.time() - t:.1f}s", level="OK")
+                    return data
+                except Exception as e:
+                    excerpt = re.sub(r"\s+", " ", str(raw))[:250]
+                    log(f"Traduction {provider_name} refusée : {e}; extrait={excerpt!r}", level="WARN")
+        if not got_text:
+            log("Traduction ÉCHOUÉE : aucun fournisseur n'a répondu.", level="ERROR")
+            return None
+        log("Traduction ÉCHOUÉE : aucune réponse 100 % arabe -> news ignorée.", level="ERROR")
+        return {"_non_arabe": True}
 
 
 # ======================================================================
@@ -2251,294 +1977,13 @@ def publier_video_reel(historique):
         json_or_text=TextPost._json_or_text, step_summary=step_summary,
         graph_url=GRAPH_URL, ig_caption_limit=IG_CAPTION_LIMIT, brand_handle=BRAND_HANDLE,
         meta_suffix=META_SUFFIX, base_dir=BASE_DIR, output_dir=OUTPUT_DIR,
+        est_arabe=est_arabe, nettoyer_etranger=nettoyer_etranger,
     )
     try:
         _run(historique, ctx)
     except Exception as e:
         log(f"Vidéo Reel : erreur {type(e).__name__} : {str(e)[:300]}", level="ERROR")
         log(traceback.format_exc(limit=4))
-
-
-# ======================================================================
-# CONTENU D'ENGAGEMENT DYNAMIQUE
-#   - « اشرحها لي كأني مبتدئ » (1/jour) : explique le CONCEPT d'une news déjà publiée
-#     (la mieux notée des dernières EDU_NEWS_MAX_AGE_HOURS heures, jamais réutilisée).
-#     Repli : sujet intemporel de EDU_TOPICS s'il n'y a aucune news récente.
-#   - Sondage du vendredi : porte sur la catégorie dominante des news publiées
-#     pendant les POLL_LOOKBACK_HOURS dernières heures (repli : rotation hebdomadaire).
-#   Les légendes contiennent #اشرحها_لي_كأني_مبتدئ / #استفتاء : video_reel.py
-#   s'en sert pour ne JAMAIS mettre ces cartes dans les vidéos.
-# ======================================================================
-ENGAGEMENT_ENABLED = os.getenv("ENGAGEMENT_ENABLED", "1") == "1"
-EDU_HOUR_UTC = int(os.getenv("EDU_HOUR_UTC", "9"))      # Maroc = UTC+1
-POLL_HOUR_UTC = int(os.getenv("POLL_HOUR_UTC", "15"))
-EDU_NEWS_MAX_AGE_HOURS = int(os.getenv("EDU_NEWS_MAX_AGE_HOURS", "36"))
-POLL_LOOKBACK_HOURS = int(os.getenv("POLL_LOOKBACK_HOURS", "168"))
-
-# Sujets intemporels (repli uniquement)
-EDU_TOPICS = (
-    "تقرير الوظائف الأمريكي NFP ولماذا يحرك السوق",
-    "التضخم CPI وما علاقته بسعر الذهب والدولار",
-    "سعر الفائدة وما معنى رفعه أو خفضه",
-    "ما هو الفيدرالي الأمريكي ولماذا يتابعه العالم",
-    "لماذا يرتفع الذهب عند الخوف في الأسواق (الملاذ الآمن)",
-    "ما هي السندات وعائد السندات بكلمات بسيطة",
-    "ما هو وقف الخسارة Stop Loss ولماذا ينقذ حسابك",
-    "ما هي الرافعة المالية وكيف تضاعف الخسارة قبل الربح",
-    "ما هو البيب Pip في الفوركس",
-    "لماذا يؤثر سعر الدولار على سعر الدرهم المغربي",
-    "ما الفرق بين الأسهم والعملات والسلع",
-    "ما هو الناتج المحلي الإجمالي GDP",
-    "ما هو الركود الاقتصادي وكيف تعرفه",
-    "ما هو بنك المغرب ودوره في سعر الفائدة والتضخم",
-    "كيف يؤثر سعر النفط على أسعار البنزين والمواد الغذائية",
-    "ما هي مؤشرات البورصة مثل S&P 500 وناسداك",
-    "ما هو التنويع ولماذا لا تضع كل أموالك في أصل واحد",
-    "الفرق بين المضاربة والاستثمار",
-    "ما هي العملات الرقمية وما مخاطرها",
-    "ما هي الشموع اليابانية وكيف تقرأها",
-)
-
-# Modèles de sondage par catégorie : (question, (option_a, option_b), emoji de légende)
-POLL_TEMPLATES = {
-    "Gold": ("الذهب الأسبوع القادم: يصعد أم ينزل؟", ("صعود", "نزول"), "🥇"),
-    "Forex": ("الدولار الأسبوع القادم: أقوى أم أضعف؟", ("أقوى", "أضعف"), "💵"),
-    "Crypto": ("البيتكوين الأسبوع القادم: صعود أم هبوط؟", ("صعود", "هبوط"), "₿"),
-    "Oil": ("النفط الأسبوع القادم: يرتفع أم ينخفض؟", ("يرتفع", "ينخفض"), "🛢️"),
-    "Indices": ("وول ستريت الأسبوع القادم: صعود أم هبوط؟", ("صعود", "هبوط"), "📈"),
-    "Stocks": ("أسهم التكنولوجيا الأسبوع القادم: صعود أم هبوط؟", ("صعود", "هبوط"), "💻"),
-    "Central banks": ("هل يخفض الفيدرالي الفائدة قريباً؟", ("نعم", "لا"), "🏦"),
-    "Economic news": ("التضخم الأسبوع القادم: يرتفع أم ينخفض؟", ("يرتفع", "ينخفض"), "📊"),
-    "Bonds": ("عوائد السندات الأمريكية: ترتفع أم تنخفض؟", ("ترتفع", "تنخفض"), "🏛️"),
-}
-
-
-def _coupe(texte, n):
-    """Coupe proprement à la limite d'un mot (la carte ne doit jamais déborder)."""
-    t = " ".join(str(texte or "").split())
-    if len(t) <= n:
-        return t
-    return t[:n].rsplit(" ", 1)[0].rstrip(" ،,.:;") + "…"
-
-
-def _parse_iso(s):
-    try:
-        d = datetime.fromisoformat(str(s))
-        return d if d.tzinfo else d.replace(tzinfo=timezone.utc)
-    except Exception:
-        return None
-
-
-def _news_recentes(historique, heures, now):
-    """News (pas les cartes) publiées dans les `heures` dernières heures.
-    Retourne [(post_id, entrée, âge_en_heures)] du plus récent au plus ancien."""
-    out = []
-    for pid, v in historique.items():
-        if not isinstance(v, dict) or v.get("type") or not v.get("titre"):
-            continue
-        d = _parse_iso(v.get("publie_le"))
-        if not d:
-            continue
-        age = (now - d).total_seconds() / 3600
-        if 0 <= age <= heures:
-            out.append((pid, v, age))
-    out.sort(key=lambda t: t[2])
-    return out
-
-
-def _llm_edu(entree, avec_actu):
-    system = (
-        "You are an Arabic financial educator writing for complete beginners (Moroccan / Arab "
-        "retail audience). Explain in simple Modern Standard Arabic, no jargon. "
-        + ("The user gives the headline of a financial news item ALREADY published on the page. "
-           "Choose the ONE key concept a beginner must understand to follow this news, explain "
-           "that concept (not the whole news), and make the hook headline clearly related to the "
-           "news topic. Use ONLY facts present in the headline; never invent figures, prices or "
-           "dates. " if avec_actu else
-           "Do NOT state real current prices, statistics or dates. ")
-        + "Any example must be clearly hypothetical with small round numbers. No investment advice. "
-        'Return ONLY one JSON object: {"headline": "hook title, 5-9 words, a question or a '
-        'warning", "definition": "1 simple sentence, STRICT max 85 characters", "example": '
-        '"one short hypothetical example, STRICT max 65 characters", "why_it_matters": "one short '
-        'sentence for an ordinary person, STRICT max 65 characters, may mention the dirham if '
-        'relevant", "cta": "one short question inviting comments", "news_ar": "'
-        + ("one Arabic sentence, max 80 characters, restating the news headline faithfully"
-           if avec_actu else "") +
-        '"}. No emojis, no hashtags, no Markdown.')
-    raw = llm_chat([{"role": "system", "content": system},
-                    {"role": "user", "content": entree}],
-                   temperature=0.3, max_tokens=900)
-    if not raw:
-        return None
-    try:
-        return Extract_post._extract_json(raw)
-    except Exception as e:
-        log(f"Contenu éducatif : JSON invalide ({e}).", level="WARN")
-        return None
-
-
-def _preparer_edu(now, historique):
-    """Retourne (kicker, headline, blocs, caption, categorie, base_id) ou None."""
-    deja = {v.get("base") for v in historique.values()
-            if isinstance(v, dict) and v.get("type") == "edu" and v.get("base")}
-    cands = [t for t in _news_recentes(historique, EDU_NEWS_MAX_AGE_HOURS, now)
-             if t[0] not in deja]
-    d, categorie, base_id = None, None, None
-    if cands:
-        pid, v, _ = max(cands, key=lambda t: ((t[1].get("note") or 0), -t[2]))
-        log(f"Carte éducative basée sur la news : {v.get('titre', '')[:90]} "
-            f"[{v.get('categorie')}]")
-        d = _llm_edu(f"PUBLISHED NEWS HEADLINE: {v.get('titre')}\n"
-                     f"CATEGORY: {v.get('categorie')}", True)
-        if d:
-            categorie, base_id = v.get("categorie"), pid
-    if not d:
-        sujet = EDU_TOPICS[now.timetuple().tm_yday % len(EDU_TOPICS)]
-        log("Carte éducative : aucune news exploitable, sujet intemporel utilisé.", level="WARN")
-        d = _llm_edu(f"TOPIC: {sujet}", False)
-        categorie, base_id = None, None
-    if not d:
-        log("Contenu éducatif : aucun LLM disponible, reporté.", level="WARN")
-        return None
-
-    g = lambda k: str(d.get(k) or "").strip()
-    headline, definition = g("headline"), g("definition")
-    if not (headline and definition):
-        return None
-    parts = [headline]
-    if base_id and g("news_ar"):
-        parts.append(f"📰 مرتبط بخبر اليوم: {g('news_ar')}")
-    parts.append(definition)
-    if g("example"):
-        parts.append(f"📌 مثال توضيحي: {g('example')}")
-    if g("why_it_matters"):
-        parts.append(f"💡 لماذا يهمك؟ {g('why_it_matters')}")
-    if g("cta"):
-        parts.append(f"❓ {g('cta')}")
-    parts.append("💾 احفظ المنشور وشاركه مع صديق يتعلم التداول.\n"
-                 "⚠️ محتوى تعليمي وليس نصيحة استثمارية.")
-    tags = (HASHTAGS_BASE + " " + HASHTAGS_CATEGORIE.get(categorie, "")).strip()
-    caption = ("\n\n".join(parts) + "\n\n" + tags
-               + " #تعلم_التداول #اشرحها_لي_كأني_مبتدئ")[:IG_CAPTION_LIMIT]
-    blocs = [("التعريف", _coupe(definition, 90)),
-             ("مثال", _coupe(g("example"), 70)),
-             ("لماذا يهمك؟", _coupe(g("why_it_matters"), 70))]
-    blocs = [(t, s) for t, s in blocs if s]
-    return "اشرحها لي كأني مبتدئ", _coupe(headline, 60), blocs, caption, categorie, base_id
-
-
-def _choisir_categorie_sondage(historique, now):
-    """Catégorie dominante des news publiées récemment + leurs titres (du plus récent)."""
-    recentes = _news_recentes(historique, POLL_LOOKBACK_HOURS, now)
-    cats = Counter(v.get("categorie") for _, v, _ in recentes
-                   if v.get("categorie") in POLL_TEMPLATES)
-    if cats:
-        top = max(cats.values())
-        for _, v, _ in recentes:                       # égalité : la plus récente gagne
-            if cats.get(v.get("categorie"), 0) == top:
-                cat = v["categorie"]
-                titres = [x["titre"] for _, x, _ in recentes if x.get("categorie") == cat][:3]
-                return cat, titres
-    cles = tuple(POLL_TEMPLATES)
-    return cles[now.isocalendar()[1] % len(cles)], []
-
-
-def _llm_sondage(categorie, titres):
-    system = (
-        "You write ONE audience poll in Modern Standard Arabic for a financial-markets page. "
-        f"The poll is about the {categorie} market and where it goes NEXT WEEK, inspired by the "
-        "recent headlines given by the user. Never invent figures or prices. No advice. "
-        'Return ONLY one JSON object: {"title": "poll question, 20-60 characters, ends with ؟", '
-        '"option_a": "1-2 words, the bullish/yes answer", "option_b": "1-2 words, the '
-        'bearish/no answer"}. No emojis, no hashtags, no Markdown.')
-    raw = llm_chat([{"role": "system", "content": system},
-                    {"role": "user", "content": "RECENT HEADLINES:\n" + "\n".join(f"- {t}" for t in titres)}],
-                   temperature=0.4, max_tokens=300)
-    if not raw:
-        return None
-    try:
-        d = Extract_post._extract_json(raw)
-    except Exception:
-        return None
-    titre = " ".join(str(d.get("title") or "").split())
-    a = " ".join(str(d.get("option_a") or "").split())
-    b = " ".join(str(d.get("option_b") or "").split())
-    if not (12 <= len(titre) <= 70 and 1 <= len(a) <= 12 and 1 <= len(b) <= 12 and a != b):
-        log("Sondage LLM hors limites : modèle fixe utilisé.", level="WARN")
-        return None
-    return titre, (a, b)
-
-
-def _preparer_sondage(now, historique):
-    """Retourne (kicker, headline, contenu, caption, categorie, None)."""
-    categorie, titres = _choisir_categorie_sondage(historique, now)
-    modele_titre, modele_opts, emoji = POLL_TEMPLATES[categorie]
-    titre, (a, b) = modele_titre, modele_opts
-    if titres:
-        log(f"Sondage basé sur la catégorie dominante : {categorie} ({len(titres)} news)")
-        res = _llm_sondage(categorie, titres)
-        if res:
-            titre, (a, b) = res
-    else:
-        log(f"Sondage : pas de news récentes, modèle {categorie}.", level="WARN")
-    tags = (HASHTAGS_BASE + " " + HASHTAGS_CATEGORIE.get(categorie, "")).strip()
-    caption = (f"{emoji} {titre}\n\n🟢 {a}\n🔴 {b}\n\n💬 شارك توقعك في التعليق 👇\n"
-               "⚠️ توقعات للتفاعل فقط وليست نصيحة استثمارية.\n\n"
-               + tags + " #استفتاء")[:IG_CAPTION_LIMIT]
-    contenu = {"sous": f"اكتب في التعليق: {a} أو {b}", "options": (a, b)}
-    return "استفتاء الجمعة", _coupe(titre, 70), contenu, caption, categorie, None
-
-
-def apercu_cartes():
-    """Rendu local sans réseau :  CARTE_PREVIEW=1 python Agnet_fb_money_impact_4.py"""
-    tp = TextPost()
-    blocs = [("التعريف", "الفائدة هي ثمن اقتراض المال أو مكافأة ادخاره."),
-             ("مثال", "قرض 1000 درهم بفائدة 5% يعني 50 درهماً إضافية."),
-             ("لماذا يهمك؟", "ترتفع أقساط قرضك عندما ترفع البنوك المركزية الفائدة.")]
-    for cat in ("Gold", "Indices", "Crypto"):
-        tp.generer_carte("اشرحها لي كأني مبتدئ", "ما معنى رفع سعر الفائدة؟", blocs, cat) \
-            .save(OUTPUT_DIR / f"apercu_edu_{cat}.jpg", quality=95)
-        tp._evaluer_carte()
-    tp.generer_carte_sondage("استفتاء الجمعة", "الذهب الأسبوع القادم: يصعد أم ينزل؟",
-                             "اكتب في التعليق: صعود أو نزول", ("صعود", "نزول"), "Gold") \
-        .save(OUTPUT_DIR / "apercu_sondage.jpg", quality=95)
-    tp._evaluer_carte()
-    log("Aperçus enregistrés dans output/ (apercu_edu_*.jpg, apercu_sondage.jpg)", level="OK")
-
-
-def publier_contenu_engagement(text_post, historique, fichier_json):
-    """Une fois par jour (éducatif) et le vendredi (sondage). Ne plante jamais le run."""
-    if not ENGAGEMENT_ENABLED:
-        return
-    now = datetime.now(timezone.utc)
-    jour = now.strftime("%Y-%m-%d")
-    taches = []
-    if now.hour >= EDU_HOUR_UTC and f"edu_{jour}" not in historique:
-        taches.append("edu")
-    if now.weekday() == 4 and now.hour >= POLL_HOUR_UTC and f"poll_{jour}" not in historique:
-        taches.append("poll")
-    for tache in taches:
-        try:
-            log(f"── Contenu d'engagement : {tache} ──", level="STEP")
-            carte = (_preparer_edu(now, historique) if tache == "edu"
-                     else _preparer_sondage(now, historique))
-            if not carte:
-                continue
-            kicker, headline, contenu, caption, categorie, base_id = carte
-            res = text_post.publier_carte(kicker, headline, contenu, caption, categorie)
-            if res.get("facebook") or res.get("instagram"):
-                historique[f"{tache}_{jour}"] = {
-                    "source": "Money.impact", "titre": headline, "date": jour,
-                    "type": tache, "categorie": categorie, "base": base_id,
-                    "publie_le": now.isoformat()}
-                with open(fichier_json, "w", encoding="utf-8") as f:
-                    json.dump(historique, f, ensure_ascii=False, indent=4)
-                log(f"Contenu {tache} PUBLIÉ -> historique mis à jour", level="OK")
-            else:
-                log(f"Contenu {tache} NON publié : {res.get('erreur') or 'voir ❌ ci-dessus'}",
-                    level="ERROR")
-        except Exception as e:
-            log(f"Contenu {tache} : {type(e).__name__} {str(e)[:200]}", level="ERROR")
 
 
 def main():
@@ -2568,8 +2013,7 @@ def main():
         terminer(1, "ÉCHEC (Meta)")
 
     # VIDÉO REEL : lancée AVANT les news, donc indépendante de leur durée, de leurs rejets
-    # et d'un éventuel dépassement de délai. Elle utilise les photos déjà publiées sur la Page
-    # (les cartes éducatives / sondages en sont exclues par leurs hashtags).
+    # et d'un éventuel dépassement de délai. Elle utilise les photos déjà publiées sur la Page.
     banner(3, TOTAL_STEPS, "Vidéo Reel (images de la Page, 12 dernières heures)")
     lancer_video_une_fois()
 
@@ -2587,10 +2031,6 @@ def main():
 
     banner(5, TOTAL_STEPS, "Sélection des news à examiner")
     historique = charger_historique(fichier_json)
-
-    # Contenu d'engagement DYNAMIQUE (basé sur les news déjà publiées) : sans API d'image.
-    publier_contenu_engagement(text_post, historique, fichier_json)
-
     now = datetime.now(timezone.utc)
     candidates = []
     for i, news in enumerate(all_news):
@@ -2621,9 +2061,9 @@ def main():
                 "augmente MAX_NEWS_AGE_HOURS si tu veux les publier.", level="WARN")
         terminer(0, "RIEN À PUBLIER")      # la vidéo est lancée dans terminer()
 
-    # Titres déjà connus : historique (news uniquement) + news acceptées pendant ce run.
+    # Titres déjà connus : historique + news acceptées pendant ce run (anti-doublons).
     titres_connus = [v.get("titre", "") for v in historique.values()
-                     if isinstance(v, dict) and v.get("titre") and not v.get("type")]
+                     if isinstance(v, dict) and v.get("titre")]
 
     banner(6, TOTAL_STEPS, "Filtrage, traduction, image et publication")
     for k, (news, post_id) in enumerate(candidates, 1):
@@ -2662,7 +2102,7 @@ def main():
 
         # --- Filtre 3 : validation LLM stricte (note >= MIN_NEWS_SCORE) ---
         editorial_ok, editorial_category, editorial_reason, editorial_score = \
-            extract_post.valider_actualite(news, article_content, titres_connus[-15:])
+            extract_post.valider_actualite(news, article_content)
         if not editorial_ok:
             STATS["rejetees"] += 1
             STATS["echecs"].append((title, f"rejet éditorial (note {editorial_score}) : {editorial_reason}"))
@@ -2671,9 +2111,14 @@ def main():
         text_original = (f"{title}\n{content}\n\nCorps de l'article : {article_content}"
                          f"\nsource: {src}, date: {date}, catégorie: {editorial_category}")
         text_translated = extract_post.tradication_of_text(text_original)
-        if not isinstance(text_translated, dict):
+        if text_translated is None:
             log("Aucune traduction LLM exploitable : arrêt du workflow, aucune publication sans traduction.", level="ERROR")
             terminer(1, "ÉCHEC (LLM indisponible pour la traduction)")
+        if text_translated.get("_non_arabe"):
+            # Aucune réponse 100 % arabe : on ignore cette news (jamais de post chinois / à carrés).
+            STATS["rejetees"] += 1
+            STATS["echecs"].append((title, "rejet : traduction non arabe"))
+            continue
 
         caption = str(text_translated.get("caption") or "").strip()
         if not caption:
@@ -2682,7 +2127,7 @@ def main():
             continue
         headline = str(text_translated.get("headline") or "").strip()
         if not headline:
-            headline = " ".join(caption.split()[:14])
+            headline = nettoyer_pour_image(" ".join(caption.split()[:14]))
             log("Pas de titre court renvoyé : début de la légende utilisé.", level="WARN")
 
         # Nom de la source (« المصدر: ... ») puis hashtags, ajoutés à chaque publication.
@@ -2721,9 +2166,6 @@ def main():
 
 
 if __name__ == "__main__":
-    if os.getenv("CARTE_PREVIEW") == "1":      # aperçu local des cartes, sans réseau
-        apercu_cartes()
-        sys.exit(0)
     try:
         main()
     except SystemExit:
