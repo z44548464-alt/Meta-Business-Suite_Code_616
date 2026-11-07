@@ -5,8 +5,8 @@ Lit UNIQUEMENT la Page Facebook : photos publiées dans les dernières VIDEO_LOO
 sondages (hashtags dans la légende de la photo) ET les photos dont la légende n'est pas en arabe
 (anciens posts chinois / à carrés □□□), et s'il en reste au moins 3, crée un diaporama
 9:16 (Ken Burns + transitions aléatoires + musique aléatoire news_musique*.mp3) avec 3 à 5 images,
-puis le publie en Reel sur Facebook et Instagram, et en Short sur YouTube.
-Appelé par Agnet_fb_money_impact_3.py : publier_video_reel(historique, ctx).
+puis le publie en Reel sur Facebook, en Short sur YouTube, puis en Reel sur Instagram.
+Appelé par Agnet_fb_money_impact_4.py : publier_video_reel(historique, ctx).
 """
 import io
 import json
@@ -45,6 +45,7 @@ VIDEO_TRANSITION_S = 0.8
 VIDEO_TRANSITIONS = ("fade", "slideleft", "slideright", "slideup", "slidedown")
 VIDEO_ZOOM_AMOUNT = 0.12
 VIDEO_HASHTAGS = "#الأسواق_المالية #فوركس #الذهب #البورصة #اقتصاد #forex #trading #money_impact"
+YOUTUBE_MAX_PAR_24H = int(os.getenv("YOUTUBE_MAX_PER_DAY", "6"))   # quota API : ~6 uploads/jour
 
 # Photos de la Page qui ne sont PAS des actualités : cartes éducatives et sondages.
 # Leurs légendes contiennent ces hashtags (voir _preparer_edu / _preparer_sondage).
@@ -467,17 +468,39 @@ def _reel_facebook(chemin, caption, page_id, token):
     return None
 
 
+# ----------------------------------------------------------------------
+# YouTube
+# ----------------------------------------------------------------------
+def _youtube_dernieres_24h(hv):
+    """Nombre de Shorts déjà envoyés à YouTube durant les dernières 24 h."""
+    limite = datetime.now(timezone.utc) - timedelta(hours=24)
+    n = 0
+    for v in hv.get("videos", []):
+        if isinstance(v, dict) and v.get("youtube_video_id"):
+            d = _parse_date(v.get("date"))
+            if d and d >= limite:
+                n += 1
+    return n
+
+
 # >>> YOUTUBE : fonction dédiée, ne lève jamais d'exception, logs à chaque étape
-def _short_youtube(chemin, titres, caption):
+def _short_youtube(chemin, titres, caption, hv):
     _log("YouTube : tentative d'upload du Short…")
     if publier_short_youtube is None:
         _log(f"Module publie_video_youtub_2.py indisponible ({_YT_IMPORT_ERR}) : YouTube ignoré.",
              level="ERROR")
         return None
     try:
+        recents = _youtube_dernieres_24h(hv)
+        if recents >= YOUTUBE_MAX_PAR_24H:
+            _log(f"YouTube : {recents} Short(s) déjà envoyés ces dernières 24 h "
+                 f"(limite {YOUTUBE_MAX_PAR_24H}, quota API) : upload YouTube sauté pour ce run.",
+                 level="WARN")
+            return None
         _log(f"YouTube : fichier {Path(chemin).name} "
              f"({Path(chemin).stat().st_size // 1024} Ko) | "
-             f"YOUTUBE_ENABLED={os.getenv('YOUTUBE_ENABLED', '1')}")
+             f"YOUTUBE_ENABLED={os.getenv('YOUTUBE_ENABLED', '1')} | "
+             f"envois des dernières 24 h : {recents}/{YOUTUBE_MAX_PAR_24H}")
         vid = publier_short_youtube(chemin, titres, caption, C)
         if not vid:
             _log("YouTube : aucun ID renvoyé (voir les messages « YouTube : » ci-dessus).",
@@ -492,8 +515,8 @@ def _short_youtube(chemin, titres, caption):
 # Point d'entrée
 # ----------------------------------------------------------------------
 def publier_video_reel(historique, ctx):
-    """Images d'actualité de la Page (12 h) jamais utilisées -> vidéo -> Facebook + Instagram
-    + YouTube. Ne lève jamais d'exception."""
+    """Images d'actualité de la Page (12 h) jamais utilisées -> vidéo -> Facebook + YouTube
+    + Instagram. Ne lève jamais d'exception."""
     global C, VIDEO_DIR, MUSIC_DIR, FFMPEG
     C = ctx
     VIDEO_DIR = Path(C.output_dir) / "video"
@@ -539,7 +562,7 @@ def publier_video_reel(historique, ctx):
         choisies, nb_libres = _choisir_images(candidats, deja)
         if not choisies:
             _log(f"Seulement {nb_libres} image(s) libre(s) (minimum {VIDEO_MIN_IMAGES}) : "
-                 "pas de vidéo pour ce run.", level="WARN")
+                 "pas de vidéo pour ce run (YouTube non tenté).", level="WARN")
             return
 
         # 3) téléchargement
@@ -575,18 +598,20 @@ def publier_video_reel(historique, ctx):
         caption = _legende_video(titres)
         _log(f"Légende vidéo : {len(caption)} caractères")
 
-        # 6) publication
+        # 6) publication : Facebook, puis YouTube (indépendant), puis Instagram
         fb_id = ig_post_id = yt_id = None
-        fb_id = _reel_facebook(rendus[VIDEO_FORMATS["facebook"]], caption, page_id, token)
+        fichier_9_16 = rendus[VIDEO_FORMATS["facebook"]]
+        fb_id = _reel_facebook(fichier_9_16, caption, page_id, token)
+
+        # >>> YOUTUBE : avant Instagram (dont le traitement peut durer plusieurs minutes)
+        yt_id = _short_youtube(fichier_9_16, titres, caption, hv)
+
         if ig_id:
             try:
                 url = _heberger_video(rendus[VIDEO_FORMATS["instagram"]], cloud)
                 ig_post_id = _reel_instagram(url, caption, ig_id, token)
             except Exception as e:
                 _log(f"Instagram vidéo : {type(e).__name__} {str(e)[:300]}", level="ERROR")
-
-        # >>> YOUTUBE : Short (même fichier 9:16 que Facebook)
-        yt_id = _short_youtube(rendus[VIDEO_FORMATS["facebook"]], titres, caption)
 
         # 7) suivi
         if fb_id or ig_post_id or yt_id:
