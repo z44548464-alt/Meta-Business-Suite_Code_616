@@ -78,7 +78,7 @@ jobs:
         timeout-minutes: 80
         run: |
           set -o pipefail
-          python -u Agnet_fb_money_impact_3.py 2>&1 | tee agent.log
+          python -u Agnet_fb_money_impact_4.py 2>&1 | tee agent.log
         env:
         
           # tiktok 
