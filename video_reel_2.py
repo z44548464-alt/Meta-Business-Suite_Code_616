@@ -1,11 +1,11 @@
-"""Module vidéo Reels (Facebook + Instagram + YouTube Shorts) pour Money.impact.
+"""Module vidéo Reels (Facebook + Instagram + YouTube Shorts + TikTok) pour Money.impact.
 
 Lit UNIQUEMENT la Page Facebook : photos publiées dans les dernières VIDEO_LOOKBACK_HOURS heures,
 écarte celles déjà utilisées dans une vidéo (historique_videos.json), les cartes éducatives /
 sondages (hashtags dans la légende de la photo) ET les photos dont la légende n'est pas en arabe
 (anciens posts chinois / à carrés □□□), et s'il en reste au moins 3, crée un diaporama
 9:16 (Ken Burns + transitions aléatoires + musique aléatoire news_musique*.mp3) avec 3 à 5 images,
-puis le publie en Reel sur Facebook, en Short sur YouTube, puis en Reel sur Instagram.
+puis le publie en Reel sur Facebook, en Short sur YouTube, sur TikTok, puis en Reel sur Instagram.
 Appelé par Agnet_fb_money_impact_4.py : publier_video_reel(historique, ctx).
 """
 import io
@@ -32,6 +32,14 @@ try:
 except Exception as _e:
     publier_short_youtube = None
     _YT_IMPORT_ERR = f"{type(_e).__name__}: {str(_e)[:200]}"
+
+# >>> TIKTOK : import du module d'upload (ne plante jamais le script s'il échoue)
+try:
+    from publie_video_tiktok_2 import publier_video_tiktok
+    _TT_IMPORT_ERR = None
+except Exception as _e:
+    publier_video_tiktok = None
+    _TT_IMPORT_ERR = f"{type(_e).__name__}: {str(_e)[:200]}"
 
 # ----------------------------------------------------------------------
 # Réglages
@@ -512,11 +520,28 @@ def _short_youtube(chemin, titres, caption, hv):
 
 
 # ----------------------------------------------------------------------
+# TikTok
+# ----------------------------------------------------------------------
+# >>> TIKTOK : fonction dédiée, ne lève jamais d'exception, retourne True/False
+def _tiktok_video(chemin, titres, caption):
+    _log("TikTok : tentative d'upload…")
+    if publier_video_tiktok is None:
+        _log(f"Module publie_video_tiktok_2.py indisponible ({_TT_IMPORT_ERR}) : TikTok ignoré.",
+             level="ERROR")
+        return False
+    try:
+        return bool(publier_video_tiktok(chemin, titres, caption, C))
+    except Exception as e:
+        _log(f"TikTok vidéo : {type(e).__name__} {str(e)[:300]}", level="ERROR")
+        return False
+
+
+# ----------------------------------------------------------------------
 # Point d'entrée
 # ----------------------------------------------------------------------
 def publier_video_reel(historique, ctx):
     """Images d'actualité de la Page (12 h) jamais utilisées -> vidéo -> Facebook + YouTube
-    + Instagram. Ne lève jamais d'exception."""
+    + TikTok + Instagram. Ne lève jamais d'exception."""
     global C, VIDEO_DIR, MUSIC_DIR, FFMPEG
     C = ctx
     VIDEO_DIR = Path(C.output_dir) / "video"
@@ -562,7 +587,7 @@ def publier_video_reel(historique, ctx):
         choisies, nb_libres = _choisir_images(candidats, deja)
         if not choisies:
             _log(f"Seulement {nb_libres} image(s) libre(s) (minimum {VIDEO_MIN_IMAGES}) : "
-                 "pas de vidéo pour ce run (YouTube non tenté).", level="WARN")
+                 "pas de vidéo pour ce run (YouTube et TikTok non tentés).", level="WARN")
             return
 
         # 3) téléchargement
@@ -598,13 +623,17 @@ def publier_video_reel(historique, ctx):
         caption = _legende_video(titres)
         _log(f"Légende vidéo : {len(caption)} caractères")
 
-        # 6) publication : Facebook, puis YouTube (indépendant), puis Instagram
+        # 6) publication : Facebook, puis YouTube, puis TikTok (indépendants), puis Instagram
         fb_id = ig_post_id = yt_id = None
+        tk_ok = False
         fichier_9_16 = rendus[VIDEO_FORMATS["facebook"]]
         fb_id = _reel_facebook(fichier_9_16, caption, page_id, token)
 
         # >>> YOUTUBE : avant Instagram (dont le traitement peut durer plusieurs minutes)
         yt_id = _short_youtube(fichier_9_16, titres, caption, hv)
+
+        # >>> TIKTOK : après YouTube, avant Instagram
+        tk_ok = _tiktok_video(fichier_9_16, titres, caption)
 
         if ig_id:
             try:
@@ -614,24 +643,25 @@ def publier_video_reel(historique, ctx):
                 _log(f"Instagram vidéo : {type(e).__name__} {str(e)[:300]}", level="ERROR")
 
         # 7) suivi
-        if fb_id or ig_post_id or yt_id:
+        if fb_id or ig_post_id or yt_id or tk_ok:
             hv["used_post_ids"].extend(pid for pid, _, _ in items)
             hv["videos"].append({
                 "date": datetime.now(timezone.utc).isoformat(),
                 "post_ids": [pid for pid, _, _ in items],
                 "facebook_video_id": fb_id, "instagram_media_id": ig_post_id,
-                "youtube_video_id": yt_id,
+                "youtube_video_id": yt_id, "tiktok": bool(tk_ok),
                 "duree_s": duree, "musique": musique.name if musique else None,
                 "transitions": plan["transitions"], "source": source,
             })
             _sauver_hist_videos(hv)
             _log(f"VIDÉO PUBLIÉE (Facebook : {'oui' if fb_id else 'non'} | "
                  f"Instagram : {'oui' if ig_post_id else 'non'} | "
-                 f"YouTube : {'oui' if yt_id else 'non'}) -> IDs des images enregistrés",
+                 f"YouTube : {'oui' if yt_id else 'non'} | "
+                 f"TikTok : {'oui' if tk_ok else 'non'}) -> IDs des images enregistrés",
                  level="OK")
             C.step_summary(f"**Vidéo Reel** : {n} images, {duree}s — "
                            f"FB={'✅' if fb_id else '❌'} IG={'✅' if ig_post_id else '❌'} "
-                           f"YT={'✅' if yt_id else '❌'}")
+                           f"YT={'✅' if yt_id else '❌'} TT={'✅' if tk_ok else '❌'}")
         else:
             _log("Vidéo NON publiée sur aucune plateforme : images conservées pour le prochain run.",
                  level="ERROR")
