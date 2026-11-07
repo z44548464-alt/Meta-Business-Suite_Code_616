@@ -32,13 +32,13 @@ jobs:
           python-version: "3.11"
           cache: pip
 
-      # Raqm + polices : arabe (Noto), latin (DejaVu/Liberation/FreeFont), CJK et emoji (Noto)
+      # Raqm + polices (mis en cache, sans ffmpeg)
       - name: Dépendances système (Raqm + polices) avec cache
         uses: awalsh128/cache-apt-pkgs-action@v1
         timeout-minutes: 15
         with:
-          packages: libraqm0 libfribidi0 libharfbuzz0b fonts-dejavu-core fonts-noto-core fonts-noto-cjk fonts-noto-color-emoji fonts-freefont-ttf fonts-liberation
-          version: v4
+          packages: libraqm0 libfribidi0 libharfbuzz0b fonts-dejavu-core fonts-noto-core
+          version: v3
 
       # ffmpeg installé directement par apt : toutes les dépendances (libblas, etc.) sont incluses
       - name: Installer ffmpeg
@@ -61,31 +61,37 @@ jobs:
       # Filet de sécurité : binaire ffmpeg statique (utilisé si ffmpeg système est cassé)
       - name: ffmpeg statique de secours
         run: pip install imageio-ffmpeg --progress-bar off || echo "imageio-ffmpeg non installé (secours indisponible)"
-
+      - name: Dépendances TikTok (undetected-chromedriver)
+        run: |
+          pip install undetected-chromedriver selenium setuptools --progress-bar off
+          google-chrome --version || echo "ATTENTION : Chrome absent"
       - name: Vérifier la version du script
         run: |
           ls -la
           ls -la fonts imgs music music_NEWS 2>/dev/null || echo "Dossiers fonts/, imgs/, music/ ou music_NEWS/ absents"
           echo "Musiques trouvées : $(ls music/news_musique*.mp3 music_NEWS/news_musique*.mp3 2>/dev/null | wc -l)"
-          echo "Polices arabes installées :"
-          fc-list :lang=ar family | sort -u | head -8 || true
-          grep -c "def banner" Agnet_fb_money_impact_4.py || echo ">>> ANCIENNE VERSION du script <<<"
-          grep -m1 "SCRIPT_VERSION =" Agnet_fb_money_impact_4.py
-          python -m py_compile Agnet_fb_money_impact_4.py video_reel_2.py publie_video_youtub_2.py && echo "Syntaxe OK"
+          grep -c "def banner" Agnet_fb_money_impact_3.py || echo ">>> ANCIENNE VERSION du script <<<"
+          grep -m1 "SCRIPT_VERSION =" Agnet_fb_money_impact_3.py
+          python -m py_compile Agnet_fb_money_impact_4.py video_reel_2.py publie_video_youtub_2.py publie_video_tiktok_2.py && echo "Syntaxe OK"
 
       - name: Lancer l'agent
         timeout-minutes: 80
         run: |
           set -o pipefail
-          python -u Agnet_fb_money_impact_4.py 2>&1 | tee agent.log
+          python -u Agnet_fb_money_impact_3.py 2>&1 | tee agent.log
         env:
-          # YouTube Shorts
+        
+          # tiktok 
+          TIKTOK_SESSION_B64: ${{ secrets.TIKTOK_SESSION_B64 }}
+          TIKTOK_ENABLED: "1"
+          TIKTOK_HEADLESS: "1"
+          
+                      # YouTube Shorts
           ID_CLIENT_FB: ${{ secrets.ID_CLIENT_FB }}
           CODE_SECRET_DU_CLIENT_FB: ${{ secrets.CODE_SECRET_DU_CLIENT_FB }}
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
           YOUTUBE_ENABLED: "1"          # "0" pour désactiver
           YOUTUBE_PRIVACY: "public"     # public | unlisted | private
-          YOUTUBE_MAX_PER_DAY: "6"      # quota API YouTube : ~6 uploads par jour
           # comptes pour générer les images / le texte
           CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
           CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
@@ -134,15 +140,11 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: agent-log
-          path: agent.log
+          path: |
+            agent.log
+            output/tiktok_debug/
           if-no-files-found: ignore
           retention-days: 7
-
-      - name: Résumé vidéo + YouTube (extrait du log)
-        if: always()
-        run: |
-          echo "---- Lignes Vidéo Reel / YouTube ----"
-          grep -n -E "Vidéo Reel|YouTube|Reel Facebook|Reel Instagram|VIDÉO|image\(s\) libre" agent.log || echo "Aucune ligne vidéo/YouTube dans le log (la vidéo n'a pas été tentée)."
 
       - name: Sauvegarder les historiques (posts + vidéos)
         if: always()
@@ -263,3 +265,4 @@ jobs:
 
           echo "Échec du push après 5 tentatives."
           exit 1
+          
