@@ -1,6 +1,6 @@
 import sys
 import faulthandler
-SCRIPT_VERSION = "2026-11-07-money-impact-video-v4-arabic-guard"
+SCRIPT_VERSION = "2026-11-07-money-impact-video-v5-youtube-check"
 print(f"▶ Python démarré (version {SCRIPT_VERSION}), chargement des modules…", flush=True)
 faulthandler.enable()
 faulthandler.dump_traceback_later(90, repeat=True, file=sys.stderr)
@@ -1843,7 +1843,7 @@ def diagnostic_environnement():
         log(f"Groq clé {label:<2} présente (TOKEN_AI_DESCRYB_IMG{'' if label == '0' else label})",
             level="OK")
 
-    # YouTube (optionnel : sert seulement pour les Shorts, géré dans publie_video_youtub.py)
+    # YouTube (optionnel : sert seulement pour les Shorts, géré dans publie_video_youtub_2.py)
     yt = [n for n in ("ID_CLIENT_FB", "CODE_SECRET_DU_CLIENT_FB", "YOUTUBE_REFRESH_TOKEN")
           if not os.getenv(n, "")]
     if yt:
@@ -1905,6 +1905,17 @@ def verifier_meta():
         except Exception as e:
             log(f"Instagram : test impossible ({type(e).__name__}) : {str(e)[:200]}", level="ERROR")
     return fb_ok, ig_ok
+
+
+def verifier_youtube_demarrage():
+    """Test YouTube au démarrage (sans rien publier) : le résultat apparaît dans les logs."""
+    try:
+        from publie_video_youtub_2 import verifier_youtube
+    except Exception as e:
+        log(f"YouTube : module publie_video_youtub_2.py invalide ({type(e).__name__}: "
+            f"{str(e)[:200]}) : aucun Short ne sera publié.", level="ERROR")
+        return False
+    return verifier_youtube(SimpleNamespace(log=log))
 
 
 def ecrire_resume(statut):
@@ -1969,7 +1980,7 @@ def publier_video_reel(historique):
     try:
         from video_reel_2 import publier_video_reel as _run
     except Exception as e:
-        log(f"Module video_reel.py introuvable ou invalide ({type(e).__name__}: {str(e)[:200]}) : "
+        log(f"Module video_reel_2.py introuvable ou invalide ({type(e).__name__}: {str(e)[:200]}) : "
             "vidéo ignorée.", level="ERROR")
         return
     ctx = SimpleNamespace(
@@ -1999,7 +2010,7 @@ def main():
         STATS["echecs"].append(("Démarrage", "secrets manquants : " + ", ".join(manquants)))
         terminer(1, "ÉCHEC (configuration)")
 
-    banner(2, TOTAL_STEPS, "Vérification des accès (LLM, Facebook, Instagram)")
+    banner(2, TOTAL_STEPS, "Vérification des accès (LLM, Facebook, Instagram, YouTube)")
     if llm_chat([{"role": "user", "content": "Reply with the word: ok"}], max_tokens=40) is None:
         log("Aucun service LLM ne répond (tous comptes Cloudflare, Hugging Face, Groq) : arrêt.",
             level="ERROR")
@@ -2011,6 +2022,7 @@ def main():
             "générer des images.", level="ERROR")
         STATS["echecs"].append(("Meta", "token/ID refusés par l'API Graph"))
         terminer(1, "ÉCHEC (Meta)")
+    verifier_youtube_demarrage()      # n'arrête jamais le script : affiche seulement le diagnostic
 
     # VIDÉO REEL : lancée AVANT les news, donc indépendante de leur durée, de leurs rejets
     # et d'un éventuel dépassement de délai. Elle utilise les photos déjà publiées sur la Page.
