@@ -5,10 +5,9 @@ Secrets GitHub :
   ID_CLIENT_FB              -> client ID Google (YouTube)
   CODE_SECRET_DU_CLIENT_FB  -> client secret Google (YouTube)
   YOUTUBE_REFRESH_TOKEN     -> obtenu une fois avec youtube_get_refresh_token.py
-Portées OAuth du refresh token :
-  https://www.googleapis.com/auth/youtube.upload      (publier le Short)
-  https://www.googleapis.com/auth/youtube.force-ssl   (poster l'avertissement en 1er commentaire)
 Options : YOUTUBE_ENABLED ("1"/"0"), YOUTUBE_PRIVACY (public|unlisted|private), YOUTUBE_CATEGORY_ID.
+Titre et description sont 100 % arabes (écritures étrangères retirées via ctx.nettoyer_etranger /
+ctx.est_arabe fournis par le script principal).
 Ne lève jamais d'exception : retourne l'ID de la vidéo ou None.
 """
 import json
@@ -21,10 +20,8 @@ import requests
 
 TOKEN_URL = "https://oauth2.googleapis.com/token"
 UPLOAD_URL = "https://www.googleapis.com/upload/youtube/v3/videos"
-COMMENT_URL = "https://www.googleapis.com/youtube/v3/commentThreads"
 YT_CATEGORY_ID = os.getenv("YOUTUBE_CATEGORY_ID", "25")          # 25 = News & Politics
 YT_PRIVACY = os.getenv("YOUTUBE_PRIVACY", "public")
-DISCLAIMER_DEFAUT = "⚠️ هذا محتوى إخباري تعليمي، وليس نصيحة استثمارية."
 YT_HASHTAGS = ("#Shorts #الأسواق_المالية #فوركس #الذهب #البورصة #اقتصاد #أخبار_اقتصادية "
                "#تداول #استثمار #forex #trading #gold #markets #money_impact")
 YT_TAGS = ["Shorts", "الأسواق المالية", "فوركس", "الذهب", "البورصة", "اقتصاد", "أخبار اقتصادية",
@@ -45,6 +42,16 @@ def _secret(*names):
         if v:
             return v
     return ""
+
+
+def _est_arabe(ctx, t):
+    f = getattr(ctx, "est_arabe", None)
+    return f(t, min_letters=8) if f else True
+
+
+def _net(ctx, t):
+    f = getattr(ctx, "nettoyer_etranger", None)
+    return f(t) if f else (t or "")
 
 
 def _erreur_google(resp):
@@ -76,14 +83,14 @@ def _access_token(client_id, client_secret, refresh, ctx):
     return None
 
 
-def construire_titre(titres):
-    """Titre court (<= 100 caractères) terminé par #Shorts, à partir du 1er titre disponible."""
+def construire_titre(titres, ctx=None):
+    """Titre court (<= 100 caractères) terminé par #Shorts, 100 % arabe."""
     base = ""
     for t in titres or []:
         t = re.sub(r"\n*\s*المصدر\s*[:：].*$", "", t or "", flags=re.S)
         t = re.sub(r"#\S+", "", t).replace("<", "").replace(">", "")
-        t = " ".join(t.split())
-        if t:
+        t = " ".join(_net(ctx, t).split())
+        if t and _est_arabe(ctx, t):
             base = t
             break
     if not base:
@@ -93,40 +100,10 @@ def construire_titre(titres):
     return f"{base} #Shorts"[:100]
 
 
-def construire_description(legende, disclaimer=DISCLAIMER_DEFAUT):
-    """Légende + avertissement + hashtags (l'avertissement est aussi posté en 1er commentaire)."""
-    desc = (legende or "").replace("<", "").replace(">", "").strip()
+def construire_description(legende, ctx=None):
+    desc = _net(ctx, legende).replace("<", "").replace(">", "").strip()
     desc = re.sub(r"(?:\s*#\S+)+\s*$", "", desc).rstrip()      # évite les hashtags en double
-    return (desc[:4200] + "\n\n" + disclaimer + "\n\n" + YT_HASHTAGS)[:5000]
-
-
-def _commenter_youtube(token, video_id, texte, ctx):
-    """Poste l'avertissement en 1er commentaire. Nécessite la portée youtube.force-ssl.
-    Ne lève jamais d'exception et ne change pas le résultat de la publication."""
-    corps = json.dumps({"snippet": {"videoId": video_id, "topLevelComment": {
-        "snippet": {"textOriginal": texte}}}}, ensure_ascii=False).encode("utf-8")
-    for essai in range(1, 4):
-        try:
-            r = requests.post(COMMENT_URL, params={"part": "snippet"}, data=corps, timeout=40,
-                              headers={"Authorization": f"Bearer {token}",
-                                       "Content-Type": "application/json; charset=UTF-8"})
-            if r.ok:
-                _log(ctx, "YouTube : avertissement posté en 1er commentaire.", level="OK")
-                return True
-            msg, raison = _erreur_google(r)
-            _log(ctx, f"YouTube : commentaire refusé (essai {essai}/3, HTTP {r.status_code}) -> "
-                      f"{msg}", level="WARN")
-            if r.status_code in (401, 403):
-                _log(ctx, "   -> le refresh token n'a pas la portée "
-                          "https://www.googleapis.com/auth/youtube.force-ssl : régénère-le avec "
-                          "youtube.upload + youtube.force-ssl. L'avertissement reste dans la "
-                          "description de la vidéo.", level="WARN")
-                return False
-        except Exception as e:
-            _log(ctx, f"YouTube : commentaire exception {type(e).__name__} {str(e)[:150]}",
-                 level="WARN")
-        time.sleep(5 * essai)
-    return False
+    return (desc[:4300] + "\n\n" + YT_HASHTAGS)[:5000]
 
 
 def publier_short_youtube(chemin_video, titres, legende, ctx=None):
@@ -154,11 +131,9 @@ def publier_short_youtube(chemin_video, titres, legende, ctx=None):
         if not token:
             return None
 
-        disclaimer = getattr(ctx, "disclaimer", None) or DISCLAIMER_DEFAUT
-        titre = construire_titre(titres)
+        titre = construire_titre(titres, ctx)
         meta = {
-            "snippet": {"title": titre,
-                        "description": construire_description(legende, disclaimer),
+            "snippet": {"title": titre, "description": construire_description(legende, ctx),
                         "tags": YT_TAGS, "categoryId": YT_CATEGORY_ID,
                         "defaultLanguage": "ar", "defaultAudioLanguage": "ar"},
             "status": {"privacyStatus": YT_PRIVACY, "selfDeclaredMadeForKids": False,
@@ -207,8 +182,6 @@ def publier_short_youtube(chemin_video, titres, legende, ctx=None):
                         _log(ctx, f"YouTube : la vidéo est en « {prive} » : le projet Google Cloud "
                                   "n'est pas audité (vidéos forcées en privé). Demande l'audit de "
                                   "l'API YouTube Data.", level="WARN")
-                    if vid:
-                        _commenter_youtube(token, vid, disclaimer, ctx)   # 1er commentaire
                     return vid
                 msg, _ = _erreur_google(up)
                 _log(ctx, f"YouTube : ÉCHEC upload (HTTP {up.status_code}) -> {msg}", level="ERROR")
