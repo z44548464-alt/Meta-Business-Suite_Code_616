@@ -1663,6 +1663,25 @@ Use relevant=false and financial_event="" when there is no clear financial event
         The headline should be 8 to 15 Arabic words, newsroom style, capture the key fact
         and market impact if any, with no emojis, hashtags, quotation marks, or source name.
         """
+        prompt="""
+        Act as a professional Arabic translator specializing in financial news. 
+
+Your task is to translate the provided financial text into natural, professional Modern Standard Arabic (Fusha) while strictly adhering to the following rules:
+
+1. Financial Accuracy & Facts: Preserve the exact financial meaning, numbers, and facts. Do not add, extrapolate, or assume any facts that are not explicitly stated in the source text. Do not include the name of the news source.
+
+2. Language & Code-Switching Rule: The translation must be entirely in Arabic. You must avoid mixing other languages within the Arabic text, with only TWO exceptions: Names of companies/entities, names of people, or specific geographic locations may be kept in English or transliterated to Arabic if necessary. No other English/foreign words or technical jargon should be left untranslated.
+
+3. Length & Concise Caption: Summarize and translate the key facts faithfully into a concise caption. The caption must be at most 1500 characters.
+
+4. Headline Requirements: Create a short, newsroom-style Arabic headline between 8 and 15 Arabic words. It must capture the core fact and its market impact. Do not use emojis, hashtags, quotation marks, or the source name in the headline.
+
+5. Output Format: Return ONLY one valid JSON object. Do not include Markdown fences (like ```json), comments, or any introductory/concluding text before or after the JSON. Every key and string must use double quotes.
+
+Required JSON Structure:
+{"caption": "Your full Arabic translation/summary here", "headline": "Your short Arabic news headline here"}
+        
+        """
         t = time.time()
         log("Traduction en arabe (Cloudflare -> Hugging Face -> Groq, tous comptes)…")
         messages = [
