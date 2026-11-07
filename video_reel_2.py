@@ -27,7 +27,7 @@ from PIL import Image, ImageEnhance, ImageFilter, ImageOps
 
 # >>> YOUTUBE : import du module d'upload (ne plante jamais le script s'il échoue)
 try:
-    from publie_video_youtub import publier_short_youtube
+    from publie_video_youtub_2 import publier_short_youtube
     _YT_IMPORT_ERR = None
 except Exception as _e:
     publier_short_youtube = None
@@ -471,7 +471,7 @@ def _reel_facebook(chemin, caption, page_id, token):
 def _short_youtube(chemin, titres, caption):
     _log("YouTube : tentative d'upload du Short…")
     if publier_short_youtube is None:
-        _log(f"Module publie_video_youtub.py indisponible ({_YT_IMPORT_ERR}) : YouTube ignoré.",
+        _log(f"Module publie_video_youtub_2.py indisponible ({_YT_IMPORT_ERR}) : YouTube ignoré.",
              level="ERROR")
         return None
     try:
