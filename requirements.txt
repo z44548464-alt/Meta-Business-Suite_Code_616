@@ -13,3 +13,6 @@ feedparser
 bs4
 arabic-reshaper
 python-bidi
+undetected-chromedriver
+selenium
+setuptools
