@@ -1,11 +1,11 @@
 """Module vidéo Reels (Facebook + Instagram + YouTube Shorts) pour Money.impact.
 
 Lit UNIQUEMENT la Page Facebook : photos publiées dans les dernières VIDEO_LOOKBACK_HOURS heures,
-écarte celles déjà utilisées dans une vidéo (historique_videos.json) ET les cartes éducatives /
-sondages (hashtags dans la légende de la photo), et s'il en reste au moins 3, crée un diaporama
+écarte celles déjà utilisées dans une vidéo (historique_videos.json), les cartes éducatives /
+sondages (hashtags dans la légende de la photo) ET les photos dont la légende n'est pas en arabe
+(anciens posts chinois / à carrés □□□), et s'il en reste au moins 3, crée un diaporama
 9:16 (Ken Burns + transitions aléatoires + musique aléatoire news_musique*.mp3) avec 3 à 5 images,
 puis le publie en Reel sur Facebook et Instagram, et en Short sur YouTube.
-L'avertissement « محتوى إخباري تعليمي » est posté en 1er commentaire de chaque vidéo.
 Appelé par Agnet_fb_money_impact_3.py : publier_video_reel(historique, ctx).
 """
 import io
@@ -27,7 +27,7 @@ from PIL import Image, ImageEnhance, ImageFilter, ImageOps
 
 # >>> YOUTUBE : import du module d'upload (ne plante jamais le script s'il échoue)
 try:
-    from publie_video_youtub_2 import publier_short_youtube
+    from publie_video_youtub import publier_short_youtube
     _YT_IMPORT_ERR = None
 except Exception as _e:
     publier_short_youtube = None
@@ -47,7 +47,7 @@ VIDEO_ZOOM_AMOUNT = 0.12
 VIDEO_HASHTAGS = "#الأسواق_المالية #فوركس #الذهب #البورصة #اقتصاد #forex #trading #money_impact"
 
 # Photos de la Page qui ne sont PAS des actualités : cartes éducatives et sondages.
-# Leurs légendes contiennent ces hashtags.
+# Leurs légendes contiennent ces hashtags (voir _preparer_edu / _preparer_sondage).
 EXCLURE_TAGS = ("#اشرحها_لي_كأني_مبتدئ", "#استفتاء")
 
 C = None
@@ -58,18 +58,6 @@ FFMPEG = "ffmpeg"
 
 def _log(*args, **kwargs):
     C.log(*args, **kwargs)
-
-
-def _commenter(objet_id, token, nom):
-    """Poste l'avertissement en 1er commentaire (ne bloque jamais la publication)."""
-    fn = getattr(C, "poster_commentaire", None)
-    texte = getattr(C, "disclaimer", "")
-    if not (fn and texte and objet_id):
-        return
-    try:
-        fn(objet_id, texte, token, nom)
-    except Exception as e:
-        _log(f"{nom} : commentaire impossible ({type(e).__name__} {str(e)[:120]})", level="WARN")
 
 
 # ----------------------------------------------------------------------
@@ -125,7 +113,7 @@ def _est_carte(nom):
 
 def _candidats_facebook(page_id, token):
     """Photos d'ACTUALITÉ publiées sur la Page dans les VIDEO_LOOKBACK_HOURS dernières heures
-    (cartes éducatives et sondages exclus).
+    (cartes éducatives, sondages et légendes non arabes exclus).
     Liste (éventuellement vide) ou None si l'API Facebook échoue."""
     limite = datetime.now(timezone.utc) - timedelta(hours=VIDEO_LOOKBACK_HOURS)
     url = f"{C.graph_url}/{page_id}/photos"
@@ -133,6 +121,7 @@ def _candidats_facebook(page_id, token):
               "limit": 50, "access_token": token}
     out = []
     cartes = 0
+    non_arabes = 0
     try:
         for _ in range(6):
             r = requests.get(url, params=params, timeout=40)
@@ -152,6 +141,9 @@ def _candidats_facebook(page_id, token):
                 if _est_carte(p.get("name")):
                     cartes += 1
                     continue        # carte éducative / sondage : jamais dans les vidéos
+                if not C.est_arabe(p.get("name") or "", min_letters=10):
+                    non_arabes += 1
+                    continue        # légende chinoise / non arabe : photo exclue de la vidéo
                 best = max(p.get("images") or [], key=lambda i: i.get("width", 0), default=None)
                 if best and best.get("source"):
                     out.append({"id": str(p["id"]), "created": created, "url": best["source"],
@@ -162,6 +154,8 @@ def _candidats_facebook(page_id, token):
             url, params = nxt, None
         if cartes:
             _log(f"{cartes} carte(s) éducative(s)/sondage(s) ignorée(s) pour la vidéo.")
+        if non_arabes:
+            _log(f"{non_arabes} photo(s) à légende non arabe ignorée(s) pour la vidéo.", level="WARN")
         return out
     except Exception as e:
         _log(f"Lecture des photos de la Page : {type(e).__name__} {str(e)[:150]}", level="WARN")
@@ -347,9 +341,10 @@ def _legende_video(titres):
             "You write short Instagram/Facebook Reels captions in Modern Standard Arabic for a "
             "financial-markets news page. Each numbered item is a news post (Arabic or English). "
             "Write ONE short Arabic bullet line per item (starting with '•', max 15 words), "
-            "preceded by one short catchy Arabic intro line. Stay faithful to the items: do NOT add "
-            "facts, numbers, hashtags, the page name or links. Write ONLY in Arabic (no Chinese, "
-            "Cyrillic or other scripts). Max 700 characters. "
+            "preceded by one short catchy Arabic intro line. The output MUST be 100% Arabic "
+            "script (company names and tickers may stay in Latin letters). No Chinese or English "
+            "sentences. Stay faithful to the items: do NOT add "
+            "facts, numbers, hashtags, the page name or links. Max 700 characters. "
             "Return ONLY the caption text."},
         {"role": "user", "content": liste},
     ]
@@ -359,12 +354,9 @@ def _legende_video(titres):
             texte = (C.llm_chat(msgs, temperature=0.2, max_tokens=900) or "").strip().strip("`")
         except Exception as e:
             _log(f"Légende LLM : {type(e).__name__} {str(e)[:120]}", level="WARN")
-    # alphabet étranger (chinois, cyrillique...) : on préfère la légende fixe
-    if re.search(r"[\u0400-\u04FF\u0E00-\u0E7F\u3040-\u30FF\u3400-\u9FFF\uAC00-\uD7AF]", texte):
-        _log("Légende LLM : alphabet étranger détecté, légende fixe utilisée.", level="WARN")
-        texte = ""
-    if len(texte) < 20:
-        _log("Légende LLM indisponible : légende fixe utilisée.", level="WARN")
+    texte = C.nettoyer_etranger(texte)
+    if len(texte) < 20 or not C.est_arabe(texte, min_letters=15):
+        _log("Légende LLM indisponible ou non arabe : légende fixe utilisée.", level="WARN")
         texte = base_fixe
     return (texte[:1700].rstrip() + pied)[:C.ig_caption_limit]
 
@@ -420,7 +412,6 @@ def _reel_instagram(video_url, caption, ig_id, token):
         pdata = C.json_or_text(pr)
         if pr.ok and "error" not in pdata and pdata.get("id"):
             _log(f"Reel Instagram : PUBLIÉ (id={pdata['id']})", level="OK")
-            _commenter(pdata["id"], token, "Reel Instagram")      # avertissement en 1er commentaire
             return pdata["id"]
         _log("Reel Instagram : ÉCHEC publication -> " + C.explain_graph_error(pdata), level="ERROR")
     except Exception as e:
@@ -470,7 +461,6 @@ def _reel_facebook(chemin, caption, page_id, token):
                 break
             time.sleep(6)
         _log(f"Reel Facebook : PUBLIÉ (video_id={video_id})", level="OK")
-        _commenter(video_id, token, "Reel Facebook")              # avertissement en 1er commentaire
         return video_id
     except Exception as e:
         _log(f"Reel Facebook : exception {type(e).__name__} : {str(e)[:300]}", level="ERROR")
@@ -481,7 +471,7 @@ def _reel_facebook(chemin, caption, page_id, token):
 def _short_youtube(chemin, titres, caption):
     _log("YouTube : tentative d'upload du Short…")
     if publier_short_youtube is None:
-        _log(f"Module publie_video_youtub_2.py indisponible ({_YT_IMPORT_ERR}) : YouTube ignoré.",
+        _log(f"Module publie_video_youtub.py indisponible ({_YT_IMPORT_ERR}) : YouTube ignoré.",
              level="ERROR")
         return None
     try:
@@ -585,7 +575,7 @@ def publier_video_reel(historique, ctx):
         caption = _legende_video(titres)
         _log(f"Légende vidéo : {len(caption)} caractères")
 
-        # 6) publication (chaque plateforme poste l'avertissement en 1er commentaire)
+        # 6) publication
         fb_id = ig_post_id = yt_id = None
         fb_id = _reel_facebook(rendus[VIDEO_FORMATS["facebook"]], caption, page_id, token)
         if ig_id:
