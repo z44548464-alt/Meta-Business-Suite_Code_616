@@ -85,6 +85,7 @@ jobs:
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
           YOUTUBE_ENABLED: "1"          # "0" pour désactiver
           YOUTUBE_PRIVACY: "public"     # public | unlisted | private
+          YOUTUBE_MAX_PER_DAY: "6"      # quota API YouTube : ~6 uploads par jour
           # comptes pour générer les images / le texte
           CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
           CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
@@ -136,6 +137,12 @@ jobs:
           path: agent.log
           if-no-files-found: ignore
           retention-days: 7
+
+      - name: Résumé vidéo + YouTube (extrait du log)
+        if: always()
+        run: |
+          echo "---- Lignes Vidéo Reel / YouTube ----"
+          grep -n -E "Vidéo Reel|YouTube|Reel Facebook|Reel Instagram|VIDÉO|image\(s\) libre" agent.log || echo "Aucune ligne vidéo/YouTube dans le log (la vidéo n'a pas été tentée)."
 
       - name: Sauvegarder les historiques (posts + vidéos)
         if: always()
