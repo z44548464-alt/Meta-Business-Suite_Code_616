@@ -1,4 +1,4 @@
-name: Agent Facebook Instagram 2 (money impact)
+name: Agent Facebook Instagram 3 (money impact)
 
 on:
   schedule:
@@ -32,22 +32,21 @@ jobs:
           python-version: "3.11"
           cache: pip
 
-      # Raqm + polices (mis en cache, sans ffmpeg)
+      # Raqm + polices : arabe (Noto), latin (DejaVu/Liberation/FreeFont), CJK et emoji (Noto)
       - name: Dépendances système (Raqm + polices) avec cache
         uses: awalsh128/cache-apt-pkgs-action@v1
         timeout-minutes: 15
         with:
-          packages: libraqm0 libfribidi0 libharfbuzz0b fonts-dejavu-core fonts-noto-core
-          version: v3
+          packages: libraqm0 libfribidi0 libharfbuzz0b fonts-dejavu-core fonts-noto-core fonts-noto-cjk fonts-noto-color-emoji fonts-freefont-ttf fonts-liberation
+          version: v4
 
-      # ffmpeg + tesseract (OCR anti-écriture des images IA) installés directement par apt
-      - name: Installer ffmpeg et tesseract
+      # ffmpeg installé directement par apt : toutes les dépendances (libblas, etc.) sont incluses
+      - name: Installer ffmpeg
         timeout-minutes: 10
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y --no-install-recommends ffmpeg libblas3 liblapack3 tesseract-ocr
+          sudo apt-get install -y --no-install-recommends ffmpeg libblas3 liblapack3
           ffmpeg -version | head -n 1
-          tesseract --version | head -n 1
           ffmpeg -hide_banner -filters 2>/dev/null | grep -E " (xfade|zoompan) " || echo "ATTENTION : filtre xfade/zoompan absent"
 
       - name: Installer les dépendances Python
@@ -55,9 +54,8 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt --progress-bar off
-          pip install pytesseract --progress-bar off
           echo "---- Versions installées ----"
-          pip list 2>/dev/null | grep -i -E "groq|langchain|huggingface|pillow|arabic|bidi|cloudinary|feedparser|beautifulsoup|requests|pytesseract" || true
+          pip list 2>/dev/null | grep -i -E "groq|langchain|huggingface|pillow|arabic|bidi|cloudinary|feedparser|beautifulsoup|requests" || true
           ffmpeg -version | head -n 1
 
       # Filet de sécurité : binaire ffmpeg statique (utilisé si ffmpeg système est cassé)
@@ -69,17 +67,19 @@ jobs:
           ls -la
           ls -la fonts imgs music music_NEWS 2>/dev/null || echo "Dossiers fonts/, imgs/, music/ ou music_NEWS/ absents"
           echo "Musiques trouvées : $(ls music/news_musique*.mp3 music_NEWS/news_musique*.mp3 2>/dev/null | wc -l)"
-          grep -c "def banner" Agnet_fb_money_impact_3_1.py || echo ">>> ANCIENNE VERSION du script <<<"
-          grep -m1 "SCRIPT_VERSION =" Agnet_fb_money_impact_3_1.py
-          python -m py_compile Agnet_fb_money_impact_3_1.py video_reel_2.py publie_video_youtub_2.py && echo "Syntaxe OK"
+          echo "Polices arabes installées :"
+          fc-list :lang=ar family | sort -u | head -8 || true
+          grep -c "def banner" Agnet_fb_money_impact_3.py || echo ">>> ANCIENNE VERSION du script <<<"
+          grep -m1 "SCRIPT_VERSION =" Agnet_fb_money_impact_3.py
+          python -m py_compile Agnet_fb_money_impact_3.py video_reel.py publie_video_youtub.py && echo "Syntaxe OK"
 
       - name: Lancer l'agent
         timeout-minutes: 80
         run: |
           set -o pipefail
-          python -u Agnet_fb_money_impact_3_1.py 2>&1 | tee agent.log
+          python -u Agnet_fb_money_impact_3.py 2>&1 | tee agent.log
         env:
-          # YouTube Shorts (le refresh token doit avoir les portées youtube.upload + youtube.force-ssl)
+          # YouTube Shorts
           ID_CLIENT_FB: ${{ secrets.ID_CLIENT_FB }}
           CODE_SECRET_DU_CLIENT_FB: ${{ secrets.CODE_SECRET_DU_CLIENT_FB }}
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
@@ -123,13 +123,6 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           TOGETHER_API_KEY: ${{ secrets.TOGETHER_API_KEY }}
           POLLINATIONS_API_KEY: ${{ secrets.POLLINATIONS_API_KEY }}
-
-          # images : vraies photos du web (sans clé) -> image IA vérifiée par OCR -> fond local
-          WEB_IMAGES_ENABLED: "1"       # "0" : plus de photos web (image IA seulement)
-          OCR_CHECK: "1"                # contrôle anti-écriture des images IA
-          OCR_MIN_CONF: "60"            # monte à 70 si trop d'images saines sont rejetées
-          IMAGE_MAX_TRIES: "4"
-          REQUIRE_WHAT_NEXT: "1"        # "0" : publier même sans « وماذا بعد؟ »
 
           # vidéo Reels : indépendante des news, lit les photos de la Page (12 dernières heures)
           VIDEO_ENABLED: "1"            # mettre "0" pour la désactiver
