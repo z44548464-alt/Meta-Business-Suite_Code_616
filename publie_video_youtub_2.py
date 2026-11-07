@@ -5,10 +5,11 @@ Secrets GitHub :
   ID_CLIENT_FB              -> client ID Google (YouTube)
   CODE_SECRET_DU_CLIENT_FB  -> client secret Google (YouTube)
   YOUTUBE_REFRESH_TOKEN     -> obtenu une fois avec youtube_get_refresh_token.py
-Options : YOUTUBE_ENABLED ("1"/"0"), YOUTUBE_PRIVACY (public|unlisted|private), YOUTUBE_CATEGORY_ID.
+Options : YOUTUBE_ENABLED ("1"/"0"), YOUTUBE_PRIVACY (public|unlisted|private),
+          YOUTUBE_CATEGORY_ID, YOUTUBE_MAX_PER_DAY (gestion du quota, défaut 6).
 Titre et description sont 100 % arabes (écritures étrangères retirées via ctx.nettoyer_etranger /
 ctx.est_arabe fournis par le script principal).
-Ne lève jamais d'exception : retourne l'ID de la vidéo ou None.
+Ne lève jamais d'exception : publier_short_youtube retourne l'ID de la vidéo ou None.
 """
 import json
 import os
@@ -66,21 +67,84 @@ def _erreur_google(resp):
         return resp.text[:250], ""
 
 
+def _secrets_youtube():
+    return (_secret("ID_CLIENT_FB", "YOUTUBE_CLIENT_ID"),
+            _secret("CODE_SECRET_DU_CLIENT_FB", "YOUTUBE_CLIENT_SECRET"),
+            _secret("YOUTUBE_REFRESH_TOKEN"))
+
+
+def _scope_ok(scope):
+    """True si le jeton autorise l'upload de vidéos."""
+    return any(t.endswith("/youtube.upload") or t.endswith("/youtube")
+               for t in (scope or "").split())
+
+
+def _renouveler_jeton(client_id, client_secret, refresh, ctx):
+    """Retourne (access_token, scope) ou (None, '')."""
+    for essai in range(1, 3):
+        try:
+            r = requests.post(TOKEN_URL, data={
+                "client_id": client_id, "client_secret": client_secret,
+                "refresh_token": refresh, "grant_type": "refresh_token"}, timeout=40)
+            if r.ok and r.json().get("access_token"):
+                d = r.json()
+                return d["access_token"], d.get("scope", "")
+            msg, code = _erreur_google(r)
+            _log(ctx, f"YouTube : jeton refusé (HTTP {r.status_code}) -> {msg}", level="ERROR")
+            if code == "invalid_grant":
+                _log(ctx, "   -> refresh token expiré/révoqué : passe l'écran de consentement "
+                          "OAuth en « En production » puis régénère YOUTUBE_REFRESH_TOKEN.",
+                     level="ERROR")
+                return None, ""
+            if code in ("invalid_client", "unauthorized_client"):
+                _log(ctx, "   -> ID_CLIENT_FB / CODE_SECRET_DU_CLIENT_FB incorrects ou ne "
+                          "correspondent pas au refresh token.", level="ERROR")
+                return None, ""
+            if r.status_code < 500:
+                return None, ""
+        except Exception as e:
+            _log(ctx, f"YouTube : jeton impossible essai {essai}/2 "
+                      f"({type(e).__name__} {str(e)[:150]})", level="WARN")
+        time.sleep(3)
+    return None, ""
+
+
 def _access_token(client_id, client_secret, refresh, ctx):
+    token, scope = _renouveler_jeton(client_id, client_secret, refresh, ctx)
+    if token and scope and not _scope_ok(scope):
+        _log(ctx, f"YouTube : le jeton n'a pas le droit d'uploader (scope : {scope}). "
+                  "Régénère le refresh token avec le scope youtube.upload.", level="ERROR")
+        return None
+    return token
+
+
+def verifier_youtube(ctx=None):
+    """Test de démarrage SANS rien publier : secrets présents, jeton valide, scope correct.
+    Retourne True si l'upload est possible. Ne lève jamais d'exception."""
     try:
-        r = requests.post(TOKEN_URL, data={
-            "client_id": client_id, "client_secret": client_secret,
-            "refresh_token": refresh, "grant_type": "refresh_token"}, timeout=40)
-        if r.ok and r.json().get("access_token"):
-            return r.json()["access_token"]
-        msg, code = _erreur_google(r)
-        _log(ctx, f"YouTube : jeton refusé -> {msg}", level="ERROR")
-        if code == "invalid_grant":
-            _log(ctx, "   -> refresh token expiré/révoqué : passe l'écran de consentement OAuth "
-                      "en « En production » puis régénère le token.", level="ERROR")
+        if os.getenv("YOUTUBE_ENABLED", "1") != "1":
+            _log(ctx, "YouTube : désactivé (YOUTUBE_ENABLED != 1).", level="WARN")
+            return False
+        client_id, client_secret, refresh = _secrets_youtube()
+        manque = [n for n, v in (("ID_CLIENT_FB", client_id),
+                                 ("CODE_SECRET_DU_CLIENT_FB", client_secret),
+                                 ("YOUTUBE_REFRESH_TOKEN", refresh)) if not v]
+        if manque:
+            _log(ctx, "YouTube : secret(s) absent(s) -> " + ", ".join(manque), level="ERROR")
+            return False
+        token, scope = _renouveler_jeton(client_id, client_secret, refresh, ctx)
+        if not token:
+            return False
+        if not _scope_ok(scope):
+            _log(ctx, f"YouTube : jeton valide MAIS sans droit d'upload (scope : {scope or '?'}). "
+                      "Régénère le refresh token avec le scope youtube.upload.", level="ERROR")
+            return False
+        _log(ctx, f"YouTube : jeton valide, upload autorisé (confidentialité demandée : "
+                  f"{YT_PRIVACY}).", level="OK")
+        return True
     except Exception as e:
-        _log(ctx, f"YouTube : jeton impossible ({type(e).__name__} {str(e)[:150]})", level="ERROR")
-    return None
+        _log(ctx, f"YouTube : test impossible {type(e).__name__} : {str(e)[:200]}", level="ERROR")
+        return False
 
 
 def construire_titre(titres, ctx=None):
@@ -112,14 +176,12 @@ def publier_short_youtube(chemin_video, titres, legende, ctx=None):
         if os.getenv("YOUTUBE_ENABLED", "1") != "1":
             _log(ctx, "YouTube désactivé (YOUTUBE_ENABLED != 1).")
             return None
-        client_id = _secret("ID_CLIENT_FB", "YOUTUBE_CLIENT_ID")
-        client_secret = _secret("CODE_SECRET_DU_CLIENT_FB", "YOUTUBE_CLIENT_SECRET")
-        refresh = _secret("YOUTUBE_REFRESH_TOKEN")
+        client_id, client_secret, refresh = _secrets_youtube()
         manque = [n for n, v in (("ID_CLIENT_FB", client_id),
                                  ("CODE_SECRET_DU_CLIENT_FB", client_secret),
                                  ("YOUTUBE_REFRESH_TOKEN", refresh)) if not v]
         if manque:
-            _log(ctx, "YouTube IGNORÉ : secret(s) absent(s) -> " + ", ".join(manque), level="WARN")
+            _log(ctx, "YouTube IGNORÉ : secret(s) absent(s) -> " + ", ".join(manque), level="ERROR")
             return None
         chemin = Path(chemin_video)
         if not chemin.is_file():
@@ -156,7 +218,14 @@ def publier_short_youtube(chemin_video, titres, legende, ctx=None):
                     _log(ctx, f"YouTube : ÉCHEC initialisation (HTTP {init.status_code}) -> {msg}",
                          level="ERROR")
                     if raison in ("quotaExceeded", "dailyLimitExceeded", "uploadLimitExceeded"):
-                        _log(ctx, "   -> quota/limite d'upload atteint : réessaie demain.",
+                        _log(ctx, "   -> quota/limite d'upload atteint : réessaie demain "
+                                  "(ou demande une augmentation de quota).", level="ERROR")
+                    elif raison in ("insufficientPermissions", "forbidden"):
+                        _log(ctx, "   -> permission refusée : régénère le refresh token avec le "
+                                  "scope youtube.upload et vérifie que la chaîne YouTube existe.",
+                             level="ERROR")
+                    elif raison in ("youtubeSignupRequired", "channelNotFound"):
+                        _log(ctx, "   -> le compte Google n'a pas de chaîne YouTube.",
                              level="ERROR")
                     if init.status_code < 500:
                         return None            # erreur définitive : inutile de réessayer
@@ -176,12 +245,13 @@ def publier_short_youtube(chemin_video, titres, legende, ctx=None):
                     data = up.json()
                     vid = data.get("id")
                     prive = (data.get("status") or {}).get("privacyStatus")
-                    _log(ctx, f"YouTube : Short PUBLIÉ -> https://youtube.com/shorts/{vid}",
-                         level="OK")
+                    _log(ctx, f"YouTube : Short PUBLIÉ -> https://youtube.com/shorts/{vid} "
+                              f"(confidentialité : {prive})", level="OK")
                     if YT_PRIVACY == "public" and prive and prive != "public":
                         _log(ctx, f"YouTube : la vidéo est en « {prive} » : le projet Google Cloud "
                                   "n'est pas audité (vidéos forcées en privé). Demande l'audit de "
-                                  "l'API YouTube Data.", level="WARN")
+                                  "l'API YouTube Data ou publie-la à la main dans YouTube Studio.",
+                             level="WARN")
                     return vid
                 msg, _ = _erreur_google(up)
                 _log(ctx, f"YouTube : ÉCHEC upload (HTTP {up.status_code}) -> {msg}", level="ERROR")
