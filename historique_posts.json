@@ -13256,5 +13256,23 @@
         "categorie": "Stocks",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794152095/actualites_financieres/mgsfyj6qnp6tcit364vi.jpg",
         "publie_le": "2026-11-08T15:35:04.950910+00:00"
+    },
+    "Bloomberg Markets_Saudi Aramco Tower Targeted in Rare Strike on Riyadh Finance Hub_2026-11-08 17:15": {
+        "source": "Bloomberg Markets",
+        "titre": "Saudi Aramco Tower Targeted in Rare Strike on Riyadh Finance Hub",
+        "date": "2026-11-08 17:15",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794158678/actualites_financieres/zaxasfujx3nkm6s3xer8.jpg",
+        "publie_le": "2026-11-08T17:24:54.878893+00:00"
+    },
+    "Seeking Alpha_Wall Street Brunch: Anthropic IPO Goes On The Road_2026-11-08 16:50": {
+        "source": "Seeking Alpha",
+        "titre": "Wall Street Brunch: Anthropic IPO Goes On The Road",
+        "date": "2026-11-08 16:50",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794158712/actualites_financieres/imdt6iricyqaju6gmn0w.jpg",
+        "publie_le": "2026-11-08T17:25:22.031881+00:00"
     }
 }
