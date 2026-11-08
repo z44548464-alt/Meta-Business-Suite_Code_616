@@ -13193,5 +13193,32 @@
         "categorie": "Economic news",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794141088/actualites_financieres/xjeon8ymkdra4527vixj.jpg",
         "publie_le": "2026-11-08T12:31:42.628461+00:00"
+    },
+    "Bloomberg Markets_Democratic Sweep Tests Trump-Linked Trades Across Latin America_2026-11-08 13:30": {
+        "source": "Bloomberg Markets",
+        "titre": "Democratic Sweep Tests Trump-Linked Trades Across Latin America",
+        "date": "2026-11-08 13:30",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794145260/actualites_financieres/bbdj3eqwugt0go4iuycn.jpg",
+        "publie_le": "2026-11-08T13:41:10.441799+00:00"
+    },
+    "Financial Times Markets_Saudi Aramco office in Riyadh damaged in latest Houthi strikes_2026-11-08 12:16": {
+        "source": "Financial Times Markets",
+        "titre": "Saudi Aramco office in Riyadh damaged in latest Houthi strikes",
+        "date": "2026-11-08 12:16",
+        "note": 80,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794145293/actualites_financieres/s66if5sbjlkc6f49qnjv.jpg",
+        "publie_le": "2026-11-08T13:41:43.772286+00:00"
+    },
+    "Bloomberg Markets_Indian Stocks Snap Diwali Win Streak in First Drop Since 2017_2026-11-08 09:12": {
+        "source": "Bloomberg Markets",
+        "titre": "Indian Stocks Snap Diwali Win Streak in First Drop Since 2017",
+        "date": "2026-11-08 09:12",
+        "note": 80,
+        "categorie": "Indices",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794145336/actualites_financieres/vdtyycygh7syrbriaqkx.jpg",
+        "publie_le": "2026-11-08T13:42:31.464316+00:00"
     }
 }
