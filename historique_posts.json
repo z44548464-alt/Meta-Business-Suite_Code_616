@@ -13290,16 +13290,25 @@
         "date": "2026-11-08 22:07",
         "note": 80,
         "categorie": "Forex",
-        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794176804/actualites_financieres/j5rspeikveftzcmrbgzb.jpg",
-        "publie_le": "2026-11-08T22:26:57.929777+00:00"
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794177324/actualites_financieres/kzgk155qpklxn59aumh1.jpg",
+        "publie_le": "2026-11-08T22:35:37.448905+00:00"
     },
     "OilPrice_Democratic Win Set to Reshuffle U.S. Energy Policy_2026-11-08 22:00": {
         "source": "OilPrice",
         "titre": "Democratic Win Set to Reshuffle U.S. Energy Policy",
         "date": "2026-11-08 22:00",
         "note": 80,
-        "categorie": "Oil",
-        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794176838/actualites_financieres/tbtmpb9hjuy9cgy8so5l.jpg",
-        "publie_le": "2026-11-08T22:27:25.117442+00:00"
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794177355/actualites_financieres/aqkvlukw1ryptztgujht.jpg",
+        "publie_le": "2026-11-08T22:36:06.626183+00:00"
+    },
+    "Bloomberg Markets_Asian Markets at Risk of Pressure on Nvidia Probe: Markets Wrap_2026-11-08 22:20": {
+        "source": "Bloomberg Markets",
+        "titre": "Asian Markets at Risk of Pressure on Nvidia Probe: Markets Wrap",
+        "date": "2026-11-08 22:20",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794177293/actualites_financieres/apccwalrvuvlldiboyko.jpg",
+        "publie_le": "2026-11-08T22:35:07.134467+00:00"
     }
 }
