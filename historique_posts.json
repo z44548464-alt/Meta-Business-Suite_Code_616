@@ -13427,5 +13427,50 @@
         "categorie": "Stocks",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794190318/actualites_financieres/zeev6fsxgfwyhqxrn9jd.jpg",
         "publie_le": "2026-11-09T02:12:12.534079+00:00"
+    },
+    "Bloomberg Markets_Foreign Funds Pile Into India as AI Trade Falters_2026-11-09 02:45": {
+        "source": "Bloomberg Markets",
+        "titre": "Foreign Funds Pile Into India as AI Trade Falters",
+        "date": "2026-11-09 02:45",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794192492/actualites_financieres/j2hqyfclbtwcxny4xnon.jpg",
+        "publie_le": "2026-11-09T02:48:23.393995+00:00"
+    },
+    "CNBC Economy_China wholesale inflation hits highest in more than four years as consumer measure slows_2026-11-09 02:28": {
+        "source": "CNBC Economy",
+        "titre": "China wholesale inflation hits highest in more than four years as consumer measure slows",
+        "date": "2026-11-09 02:28",
+        "note": 85,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794192518/actualites_financieres/nytce8j90b1hhti9haiu.jpg",
+        "publie_le": "2026-11-09T02:48:48.844196+00:00"
+    },
+    "Bloomberg Markets_China’s Cheap Domestic Gas Curbs LNG Buying as Winter Nears_2026-11-09 02:20": {
+        "source": "Bloomberg Markets",
+        "titre": "China’s Cheap Domestic Gas Curbs LNG Buying as Winter Nears",
+        "date": "2026-11-09 02:20",
+        "note": 80,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794192544/actualites_financieres/tdmjaoyfexvkbam6lpez.jpg",
+        "publie_le": "2026-11-09T02:49:15.420755+00:00"
+    },
+    "Bloomberg Markets_Philippine Economy Unexpectedly Slows, Pressuring Marcos_2026-11-09 02:03": {
+        "source": "Bloomberg Markets",
+        "titre": "Philippine Economy Unexpectedly Slows, Pressuring Marcos",
+        "date": "2026-11-09 02:03",
+        "note": 85,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794192570/actualites_financieres/dhoqas2xi4ajcmnzfg4c.jpg",
+        "publie_le": "2026-11-09T02:49:39.800035+00:00"
+    },
+    "Financial Times_China’s inflation edges lower in October_2026-11-09 02:01": {
+        "source": "Financial Times",
+        "titre": "China’s inflation edges lower in October",
+        "date": "2026-11-09 02:01",
+        "note": 85,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794192594/actualites_financieres/pt1xopguos8epsb5rmbj.jpg",
+        "publie_le": "2026-11-09T02:50:05.300059+00:00"
     }
 }
