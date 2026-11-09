@@ -13373,5 +13373,50 @@
         "categorie": "Central banks",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794185576/actualites_financieres/umefnp39unqwgc9gffyo.jpg",
         "publie_le": "2026-11-09T00:53:06.919638+00:00"
+    },
+    "CNBC Economy_China wholesale inflation hits over four-year high as consumer measure slows_2026-11-09 01:40": {
+        "source": "CNBC Economy",
+        "titre": "China wholesale inflation hits over four-year high as consumer measure slows",
+        "date": "2026-11-09 01:40",
+        "note": 85,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794189656/actualites_financieres/jldoy8gj0gm71be84zvi.jpg",
+        "publie_le": "2026-11-09T02:01:09.634881+00:00"
+    },
+    "Bloomberg Markets_Lula Vows Fiscal Responsibility in First Address Since Election_2026-11-09 01:09": {
+        "source": "Bloomberg Markets",
+        "titre": "Lula Vows Fiscal Responsibility in First Address Since Election",
+        "date": "2026-11-09 01:09",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794189719/actualites_financieres/vbzzz0hunar4umwrvsta.jpg",
+        "publie_le": "2026-11-09T02:02:12.657541+00:00"
+    },
+    "Bloomberg Markets_Berkshire Plans First Japan Bond Offering Since April_2026-11-09 01:04": {
+        "source": "Bloomberg Markets",
+        "titre": "Berkshire Plans First Japan Bond Offering Since April",
+        "date": "2026-11-09 01:04",
+        "note": 80,
+        "categorie": "Bonds",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794189751/actualites_financieres/fyztiv9rhnmktlnafxy1.jpg",
+        "publie_le": "2026-11-09T02:02:44.978485+00:00"
+    },
+    "Bloomberg Markets_Gold Gains as Oil Extends Fall and Nvidia Probe Rattles Markets_2026-11-08 23:40": {
+        "source": "Bloomberg Markets",
+        "titre": "Gold Gains as Oil Extends Fall and Nvidia Probe Rattles Markets",
+        "date": "2026-11-08 23:40",
+        "note": 80,
+        "categorie": "Gold",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794189791/actualites_financieres/ukjpeom7gnq4giutusdw.jpg",
+        "publie_le": "2026-11-09T02:03:28.370844+00:00"
+    },
+    "Bloomberg Markets_Asian Stocks Follow US Gains, Nvidia Probe Looms: Markets Wrap_2026-11-08 22:20": {
+        "source": "Bloomberg Markets",
+        "titre": "Asian Stocks Follow US Gains, Nvidia Probe Looms: Markets Wrap",
+        "date": "2026-11-08 22:20",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794189831/actualites_financieres/drqxgtsowx5utuzspzlt.jpg",
+        "publie_le": "2026-11-09T02:04:07.880874+00:00"
     }
 }
