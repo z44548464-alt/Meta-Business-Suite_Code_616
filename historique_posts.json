@@ -14613,8 +14613,8 @@
         "date": "2026-11-09 22:16",
         "note": 80,
         "categorie": "Stocks",
-        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794263932/actualites_financieres/zxgso3xxovpdlhryanxz.jpg",
-        "publie_le": "2026-11-09T22:39:05.814935+00:00"
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794264550/actualites_financieres/pidmxsm28lpdveb2hlmw.jpg",
+        "publie_le": "2026-11-09T22:49:22.906061+00:00"
     },
     "Bloomberg Markets_CVS Has Not Received Offers For the Retail Pharmacy Business, CEO Says_2026-11-09 21:49": {
         "source": "Bloomberg Markets",
@@ -14622,8 +14622,8 @@
         "date": "2026-11-09 21:49",
         "note": 80,
         "categorie": "Stocks",
-        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794263975/actualites_financieres/zyw6gfnjbcqjw0jsbtvu.jpg",
-        "publie_le": "2026-11-09T22:39:49.216860+00:00"
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794264594/actualites_financieres/x8z8fxbe3hq6ow0jgbvo.jpg",
+        "publie_le": "2026-11-09T22:49:59.707536+00:00"
     },
     "Bloomberg Economics_Colombia Seeks $15 Billion IMF Deal as Fiscal Pressure Mounts_2026-11-09 21:47": {
         "source": "Bloomberg Economics",
@@ -14631,8 +14631,8 @@
         "date": "2026-11-09 21:47",
         "note": 85,
         "categorie": "Economic news",
-        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794264006/actualites_financieres/gqmhotezgrscf29jik9p.jpg",
-        "publie_le": "2026-11-09T22:40:13.342415+00:00"
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794264612/actualites_financieres/ayyoh8w7iju0ok4ywksu.jpg",
+        "publie_le": "2026-11-09T22:50:23.398218+00:00"
     },
     "Bloomberg Economics_Meloni Backs Gas Price Cap to Curb Bills Ahead of Italy Election_2026-11-09 18:20": {
         "source": "Bloomberg Economics",
@@ -14640,7 +14640,25 @@
         "date": "2026-11-09 18:20",
         "note": 80,
         "categorie": "Economic news",
-        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794264087/actualites_financieres/fhfynbboqo6lyedoorrs.jpg",
-        "publie_le": "2026-11-09T22:41:41.687687+00:00"
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794264708/actualites_financieres/xm8epvw1gvmz58nvqwkg.jpg",
+        "publie_le": "2026-11-09T22:52:01.144103+00:00"
+    },
+    "Seeking Alpha_Ionis Pharmaceuticals: Q3 Triggers The Latest Selloff On Tryngolza Disappointment_2026-11-09 22:35": {
+        "source": "Seeking Alpha",
+        "titre": "Ionis Pharmaceuticals: Q3 Triggers The Latest Selloff On Tryngolza Disappointment",
+        "date": "2026-11-09 22:35",
+        "note": 90,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794264515/actualites_financieres/r5fp7zwfwsuyczh7obpi.jpg",
+        "publie_le": "2026-11-09T22:48:43.760928+00:00"
+    },
+    "Federal Reserve_Federal Reserve Board announces approval of two applications by Mutual Federal Bancorp, MHC, and MFB Bancorp, Inc._2026-11-09 21:00": {
+        "source": "Federal Reserve",
+        "titre": "Federal Reserve Board announces approval of two applications by Mutual Federal Bancorp, MHC, and MFB Bancorp, Inc.",
+        "date": "2026-11-09 21:00",
+        "note": 80,
+        "categorie": "Central banks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794264652/actualites_financieres/hrdtqomd4bo0lj3vcylt.jpg",
+        "publie_le": "2026-11-09T22:51:03.377700+00:00"
     }
 }
