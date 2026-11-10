@@ -15056,5 +15056,14 @@
         "categorie": "Stocks",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794293559/actualites_financieres/xcqgpzkqmfnxbad8o20e.jpg",
         "publie_le": "2026-11-10T06:52:49.785100+00:00"
+    },
+    "ActionForex Fundamental_US CPI in Focus_2026-11-10 06:52": {
+        "source": "ActionForex Fundamental",
+        "titre": "US CPI in Focus",
+        "date": "2026-11-10 06:52",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794294106/actualites_financieres/h4lw9a4hge41ymuop7su.jpg",
+        "publie_le": "2026-11-10T07:01:51.954300+00:00"
     }
 }
