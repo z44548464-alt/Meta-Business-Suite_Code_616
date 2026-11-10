@@ -14894,5 +14894,50 @@
         "categorie": "Stocks",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794278686/actualites_financieres/wlthl3tdislmzpjloagy.jpg",
         "publie_le": "2026-11-10T02:44:59.569803+00:00"
+    },
+    "Bloomberg Markets_Japan 30-Year Bond Sale Sees Weaker Demand Than 12-Month Average_2026-11-10 03:38": {
+        "source": "Bloomberg Markets",
+        "titre": "Japan 30-Year Bond Sale Sees Weaker Demand Than 12-Month Average",
+        "date": "2026-11-10 03:38",
+        "note": 80,
+        "categorie": "Bonds",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794282190/actualites_financieres/mlupmrwnn7jcuvv03bpf.jpg",
+        "publie_le": "2026-11-10T03:43:29.293525+00:00"
+    },
+    "Financial Times_China’s trade surplus exceeds $1tn for first 10 months of year_2026-11-10 03:09": {
+        "source": "Financial Times",
+        "titre": "China’s trade surplus exceeds $1tn for first 10 months of year",
+        "date": "2026-11-10 03:09",
+        "note": 85,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794282230/actualites_financieres/lybqkixv5bqgkyl78np5.jpg",
+        "publie_le": "2026-11-10T03:44:05.735901+00:00"
+    },
+    "Bloomberg Markets_Singapore Launches Gold Vaulting Service for Central Banks_2026-11-10 03:00": {
+        "source": "Bloomberg Markets",
+        "titre": "Singapore Launches Gold Vaulting Service for Central Banks",
+        "date": "2026-11-10 03:00",
+        "note": 80,
+        "categorie": "Gold",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794282262/actualites_financieres/mir4tdcinbbgj7qn4w6v.jpg",
+        "publie_le": "2026-11-10T03:44:36.644627+00:00"
+    },
+    "Bloomberg Economics_Chinese Trade Surplus Tops $1 Trillion for Second Time Ever_2026-11-10 02:40": {
+        "source": "Bloomberg Economics",
+        "titre": "Chinese Trade Surplus Tops $1 Trillion for Second Time Ever",
+        "date": "2026-11-10 02:40",
+        "note": 90,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794282294/actualites_financieres/vtefow00tstwdxqanfe3.jpg",
+        "publie_le": "2026-11-10T03:45:08.788212+00:00"
+    },
+    "Bloomberg Markets_Asian Stocks Ride Tech Rally Higher as Oil Drops: Markets Wrap_2026-11-09 22:16": {
+        "source": "Bloomberg Markets",
+        "titre": "Asian Stocks Ride Tech Rally Higher as Oil Drops: Markets Wrap",
+        "date": "2026-11-09 22:16",
+        "note": 80,
+        "categorie": "Indices",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794282343/actualites_financieres/dszcgim8boyvd4xnmigp.jpg",
+        "publie_le": "2026-11-10T03:45:58.016837+00:00"
     }
 }
