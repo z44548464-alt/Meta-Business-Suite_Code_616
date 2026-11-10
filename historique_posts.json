@@ -14939,5 +14939,50 @@
         "categorie": "Indices",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794282913/actualites_financieres/x7mj79keg7vkjoxpz6r1.jpg",
         "publie_le": "2026-11-10T03:55:25.605171+00:00"
+    },
+    "OilPrice_The 75-Year Army Deal That Could Reshape America's Rare Earth Supply_2026-11-10 04:00": {
+        "source": "OilPrice",
+        "titre": "The 75-Year Army Deal That Could Reshape America's Rare Earth Supply",
+        "date": "2026-11-10 04:00",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794285860/actualites_financieres/q9o1kogsjwg8f2kzxjjn.jpg",
+        "publie_le": "2026-11-10T04:44:29.151051+00:00"
+    },
+    "Bloomberg Markets_China Oil Imports Rebound as More Crude Flows From Persian Gulf_2026-11-10 03:42": {
+        "source": "Bloomberg Markets",
+        "titre": "China Oil Imports Rebound as More Crude Flows From Persian Gulf",
+        "date": "2026-11-10 03:42",
+        "note": 80,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794285886/actualites_financieres/adokfmxitu2mwzg8lde2.jpg",
+        "publie_le": "2026-11-10T04:44:55.541112+00:00"
+    },
+    "Bloomberg Markets_Rising Fuel Flows Through Hormuz May Help Ease Strained Market_2026-11-10 03:39": {
+        "source": "Bloomberg Markets",
+        "titre": "Rising Fuel Flows Through Hormuz May Help Ease Strained Market",
+        "date": "2026-11-10 03:39",
+        "note": 80,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794285909/actualites_financieres/mwzoymsctvmqlkrmdopb.jpg",
+        "publie_le": "2026-11-10T04:45:19.198771+00:00"
+    },
+    "Bloomberg Markets_Japan 30-Year Bond Sale Sees Weaker Demand After JGB Swings_2026-11-10 03:38": {
+        "source": "Bloomberg Markets",
+        "titre": "Japan 30-Year Bond Sale Sees Weaker Demand After JGB Swings",
+        "date": "2026-11-10 03:38",
+        "note": 80,
+        "categorie": "Bonds",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794285933/actualites_financieres/yjxyfxatn070epojwxgn.jpg",
+        "publie_le": "2026-11-10T04:45:42.469379+00:00"
+    },
+    "Bloomberg Markets_Gold Edges Lower as Rate-Hike Bets Temper Impact of Lower Oil_2026-11-10 00:04": {
+        "source": "Bloomberg Markets",
+        "titre": "Gold Edges Lower as Rate-Hike Bets Temper Impact of Lower Oil",
+        "date": "2026-11-10 00:04",
+        "note": 80,
+        "categorie": "Gold",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794285979/actualites_financieres/rimtwmzgbgbtcmviyaag.jpg",
+        "publie_le": "2026-11-10T04:46:38.420171+00:00"
     }
 }
