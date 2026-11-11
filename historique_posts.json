@@ -17486,5 +17486,41 @@
         "categorie": "Stocks",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794423383/actualites_financieres/x8pdajvclwdpllaeh9nm.jpg",
         "publie_le": "2026-11-11T18:56:38.579571+00:00"
+    },
+    "OilPrice_Murphy Oil Draws Boycott Call Over Israeli Gas Licenses_2026-11-11 19:30": {
+        "source": "OilPrice",
+        "titre": "Murphy Oil Draws Boycott Call Over Israeli Gas Licenses",
+        "date": "2026-11-11 19:30",
+        "note": 80,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794426699/actualites_financieres/fbuz1kmntbzghd0ajfsr.jpg",
+        "publie_le": "2026-11-11T19:51:52.179589+00:00"
+    },
+    "Bloomberg Markets_Canadian Heavy Crude Rebounds Amid Cheaper Tanker Costs_2026-11-11 19:04": {
+        "source": "Bloomberg Markets",
+        "titre": "Canadian Heavy Crude Rebounds Amid Cheaper Tanker Costs",
+        "date": "2026-11-11 19:04",
+        "note": 80,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794426750/actualites_financieres/e8vjp95od7jqw64ff8z0.jpg",
+        "publie_le": "2026-11-11T19:52:41.692467+00:00"
+    },
+    "Bloomberg Markets_H&R’s $4.7 Billion Breakup Faces Revolt by Major Investors_2026-11-11 19:04": {
+        "source": "Bloomberg Markets",
+        "titre": "H&R’s $4.7 Billion Breakup Faces Revolt by Major Investors",
+        "date": "2026-11-11 19:04",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794426777/actualites_financieres/k076xznryhwg3ab9rkha.jpg",
+        "publie_le": "2026-11-11T19:53:10.148444+00:00"
+    },
+    "Bloomberg Markets_Credit Traders Fume as $1 Billion Utz Loan Crumbles Within Weeks_2026-11-11 18:59": {
+        "source": "Bloomberg Markets",
+        "titre": "Credit Traders Fume as $1 Billion Utz Loan Crumbles Within Weeks",
+        "date": "2026-11-11 18:59",
+        "note": 80,
+        "categorie": "Bonds",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794426822/actualites_financieres/bhgarl2osg3zzjc7lfhz.jpg",
+        "publie_le": "2026-11-11T19:53:54.693026+00:00"
     }
 }
