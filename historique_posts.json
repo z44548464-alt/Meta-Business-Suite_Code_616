@@ -16604,5 +16604,50 @@
         "categorie": "Stocks",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794365773/actualites_financieres/s8lcier5cfgamursnuhm.jpg",
         "publie_le": "2026-11-11T02:56:26.875824+00:00"
+    },
+    "Financial Times_Lucrative returns lure Japanese savers into government bonds_2026-11-11 03:20": {
+        "source": "Financial Times",
+        "titre": "Lucrative returns lure Japanese savers into government bonds",
+        "date": "2026-11-11 03:20",
+        "note": 80,
+        "categorie": "Bonds",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794368728/actualites_financieres/nkeuuhzd1hbtwpvi0sfv.jpg",
+        "publie_le": "2026-11-11T03:45:38.087340+00:00"
+    },
+    "CNBC Finance_Alibaba announces plans to list T-Head, its Nvidia chip rival_2026-11-11 03:08": {
+        "source": "CNBC Finance",
+        "titre": "Alibaba announces plans to list T-Head, its Nvidia chip rival",
+        "date": "2026-11-11 03:08",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794368770/actualites_financieres/k9wlxcqeibozbgvrtt5d.jpg",
+        "publie_le": "2026-11-11T03:46:24.049086+00:00"
+    },
+    "Bloomberg Markets_Korea Fines Bond Dealers Record $1.2 Billion Over Collusion_2026-11-11 03:00": {
+        "source": "Bloomberg Markets",
+        "titre": "Korea Fines Bond Dealers Record $1.2 Billion Over Collusion",
+        "date": "2026-11-11 03:00",
+        "note": 90,
+        "categorie": "Bonds",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794368803/actualites_financieres/mu2chslhmumbwxptomi0.jpg",
+        "publie_le": "2026-11-11T03:46:56.589014+00:00"
+    },
+    "Bloomberg Economics_South Korea’s Jobless Rate Hits 3-Year Low Despite Weak Hiring_2026-11-11 02:58": {
+        "source": "Bloomberg Economics",
+        "titre": "South Korea’s Jobless Rate Hits 3-Year Low Despite Weak Hiring",
+        "date": "2026-11-11 02:58",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794368836/actualites_financieres/ko8wyn7mpqyt9i9quthu.jpg",
+        "publie_le": "2026-11-11T03:47:30.459814+00:00"
+    },
+    "Bloomberg Markets_Asian Stocks Climb for a Third Day, Bonds Slump: Markets Wrap_2026-11-10 22:32": {
+        "source": "Bloomberg Markets",
+        "titre": "Asian Stocks Climb for a Third Day, Bonds Slump: Markets Wrap",
+        "date": "2026-11-10 22:32",
+        "note": 80,
+        "categorie": "Indices",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794368890/actualites_financieres/npmlp2a0npvtp2lrnw8f.jpg",
+        "publie_le": "2026-11-11T03:48:19.268915+00:00"
     }
 }
