@@ -16656,8 +16656,8 @@
         "date": "2026-11-11 04:31",
         "note": 80,
         "categorie": "Stocks",
-        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794372632/actualites_financieres/adkjcwqwj0ndud7hj3du.jpg",
-        "publie_le": "2026-11-11T04:50:42.928797+00:00"
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794373185/actualites_financieres/j7sv2qk8056vwbwuhxgf.jpg",
+        "publie_le": "2026-11-11T04:59:55.602293+00:00"
     },
     "Bloomberg Markets_Power Turbine Stocks Dip as SoftBank Loss Fuels Fears_2026-11-10 15:48": {
         "source": "Bloomberg Markets",
@@ -16665,7 +16665,16 @@
         "date": "2026-11-10 15:48",
         "note": 80,
         "categorie": "Stocks",
-        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794372724/actualites_financieres/pwfbjomtqoly8yxpk6i6.jpg",
-        "publie_le": "2026-11-11T04:52:15.040533+00:00"
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794373306/actualites_financieres/e2yigdcosn8qhcsvuepu.jpg",
+        "publie_le": "2026-11-11T05:01:54.687576+00:00"
+    },
+    "Bloomberg Economics_China Gauges Tax on Bond Interest, With Yields Near Record Low_2026-11-11 04:45": {
+        "source": "Bloomberg Economics",
+        "titre": "China Gauges Tax on Bond Interest, With Yields Near Record Low",
+        "date": "2026-11-11 04:45",
+        "note": 80,
+        "categorie": "Bonds",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794373146/actualites_financieres/xu0w6vvkjltqfyord54o.jpg",
+        "publie_le": "2026-11-11T04:59:17.266127+00:00"
     }
 }
