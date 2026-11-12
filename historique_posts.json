@@ -17612,5 +17612,131 @@
         "categorie": "Gold",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794433201/actualites_financieres/szasfw8cjqovtd7nispe.jpg",
         "publie_le": "2026-11-11T21:40:14.934308+00:00"
+    },
+    "Bloomberg Economics_Thailand’s Tourism Comeback Slips Further Out of Reach_2026-11-12 00:30": {
+        "source": "Bloomberg Economics",
+        "titre": "Thailand’s Tourism Comeback Slips Further Out of Reach",
+        "date": "2026-11-12 00:30",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794444651/actualites_financieres/ipld1kwahvkv3tl4yaap.jpg",
+        "publie_le": "2026-11-12T00:51:00.954235+00:00"
+    },
+    "Bloomberg Markets_Gold Holds Below $4,000 as Market Looks Ahead to Fed Rate Hike_2026-11-12 00:12": {
+        "source": "Bloomberg Markets",
+        "titre": "Gold Holds Below $4,000 as Market Looks Ahead to Fed Rate Hike",
+        "date": "2026-11-12 00:12",
+        "note": 80,
+        "categorie": "Gold",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794444679/actualites_financieres/sd6yl1iqfizje4sdlvla.jpg",
+        "publie_le": "2026-11-12T00:51:32.595553+00:00"
+    },
+    "MarketWatch_Nvidia’s stock drops as the board reportedly prepares to remove CEO Jensen Huang_2026-11-12 00:06": {
+        "source": "MarketWatch",
+        "titre": "Nvidia’s stock drops as the board reportedly prepares to remove CEO Jensen Huang",
+        "date": "2026-11-12 00:06",
+        "note": 85,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794444706/actualites_financieres/q9cve2wjjklimkos1ien.jpg",
+        "publie_le": "2026-11-12T00:51:59.649502+00:00"
+    },
+    "Bloomberg Markets_Indonesia Bonds Lure Global Funds as Yields Hit Six-Year High_2026-11-12 00:05": {
+        "source": "Bloomberg Markets",
+        "titre": "Indonesia Bonds Lure Global Funds as Yields Hit Six-Year High",
+        "date": "2026-11-12 00:05",
+        "note": 80,
+        "categorie": "Bonds",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794444733/actualites_financieres/l2dtslzua192nzsugyzg.jpg",
+        "publie_le": "2026-11-12T00:52:21.469985+00:00"
+    },
+    "Bloomberg Markets_UK Surveyors Face Weakest Housing Market Since 2023, RICS Says_2026-11-12 00:01": {
+        "source": "Bloomberg Markets",
+        "titre": "UK Surveyors Face Weakest Housing Market Since 2023, RICS Says",
+        "date": "2026-11-12 00:01",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794444757/actualites_financieres/y3xkgeq78hqsen01e0p1.jpg",
+        "publie_le": "2026-11-12T00:52:52.995308+00:00"
+    },
+    "Bloomberg Markets_Rare IPO Bets on End of War and Economic Crisis in Myanmar_2026-11-12 00:00": {
+        "source": "Bloomberg Markets",
+        "titre": "Rare IPO Bets on End of War and Economic Crisis in Myanmar",
+        "date": "2026-11-12 00:00",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794444791/actualites_financieres/an5qecsgnz5f6sri8fse.jpg",
+        "publie_le": "2026-11-12T00:53:24.870959+00:00"
+    },
+    "OilPrice_Global Power Grid Expansion Surges 50% to Record High_2026-11-12 00:00": {
+        "source": "OilPrice",
+        "titre": "Global Power Grid Expansion Surges 50% to Record High",
+        "date": "2026-11-12 00:00",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794444819/actualites_financieres/ycm0hfqqyyuxb254o1gz.jpg",
+        "publie_le": "2026-11-12T00:53:51.706740+00:00"
+    },
+    "Seeking Alpha_CoreWeave Earnings Alleviate Some AI Spending Fears_2026-11-11 23:55": {
+        "source": "Seeking Alpha",
+        "titre": "CoreWeave Earnings Alleviate Some AI Spending Fears",
+        "date": "2026-11-11 23:55",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794444846/actualites_financieres/s2p7nrfs7bss2sdjogi3.jpg",
+        "publie_le": "2026-11-12T00:54:19.175826+00:00"
+    },
+    "Bloomberg Markets_Nvidia Falls as Investors Consider Future Without CEO Huang_2026-11-11 22:48": {
+        "source": "Bloomberg Markets",
+        "titre": "Nvidia Falls as Investors Consider Future Without CEO Huang",
+        "date": "2026-11-11 22:48",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794444895/actualites_financieres/khcou7fkafyyhhaclioc.jpg",
+        "publie_le": "2026-11-12T00:55:01.572497+00:00"
+    },
+    "Bloomberg Markets_US Stock Futures Fall as Nvidia Turmoil Deepens: Markets Wrap_2026-11-11 22:08": {
+        "source": "Bloomberg Markets",
+        "titre": "US Stock Futures Fall as Nvidia Turmoil Deepens: Markets Wrap",
+        "date": "2026-11-11 22:08",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794444923/actualites_financieres/agugqlt8hcf31rwjsrk2.jpg",
+        "publie_le": "2026-11-12T00:55:34.475388+00:00"
+    },
+    "Bloomberg Markets_BC Partners to Buy Investcorp BDC Amid Private Credit Shakeout_2026-11-11 22:03": {
+        "source": "Bloomberg Markets",
+        "titre": "BC Partners to Buy Investcorp BDC Amid Private Credit Shakeout",
+        "date": "2026-11-11 22:03",
+        "note": 80,
+        "categorie": "Central banks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794444949/actualites_financieres/zxs6j1pobgryvo5laeui.jpg",
+        "publie_le": "2026-11-12T00:56:01.406366+00:00"
+    },
+    "Bloomberg Markets_BHP Names New CFO as Second Top Executive Exits in a Year_2026-11-11 21:50": {
+        "source": "Bloomberg Markets",
+        "titre": "BHP Names New CFO as Second Top Executive Exits in a Year",
+        "date": "2026-11-11 21:50",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794444981/actualites_financieres/emia6nosfnxfo2fpgkjx.jpg",
+        "publie_le": "2026-11-12T00:56:27.963750+00:00"
+    },
+    "Bloomberg Markets_Paraguay on Watch for Downgrade at Fitch After Bank Collapse_2026-11-11 21:43": {
+        "source": "Bloomberg Markets",
+        "titre": "Paraguay on Watch for Downgrade at Fitch After Bank Collapse",
+        "date": "2026-11-11 21:43",
+        "note": 85,
+        "categorie": "Central banks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794445001/actualites_financieres/gw13asounpskrxcjt90j.jpg",
+        "publie_le": "2026-11-12T00:56:54.391402+00:00"
+    },
+    "Financial Times Markets_ExxonMobil launches legal challenge to EU carbon capture rules_2026-11-11 21:26": {
+        "source": "Financial Times Markets",
+        "titre": "ExxonMobil launches legal challenge to EU carbon capture rules",
+        "date": "2026-11-11 21:26",
+        "note": 80,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794445029/actualites_financieres/yjhia6ef44bo4zhqgl5f.jpg",
+        "publie_le": "2026-11-12T00:57:15.411509+00:00"
     }
 }
