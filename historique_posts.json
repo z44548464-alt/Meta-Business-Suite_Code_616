@@ -20681,5 +20681,77 @@
         "categorie": "Stocks",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794606383/actualites_financieres/fhi4oogiqg35ye5fj4qb.jpg",
         "publie_le": "2026-11-13T21:46:35.843127+00:00"
+    },
+    "OilPrice_Iran Braces for a Budget Without Oil Revenue_2026-11-13 23:00": {
+        "source": "OilPrice",
+        "titre": "Iran Braces for a Budget Without Oil Revenue",
+        "date": "2026-11-13 23:00",
+        "note": 80,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794612829/actualites_financieres/kbrdomqawgt0tgkehawm.jpg",
+        "publie_le": "2026-11-13T23:34:01.412020+00:00"
+    },
+    "MarketWatch_FAA declares rare nationwide ground stop on flights, with more than 10,000 delayed so far_2026-11-13 22:44": {
+        "source": "MarketWatch",
+        "titre": "FAA declares rare nationwide ground stop on flights, with more than 10,000 delayed so far",
+        "date": "2026-11-13 22:44",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794612858/actualites_financieres/vzzoixlnsvcm4xibhndt.jpg",
+        "publie_le": "2026-11-13T23:34:26.840242+00:00"
+    },
+    "Bloomberg Markets_Flights Grounded Across US Over Air Traffic Control Problems_2026-11-13 22:33": {
+        "source": "Bloomberg Markets",
+        "titre": "Flights Grounded Across US Over Air Traffic Control Problems",
+        "date": "2026-11-13 22:33",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794612896/actualites_financieres/xp0qleebapjsitnpffoa.jpg",
+        "publie_le": "2026-11-13T23:35:04.715675+00:00"
+    },
+    "MarketWatch_Nvidia’s stock is on a losing streak not seen in 14 years. What comes next?_2026-11-13 22:21": {
+        "source": "MarketWatch",
+        "titre": "Nvidia’s stock is on a losing streak not seen in 14 years. What comes next?",
+        "date": "2026-11-13 22:21",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794612922/actualites_financieres/s1wdsksogcit22jh83tq.jpg",
+        "publie_le": "2026-11-13T23:35:34.130982+00:00"
+    },
+    "Bloomberg Markets_FAA Grounds All Flights Nationwide_2026-11-13 22:04": {
+        "source": "Bloomberg Markets",
+        "titre": "FAA Grounds All Flights Nationwide",
+        "date": "2026-11-13 22:04",
+        "note": 90,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794612954/actualites_financieres/hllpycycjf4lm7l63ng9.jpg",
+        "publie_le": "2026-11-13T23:36:07.470881+00:00"
+    },
+    "MarketWatch_Global oil supplies are suddenly flowing. Why a crude glut won’t mean cheaper diesel._2026-11-13 22:04": {
+        "source": "MarketWatch",
+        "titre": "Global oil supplies are suddenly flowing. Why a crude glut won’t mean cheaper diesel.",
+        "date": "2026-11-13 22:04",
+        "note": 80,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794612980/actualites_financieres/hmbeka478tqetvcstlyu.jpg",
+        "publie_le": "2026-11-13T23:36:26.754832+00:00"
+    },
+    "Bloomberg Markets_Dollar Wraps Best Week in Over a Month on Fed Rate Hike Bets_2026-11-13 16:44": {
+        "source": "Bloomberg Markets",
+        "titre": "Dollar Wraps Best Week in Over a Month on Fed Rate Hike Bets",
+        "date": "2026-11-13 16:44",
+        "note": 80,
+        "categorie": "Forex",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794613024/actualites_financieres/mglsx2wjdjnmg1uzqzom.jpg",
+        "publie_le": "2026-11-13T23:37:10.590115+00:00"
+    },
+    "Bloomberg Markets_US Stocks Close Lower After Nvidia Spurs Volatility in AI Trade_2026-11-13 13:19": {
+        "source": "Bloomberg Markets",
+        "titre": "US Stocks Close Lower After Nvidia Spurs Volatility in AI Trade",
+        "date": "2026-11-13 13:19",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794613098/actualites_financieres/imexizplvvmhbmgxdoak.jpg",
+        "publie_le": "2026-11-13T23:38:33.067528+00:00"
     }
 }
