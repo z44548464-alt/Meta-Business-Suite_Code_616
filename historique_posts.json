@@ -21176,5 +21176,14 @@
         "categorie": "Stocks",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794753306/actualites_financieres/pgvwbf3cdqnpkmfxlu2f.jpg",
         "publie_le": "2026-11-15T14:35:19.848418+00:00"
+    },
+    "Seeking Alpha_Hot Inflation Grounds Bond Rally_2026-11-15 14:00": {
+        "source": "Seeking Alpha",
+        "titre": "Hot Inflation Grounds Bond Rally",
+        "date": "2026-11-15 14:00",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794753663/actualites_financieres/ozhlqx9zpwdhvvdiwo0g.jpg",
+        "publie_le": "2026-11-15T14:41:13.548200+00:00"
     }
 }
