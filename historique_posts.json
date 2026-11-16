@@ -21590,5 +21590,32 @@
         "categorie": "Economic news",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794806803/actualites_financieres/uopyrfqvmne41jtnwfxn.jpg",
         "publie_le": "2026-11-16T05:26:58.436836+00:00"
+    },
+    "OilPrice_Oil Prices Fall as Fears of a Global Supply Glut Return_2026-11-16 05:25": {
+        "source": "OilPrice",
+        "titre": "Oil Prices Fall as Fears of a Global Supply Glut Return",
+        "date": "2026-11-16 05:25",
+        "note": 80,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794807414/actualites_financieres/vln2rvfqbrefhhvfvmjv.jpg",
+        "publie_le": "2026-11-16T05:37:05.404283+00:00"
+    },
+    "Financial Times_Japan’s economy contracts for the first time in a year_2026-11-16 04:59": {
+        "source": "Financial Times",
+        "titre": "Japan’s economy contracts for the first time in a year",
+        "date": "2026-11-16 04:59",
+        "note": 90,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794807451/actualites_financieres/vlwmpgcm5r5alrqgzlwk.jpg",
+        "publie_le": "2026-11-16T05:37:40.801785+00:00"
+    },
+    "Bloomberg Markets_Wheat Falls on Optimism Trilateral Talks Will Free Up Black Sea_2026-11-16 04:11": {
+        "source": "Bloomberg Markets",
+        "titre": "Wheat Falls on Optimism Trilateral Talks Will Free Up Black Sea",
+        "date": "2026-11-16 04:11",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794807485/actualites_financieres/s3vco6cpini9u8yaek87.jpg",
+        "publie_le": "2026-11-16T05:38:16.018555+00:00"
     }
 }
