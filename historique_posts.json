@@ -23921,5 +23921,473 @@
         "categorie": "Stocks",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794920147/actualites_financieres/tdjwmbzgdlmloytbsupt.jpg",
         "publie_le": "2026-11-17T12:55:54.409320+00:00"
+    },
+    "MarketWatch_Coherent and Lumentum stocks climb as potential U.S. import ban threatens Chinese rivals_2026-11-17 15:39": {
+        "source": "MarketWatch",
+        "titre": "Coherent and Lumentum stocks climb as potential U.S. import ban threatens Chinese rivals",
+        "date": "2026-11-17 15:39",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794930473/actualites_financieres/ruild8jdzdl32xqi9hp0.jpg",
+        "publie_le": "2026-11-17T15:48:08.273832+00:00"
+    },
+    "Benzinga_Morgan Stanley Sees Japan Stocks Outrunning the S&P 500 in 2027: These ETFs Offer Exposure_2026-11-17 15:33": {
+        "source": "Benzinga",
+        "titre": "Morgan Stanley Sees Japan Stocks Outrunning the S&P 500 in 2027: These ETFs Offer Exposure",
+        "date": "2026-11-17 15:33",
+        "note": 80,
+        "categorie": "Indices",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794930533/actualites_financieres/ttifvv7vouoierjpdlma.jpg",
+        "publie_le": "2026-11-17T15:49:03.113273+00:00"
+    },
+    "ActionForex Fundamental_U.S. Retail Sales Moderate in October, but Underlying Demand Holds Up_2026-11-17 15:30": {
+        "source": "ActionForex Fundamental",
+        "titre": "U.S. Retail Sales Moderate in October, but Underlying Demand Holds Up",
+        "date": "2026-11-17 15:30",
+        "note": 85,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794930589/actualites_financieres/eosy0izvhtcrblmsltcd.jpg",
+        "publie_le": "2026-11-17T15:50:05.334951+00:00"
+    },
+    "OilPrice_Kazakhstan Unveils $85 Million Oil and Gas Manufacturing Push_2026-11-17 15:30": {
+        "source": "OilPrice",
+        "titre": "Kazakhstan Unveils $85 Million Oil and Gas Manufacturing Push",
+        "date": "2026-11-17 15:30",
+        "note": 80,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794930626/actualites_financieres/zkgq9styxlwfsl0mqv7m.jpg",
+        "publie_le": "2026-11-17T15:50:36.624272+00:00"
+    },
+    "Seeking Alpha_TimesSquare Global Concentrated Small Cap Q3 2026 Portfolio Activity_2026-11-17 15:29": {
+        "source": "Seeking Alpha",
+        "titre": "TimesSquare Global Concentrated Small Cap Q3 2026 Portfolio Activity",
+        "date": "2026-11-17 15:29",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794930669/actualites_financieres/qrx5ab8bwi4e0qp2znz0.jpg",
+        "publie_le": "2026-11-17T15:51:19.465415+00:00"
+    },
+    "Bloomberg Markets_JPMorgan Cuts Borrowing Costs on $2.85 Billion CCC Debt Deal_2026-11-17 15:24": {
+        "source": "Bloomberg Markets",
+        "titre": "JPMorgan Cuts Borrowing Costs on $2.85 Billion CCC Debt Deal",
+        "date": "2026-11-17 15:24",
+        "note": 80,
+        "categorie": "Bonds",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794930695/actualites_financieres/a8biu6tjousy4djyuy4h.jpg",
+        "publie_le": "2026-11-17T15:51:51.193908+00:00"
+    },
+    "Bloomberg Markets_Disney Tops Profit Estimates on Streaming TV Growth_2026-11-17 15:19": {
+        "source": "Bloomberg Markets",
+        "titre": "Disney Tops Profit Estimates on Streaming TV Growth",
+        "date": "2026-11-17 15:19",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794930731/actualites_financieres/c88ing5esepwd9zzbybn.jpg",
+        "publie_le": "2026-11-17T15:52:26.608616+00:00"
+    },
+    "Bloomberg Markets_US 10-Year Yield Set for Historic Run Above 5% on Fed Rate Cycle_2026-11-17 15:15": {
+        "source": "Bloomberg Markets",
+        "titre": "US 10-Year Yield Set for Historic Run Above 5% on Fed Rate Cycle",
+        "date": "2026-11-17 15:15",
+        "note": 80,
+        "categorie": "Bonds",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794930765/actualites_financieres/rshsk8oq5gib6qfiqm8t.jpg",
+        "publie_le": "2026-11-17T15:52:57.819725+00:00"
+    },
+    "Bloomberg Markets_Lucky Strike CEO Makes Take-Private Offer as Loan Hits Distress_2026-11-17 15:13": {
+        "source": "Bloomberg Markets",
+        "titre": "Lucky Strike CEO Makes Take-Private Offer as Loan Hits Distress",
+        "date": "2026-11-17 15:13",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794930795/actualites_financieres/otha77hjwviklmybsrlb.jpg",
+        "publie_le": "2026-11-17T15:53:28.245640+00:00"
+    },
+    "Benzinga_SELLAS Stock Triples on Cancer Vaccine Cutting Death Risk by 41% in Pivotal Leukemia Trial,_2026-11-17 15:09": {
+        "source": "Benzinga",
+        "titre": "SELLAS Stock Triples on Cancer Vaccine Cutting Death Risk by 41% in Pivotal Leukemia Trial,",
+        "date": "2026-11-17 15:09",
+        "note": 95,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794930842/actualites_financieres/rts720xciyz8caoqkzcu.jpg",
+        "publie_le": "2026-11-17T15:54:15.712290+00:00"
+    },
+    "Bloomberg Markets_Gulf Oil Flow at Risk From Lack of Empty Tankers, Tracker Says_2026-11-17 15:09": {
+        "source": "Bloomberg Markets",
+        "titre": "Gulf Oil Flow at Risk From Lack of Empty Tankers, Tracker Says",
+        "date": "2026-11-17 15:09",
+        "note": 80,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794930871/actualites_financieres/esqipuq0fjjurzhveupz.jpg",
+        "publie_le": "2026-11-17T15:54:37.985439+00:00"
+    },
+    "MarketWatch_Nearly half of home builders are cutting prices and offering lower mortgage rates as they struggle to find buyers_2026-11-17 15:01": {
+        "source": "MarketWatch",
+        "titre": "Nearly half of home builders are cutting prices and offering lower mortgage rates as they struggle to find buyers",
+        "date": "2026-11-17 15:01",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794930915/actualites_financieres/wyexi7pwopdtt9yayxkg.jpg",
+        "publie_le": "2026-11-17T15:55:28.787013+00:00"
+    },
+    "Bloomberg Economics_US Homebuilder Sentiment Sags to Fresh 14-Year Low on Rates_2026-11-17 15:00": {
+        "source": "Bloomberg Economics",
+        "titre": "US Homebuilder Sentiment Sags to Fresh 14-Year Low on Rates",
+        "date": "2026-11-17 15:00",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794930954/actualites_financieres/zamarvbslwfr8ugwdu9q.jpg",
+        "publie_le": "2026-11-17T15:56:02.228815+00:00"
+    },
+    "Benzinga_What Is Going on With Sandisk Stock on Tuesday?_2026-11-17 14:56": {
+        "source": "Benzinga",
+        "titre": "What Is Going on With Sandisk Stock on Tuesday?",
+        "date": "2026-11-17 14:56",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794930984/actualites_financieres/umpjdb2aiqxjo2ggllsh.jpg",
+        "publie_le": "2026-11-17T15:56:36.736141+00:00"
+    },
+    "Bloomberg Markets_Kazakhstan Has Given Over $1 Billion of Loans Lending to emerging metal tycoon_2026-11-17 14:55": {
+        "source": "Bloomberg Markets",
+        "titre": "Kazakhstan Has Given Over $1 Billion of Loans Lending to emerging metal tycoon",
+        "date": "2026-11-17 14:55",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794931028/actualites_financieres/txlo32ua6eebj7xk1gzk.jpg",
+        "publie_le": "2026-11-17T15:57:22.255533+00:00"
+    },
+    "Bloomberg Markets_SpaceX Debt for AI Chips to Hit Market as Soon as This Week_2026-11-17 14:53": {
+        "source": "Bloomberg Markets",
+        "titre": "SpaceX Debt for AI Chips to Hit Market as Soon as This Week",
+        "date": "2026-11-17 14:53",
+        "note": 80,
+        "categorie": "Bonds",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794931060/actualites_financieres/yucdfcjzfoh55mitluow.jpg",
+        "publie_le": "2026-11-17T15:57:52.600106+00:00"
+    },
+    "Benzinga_Novo Nordisk Highlights Protective Bone Biomarkers For CagriSema And Pediatric BMI Drops_2026-11-17 14:49": {
+        "source": "Benzinga",
+        "titre": "Novo Nordisk Highlights Protective Bone Biomarkers For CagriSema And Pediatric BMI Drops",
+        "date": "2026-11-17 14:49",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794931098/actualites_financieres/xtsebxktmpkqt33mmxn4.jpg",
+        "publie_le": "2026-11-17T15:58:30.188742+00:00"
+    },
+    "MarketWatch_SpaceX got a vote of confidence from Nvidia ahead of Jensen Huang’s exit_2026-11-17 14:46": {
+        "source": "MarketWatch",
+        "titre": "SpaceX got a vote of confidence from Nvidia ahead of Jensen Huang’s exit",
+        "date": "2026-11-17 14:46",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794931128/actualites_financieres/cwbbuiitctdo0i1mzfud.jpg",
+        "publie_le": "2026-11-17T15:59:01.121233+00:00"
+    },
+    "Benzinga_Home Depot Taps CFO Richard McPhail to Lead, Narrows Profit Outlook_2026-11-17 14:36": {
+        "source": "Benzinga",
+        "titre": "Home Depot Taps CFO Richard McPhail to Lead, Narrows Profit Outlook",
+        "date": "2026-11-17 14:36",
+        "note": 85,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794931160/actualites_financieres/rkfnnbme3pzihba7hzro.jpg",
+        "publie_le": "2026-11-17T15:59:28.775978+00:00"
+    },
+    "Benzinga_Michael Saylor Compliments Twenty One as Bitcoin Treasury Race Heats Up_2026-11-17 14:35": {
+        "source": "Benzinga",
+        "titre": "Michael Saylor Compliments Twenty One as Bitcoin Treasury Race Heats Up",
+        "date": "2026-11-17 14:35",
+        "note": 80,
+        "categorie": "Crypto",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794931196/actualites_financieres/bajdki0e2vsy2vfipr2i.jpg",
+        "publie_le": "2026-11-17T16:00:09.922846+00:00"
+    },
+    "Bloomberg Economics_Fed’s Hammack Proposes Principles for Market Interventions_2026-11-17 14:35": {
+        "source": "Bloomberg Economics",
+        "titre": "Fed’s Hammack Proposes Principles for Market Interventions",
+        "date": "2026-11-17 14:35",
+        "note": 80,
+        "categorie": "Central banks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794931239/actualites_financieres/mnx6ob67rigjp7sp6tjo.jpg",
+        "publie_le": "2026-11-17T16:00:45.323846+00:00"
+    },
+    "MarketWatch_U.S. retail sales slow just ahead of the holiday shopping season. A hint of trouble? Nope._2026-11-17 14:32": {
+        "source": "MarketWatch",
+        "titre": "U.S. retail sales slow just ahead of the holiday shopping season. A hint of trouble? Nope.",
+        "date": "2026-11-17 14:32",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794931292/actualites_financieres/qdlhxnj2fdpwle09hp5j.jpg",
+        "publie_le": "2026-11-17T16:01:44.912201+00:00"
+    },
+    "OilPrice_U.S. Opens New Front in Campaign to Cut Off Iran’s Supply Routes_2026-11-17 14:30": {
+        "source": "OilPrice",
+        "titre": "U.S. Opens New Front in Campaign to Cut Off Iran’s Supply Routes",
+        "date": "2026-11-17 14:30",
+        "note": 80,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794931392/actualites_financieres/jcj7bve8t9akdquel4g0.jpg",
+        "publie_le": "2026-11-17T16:03:25.050241+00:00"
+    },
+    "OilPrice_TTF Gas Bounces Back to 86 Euros as Hormuz Risks Resurface_2026-11-17 14:30": {
+        "source": "OilPrice",
+        "titre": "TTF Gas Bounces Back to 86 Euros as Hormuz Risks Resurface",
+        "date": "2026-11-17 14:30",
+        "note": 90,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794931429/actualites_financieres/ftkkitshiujjdyshlg27.jpg",
+        "publie_le": "2026-11-17T16:04:02.531931+00:00"
+    },
+    "Bloomberg Markets_South Africa to Seek Relief From EU’s Proposed Hybrid-Car Curbs_2026-11-17 14:28": {
+        "source": "Bloomberg Markets",
+        "titre": "South Africa to Seek Relief From EU’s Proposed Hybrid-Car Curbs",
+        "date": "2026-11-17 14:28",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794931467/actualites_financieres/qayttmlpbvedjbqxqwy4.jpg",
+        "publie_le": "2026-11-17T16:04:39.440821+00:00"
+    },
+    "Bloomberg Markets_UBS Holder Cevian Sells Quarter of Stake Amid Capital Debate_2026-11-17 14:24": {
+        "source": "Bloomberg Markets",
+        "titre": "UBS Holder Cevian Sells Quarter of Stake Amid Capital Debate",
+        "date": "2026-11-17 14:24",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794931508/actualites_financieres/x7af3rkuksnv8cwxsotk.jpg",
+        "publie_le": "2026-11-17T16:05:20.568013+00:00"
+    },
+    "Benzinga_FDA Clears Novartis Drug Cosentyx As Steroid Alternative for Inflammatory Pain Causing Stiff Shoulders_2026-11-17 14:24": {
+        "source": "Benzinga",
+        "titre": "FDA Clears Novartis Drug Cosentyx As Steroid Alternative for Inflammatory Pain Causing Stiff Shoulders",
+        "date": "2026-11-17 14:24",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794931539/actualites_financieres/bv5d2pppdjjsfbzwolvv.jpg",
+        "publie_le": "2026-11-17T16:05:47.428618+00:00"
+    },
+    "Bloomberg Markets_Traders Cash In on Pricing Gaps in Anthropic’s Pre-IPO Contracts_2026-11-17 14:17": {
+        "source": "Bloomberg Markets",
+        "titre": "Traders Cash In on Pricing Gaps in Anthropic’s Pre-IPO Contracts",
+        "date": "2026-11-17 14:17",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794931565/actualites_financieres/gxeur33ax4c4tulp3bhe.jpg",
+        "publie_le": "2026-11-17T16:06:12.619564+00:00"
+    },
+    "Bloomberg Economics_Waller Says Fed Open to ‘Responsible Innovation’ in Payments_2026-11-17 14:10": {
+        "source": "Bloomberg Economics",
+        "titre": "Waller Says Fed Open to ‘Responsible Innovation’ in Payments",
+        "date": "2026-11-17 14:10",
+        "note": 80,
+        "categorie": "Central banks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794931598/actualites_financieres/iwefqe6aq6qlx8bu76s5.jpg",
+        "publie_le": "2026-11-17T16:06:50.922925+00:00"
+    },
+    "Benzinga_Disney's Winning Formula: Blockbusters, Packed Parks and Football_2026-11-17 14:04": {
+        "source": "Benzinga",
+        "titre": "Disney's Winning Formula: Blockbusters, Packed Parks and Football",
+        "date": "2026-11-17 14:04",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794931630/actualites_financieres/r9djjvdsjsnh4y3qwwy1.jpg",
+        "publie_le": "2026-11-17T16:07:23.375788+00:00"
+    },
+    "Benzinga_XRP Whale Outflows Hit $127M on Binance: That May Be Good News_2026-11-17 13:59": {
+        "source": "Benzinga",
+        "titre": "XRP Whale Outflows Hit $127M on Binance: That May Be Good News",
+        "date": "2026-11-17 13:59",
+        "note": 80,
+        "categorie": "Crypto",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794931660/actualites_financieres/mjsnqz5io4yetl3ytsmz.jpg",
+        "publie_le": "2026-11-17T16:07:47.861203+00:00"
+    },
+    "Bloomberg Economics_Danish Central Bank Denies Shift in FX Peg After Krone Weakness_2026-11-17 13:58": {
+        "source": "Bloomberg Economics",
+        "titre": "Danish Central Bank Denies Shift in FX Peg After Krone Weakness",
+        "date": "2026-11-17 13:58",
+        "note": 80,
+        "categorie": "Central banks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794931689/actualites_financieres/o7p6r8ukgavydopx2ktd.jpg",
+        "publie_le": "2026-11-17T16:08:22.748609+00:00"
+    },
+    "Benzinga_Wall Street Is Trading Chips for Chicken: Staples See Best Run Against Tech Since 2001_2026-11-17 13:51": {
+        "source": "Benzinga",
+        "titre": "Wall Street Is Trading Chips for Chicken: Staples See Best Run Against Tech Since 2001",
+        "date": "2026-11-17 13:51",
+        "note": 90,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794931730/actualites_financieres/vay36891cxgy6lfqazxi.jpg",
+        "publie_le": "2026-11-17T16:09:03.335672+00:00"
+    },
+    "Benzinga_Amer Sports Unleashes $1 Billion Buyback, Raises 2026 Outlook_2026-11-17 13:41": {
+        "source": "Benzinga",
+        "titre": "Amer Sports Unleashes $1 Billion Buyback, Raises 2026 Outlook",
+        "date": "2026-11-17 13:41",
+        "note": 90,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794931762/actualites_financieres/gopbdgucl3sxtdcrodmi.jpg",
+        "publie_le": "2026-11-17T16:09:35.530756+00:00"
+    },
+    "CNBC Economy_St. Louis Fed's Musalem says four more rate hikes may be needed in coming months_2026-11-17 13:40": {
+        "source": "CNBC Economy",
+        "titre": "St. Louis Fed's Musalem says four more rate hikes may be needed in coming months",
+        "date": "2026-11-17 13:40",
+        "note": 85,
+        "categorie": "Central banks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794931792/actualites_financieres/rbq3a5upbylzwvjrramx.jpg",
+        "publie_le": "2026-11-17T16:10:06.014519+00:00"
+    },
+    "Bloomberg Economics_US Retail Sales Growth Slows as Big-Ticket Purchases Slip_2026-11-17 13:33": {
+        "source": "Bloomberg Economics",
+        "titre": "US Retail Sales Growth Slows as Big-Ticket Purchases Slip",
+        "date": "2026-11-17 13:33",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794931822/actualites_financieres/mfhboyf4ypnqhiur1yah.jpg",
+        "publie_le": "2026-11-17T16:10:36.014751+00:00"
+    },
+    "ActionForex Fundamental_Brent Is Being Dragged Down by the Surplus_2026-11-17 13:30": {
+        "source": "ActionForex Fundamental",
+        "titre": "Brent Is Being Dragged Down by the Surplus",
+        "date": "2026-11-17 13:30",
+        "note": 80,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794931859/actualites_financieres/f28miv8ybtuzrrs83jof.jpg",
+        "publie_le": "2026-11-17T16:11:11.522762+00:00"
+    },
+    "Bloomberg Economics_Germany Corrects October Inflation Data, Showing Stronger Pace_2026-11-17 13:30": {
+        "source": "Bloomberg Economics",
+        "titre": "Germany Corrects October Inflation Data, Showing Stronger Pace",
+        "date": "2026-11-17 13:30",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794931892/actualites_financieres/homxcdzja51qrzcvmgkd.jpg",
+        "publie_le": "2026-11-17T16:11:40.118411+00:00"
+    },
+    "OilPrice_Malaysia Signs First Critical Minerals Pact With France_2026-11-17 13:30": {
+        "source": "OilPrice",
+        "titre": "Malaysia Signs First Critical Minerals Pact With France",
+        "date": "2026-11-17 13:30",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794931916/actualites_financieres/oqbxk9qkfgfk7p63wfui.jpg",
+        "publie_le": "2026-11-17T16:12:09.351919+00:00"
+    },
+    "Benzinga_FuboTV Sweetens Streaming Packages With Disney+ and Hulu at No Extra Cost_2026-11-17 13:14": {
+        "source": "Benzinga",
+        "titre": "FuboTV Sweetens Streaming Packages With Disney+ and Hulu at No Extra Cost",
+        "date": "2026-11-17 13:14",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794931958/actualites_financieres/buukf8zj9opmpq3z2fyq.jpg",
+        "publie_le": "2026-11-17T16:12:51.549551+00:00"
+    },
+    "Bloomberg Economics_Italy May Exit EU Monitoring Regime Next Year, Dombrovskis Says_2026-11-17 13:12": {
+        "source": "Bloomberg Economics",
+        "titre": "Italy May Exit EU Monitoring Regime Next Year, Dombrovskis Says",
+        "date": "2026-11-17 13:12",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794931988/actualites_financieres/geq3fxkdfw1m0epa9gku.jpg",
+        "publie_le": "2026-11-17T16:13:14.314702+00:00"
+    },
+    "Bloomberg Economics_Thailand Opening Markets Wider to US to Secure Trade Deal_2026-11-17 13:10": {
+        "source": "Bloomberg Economics",
+        "titre": "Thailand Opening Markets Wider to US to Secure Trade Deal",
+        "date": "2026-11-17 13:10",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794932019/actualites_financieres/dc2wapyfyepztj5pca7v.jpg",
+        "publie_le": "2026-11-17T16:13:55.975835+00:00"
+    },
+    "Financial Times Markets_US dollar rally erases ‘liberation day’ losses as rate expectations rise_2026-11-17 13:07": {
+        "source": "Financial Times Markets",
+        "titre": "US dollar rally erases ‘liberation day’ losses as rate expectations rise",
+        "date": "2026-11-17 13:07",
+        "note": 80,
+        "categorie": "Forex",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794932052/actualites_financieres/nwjlxhaxaf7af68jc4ta.jpg",
+        "publie_le": "2026-11-17T16:14:19.573084+00:00"
+    },
+    "Benzinga_Billionaire David Tepper Slashes Alphabet Stake by 46% and Initiates $172M Bet on Oracle_2026-11-17 13:02": {
+        "source": "Benzinga",
+        "titre": "Billionaire David Tepper Slashes Alphabet Stake by 46% and Initiates $172M Bet on Oracle",
+        "date": "2026-11-17 13:02",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794932076/actualites_financieres/up2gjuvhl9jif3srqu58.jpg",
+        "publie_le": "2026-11-17T16:14:48.900717+00:00"
+    },
+    "Financial Times Markets_Iran attacks US air base in Bahrain_2026-11-17 13:02": {
+        "source": "Financial Times Markets",
+        "titre": "Iran attacks US air base in Bahrain",
+        "date": "2026-11-17 13:02",
+        "note": 90,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794932105/actualites_financieres/j5qlxhhhjpvrsmiexira.jpg",
+        "publie_le": "2026-11-17T16:15:13.320638+00:00"
+    },
+    "Bloomberg Markets_Hungary Keeps Interest Rate-Cut Window Open Citing Euro Path_2026-11-17 13:00": {
+        "source": "Bloomberg Markets",
+        "titre": "Hungary Keeps Interest Rate-Cut Window Open Citing Euro Path",
+        "date": "2026-11-17 13:00",
+        "note": 80,
+        "categorie": "Central banks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794932131/actualites_financieres/maqxke85hbydgypu651s.jpg",
+        "publie_le": "2026-11-17T16:15:44.854741+00:00"
+    },
+    "Financial Times Markets_TG Jones put up for sale by private equity firm after less than 18 months_2026-11-17 12:28": {
+        "source": "Financial Times Markets",
+        "titre": "TG Jones put up for sale by private equity firm after less than 18 months",
+        "date": "2026-11-17 12:28",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794932169/actualites_financieres/vkmwlduoyhcfcvdc8sxu.jpg",
+        "publie_le": "2026-11-17T16:16:22.922472+00:00"
+    },
+    "Benzinga_Why Is Alibaba Stock Falling Ahead of Earnings?_2026-11-17 12:15": {
+        "source": "Benzinga",
+        "titre": "Why Is Alibaba Stock Falling Ahead of Earnings?",
+        "date": "2026-11-17 12:15",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794932205/actualites_financieres/oy8vgxv61kirsz5jnfam.jpg",
+        "publie_le": "2026-11-17T16:16:52.936562+00:00"
+    },
+    "Bloomberg Economics_Angola Defies Global Trend, Cuts Rates Again to 10-Year Low_2026-11-17 12:15": {
+        "source": "Bloomberg Economics",
+        "titre": "Angola Defies Global Trend, Cuts Rates Again to 10-Year Low",
+        "date": "2026-11-17 12:15",
+        "note": 90,
+        "categorie": "Central banks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794932229/actualites_financieres/zv6v5xxagelcabl2vqyk.jpg",
+        "publie_le": "2026-11-17T16:17:22.902983+00:00"
+    },
+    "Bloomberg Markets_Disney Profit Beats With Marvel Films Powering Streaming_2026-11-17 11:31": {
+        "source": "Bloomberg Markets",
+        "titre": "Disney Profit Beats With Marvel Films Powering Streaming",
+        "date": "2026-11-17 11:31",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794932265/actualites_financieres/tk1jeltw1wuugp2sowq8.jpg",
+        "publie_le": "2026-11-17T16:17:58.024556+00:00"
+    },
+    "Bloomberg Markets_European Stocks Extend Fall as Tech Drags; Deutsche Bank Slides_2026-11-17 08:30": {
+        "source": "Bloomberg Markets",
+        "titre": "European Stocks Extend Fall as Tech Drags; Deutsche Bank Slides",
+        "date": "2026-11-17 08:30",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794932358/actualites_financieres/hrjya0axxevmnfffmv2x.jpg",
+        "publie_le": "2026-11-17T16:19:26.171014+00:00"
+    },
+    "Bloomberg Economics_Africa Nations to End Year With High Rates as Fed Risks Loom_2026-11-17 04:15": {
+        "source": "Bloomberg Economics",
+        "titre": "Africa Nations to End Year With High Rates as Fed Risks Loom",
+        "date": "2026-11-17 04:15",
+        "note": 80,
+        "categorie": "Central banks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1794932393/actualites_financieres/zr8vww9bd8v2huaut61d.jpg",
+        "publie_le": "2026-11-17T16:20:05.988355+00:00"
     }
 }
