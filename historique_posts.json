@@ -26495,5 +26495,221 @@
         "categorie": "Economic news",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795035547/actualites_financieres/skytyxjiybbho52cru1j.jpg",
         "publie_le": "2026-11-18T20:59:20.985404+00:00"
+    },
+    "Bloomberg Markets_Gold Steadies Near 14-Month Low as Fed Signals More Rate Hikes_2026-11-18 23:24": {
+        "source": "Bloomberg Markets",
+        "titre": "Gold Steadies Near 14-Month Low as Fed Signals More Rate Hikes",
+        "date": "2026-11-18 23:24",
+        "note": 80,
+        "categorie": "Gold",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795045508/actualites_financieres/hrnkqglle7k2wmxfupsn.jpg",
+        "publie_le": "2026-11-18T23:45:19.330134+00:00"
+    },
+    "Bloomberg Markets_Bain Pushes Back LNG Glut Outlook to 2030 as War Tightens Market_2026-11-18 23:02": {
+        "source": "Bloomberg Markets",
+        "titre": "Bain Pushes Back LNG Glut Outlook to 2030 as War Tightens Market",
+        "date": "2026-11-18 23:02",
+        "note": 80,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795045544/actualites_financieres/krqunddbf02cqpqiptzh.jpg",
+        "publie_le": "2026-11-18T23:45:53.924041+00:00"
+    },
+    "OilPrice_Equinor Hack Adds to Wave of Cyberattacks on Energy Companies_2026-11-18 23:00": {
+        "source": "OilPrice",
+        "titre": "Equinor Hack Adds to Wave of Cyberattacks on Energy Companies",
+        "date": "2026-11-18 23:00",
+        "note": 80,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795045572/actualites_financieres/msmbainrxcsgyahxyrc7.jpg",
+        "publie_le": "2026-11-18T23:46:22.302449+00:00"
+    },
+    "Financial Times_Meta halts plan to give Zuckerberg new class of shares_2026-11-18 22:58": {
+        "source": "Financial Times",
+        "titre": "Meta halts plan to give Zuckerberg new class of shares",
+        "date": "2026-11-18 22:58",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795045598/actualites_financieres/hnvhyy2ktaxfuf9ahjmg.jpg",
+        "publie_le": "2026-11-18T23:46:48.837300+00:00"
+    },
+    "MarketWatch_Palo Alto Networks’ stock gets a fresh AI-fueled boost from earnings_2026-11-18 22:53": {
+        "source": "MarketWatch",
+        "titre": "Palo Alto Networks’ stock gets a fresh AI-fueled boost from earnings",
+        "date": "2026-11-18 22:53",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795045626/actualites_financieres/ubj6j685kwajiu5cvrg4.jpg",
+        "publie_le": "2026-11-18T23:47:17.785801+00:00"
+    },
+    "Bloomberg Markets_Skydance Skips FIFA World Cup Bid as Netflix, Fox Eye $4 Billion Deal_2026-11-18 22:52": {
+        "source": "Bloomberg Markets",
+        "titre": "Skydance Skips FIFA World Cup Bid as Netflix, Fox Eye $4 Billion Deal",
+        "date": "2026-11-18 22:52",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795045655/actualites_financieres/nb0dfah5jpjuwvjbvimj.jpg",
+        "publie_le": "2026-11-18T23:47:46.413886+00:00"
+    },
+    "Bloomberg Markets_Brookfield-Backed Lotto Firm Logs Earnings Hit, Buys Back Bonds_2026-11-18 22:22": {
+        "source": "Bloomberg Markets",
+        "titre": "Brookfield-Backed Lotto Firm Logs Earnings Hit, Buys Back Bonds",
+        "date": "2026-11-18 22:22",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795045687/actualites_financieres/er9iu4vftyjnddj6p2lc.jpg",
+        "publie_le": "2026-11-18T23:48:21.663434+00:00"
+    },
+    "Bloomberg Markets_Challenger Rejects New $4.4 Billion Daiichi Life Takeover Bid_2026-11-18 22:08": {
+        "source": "Bloomberg Markets",
+        "titre": "Challenger Rejects New $4.4 Billion Daiichi Life Takeover Bid",
+        "date": "2026-11-18 22:08",
+        "note": 90,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795045717/actualites_financieres/h213qrnwspgdhh5rqyck.jpg",
+        "publie_le": "2026-11-18T23:48:51.951874+00:00"
+    },
+    "Bloomberg Markets_Nasdaq Futures Rise After Anthropic IPO Pricing: Markets Wrap_2026-11-18 22:07": {
+        "source": "Bloomberg Markets",
+        "titre": "Nasdaq Futures Rise After Anthropic IPO Pricing: Markets Wrap",
+        "date": "2026-11-18 22:07",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795045747/actualites_financieres/h1cavxb77zzjlebvz03p.jpg",
+        "publie_le": "2026-11-18T23:49:22.809232+00:00"
+    },
+    "Financial Times_Anthropic prices blockbuster IPO at $83 a share_2026-11-18 22:04": {
+        "source": "Financial Times",
+        "titre": "Anthropic prices blockbuster IPO at $83 a share",
+        "date": "2026-11-18 22:04",
+        "note": 90,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795045778/actualites_financieres/pe5uxr86ax9w9urkm1z8.jpg",
+        "publie_le": "2026-11-18T23:49:54.708038+00:00"
+    },
+    "Bloomberg Economics_AI Is Making China’s Jobs Slump Even Worse_2026-11-18 22:00": {
+        "source": "Bloomberg Economics",
+        "titre": "AI Is Making China’s Jobs Slump Even Worse",
+        "date": "2026-11-18 22:00",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795045820/actualites_financieres/t79m3giigbolpoaxxqzo.jpg",
+        "publie_le": "2026-11-18T23:50:35.896984+00:00"
+    },
+    "OilPrice_China Burns Less Oil and Coal as the Iran War Reshapes Its Energy Mix_2026-11-18 22:00": {
+        "source": "OilPrice",
+        "titre": "China Burns Less Oil and Coal as the Iran War Reshapes Its Energy Mix",
+        "date": "2026-11-18 22:00",
+        "note": 80,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795045852/actualites_financieres/wngmna7eejioyise98di.jpg",
+        "publie_le": "2026-11-18T23:51:08.597889+00:00"
+    },
+    "Benzinga_Anthropic Prices IPO At $83, Above Range, In What Could Be Biggest Listing Ever (UPDATED)_2026-11-18 21:57": {
+        "source": "Benzinga",
+        "titre": "Anthropic Prices IPO At $83, Above Range, In What Could Be Biggest Listing Ever (UPDATED)",
+        "date": "2026-11-18 21:57",
+        "note": 90,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795045894/actualites_financieres/zmsbca8rqqzsqy0hqzjn.jpg",
+        "publie_le": "2026-11-18T23:51:43.637507+00:00"
+    },
+    "Bloomberg Markets_Foreign Holdings of US Treasuries Decline by Most Since March_2026-11-18 21:41": {
+        "source": "Bloomberg Markets",
+        "titre": "Foreign Holdings of US Treasuries Decline by Most Since March",
+        "date": "2026-11-18 21:41",
+        "note": 85,
+        "categorie": "Bonds",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795045929/actualites_financieres/jqhehod2altxnfmt3jns.jpg",
+        "publie_le": "2026-11-18T23:52:29.759750+00:00"
+    },
+    "Benzinga_Everpure Stock Gets a Lift After Q3 Earnings — Here's Why_2026-11-18 21:30": {
+        "source": "Benzinga",
+        "titre": "Everpure Stock Gets a Lift After Q3 Earnings — Here's Why",
+        "date": "2026-11-18 21:30",
+        "note": 85,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795045970/actualites_financieres/qqeuinyrzmoszreyqhkm.jpg",
+        "publie_le": "2026-11-18T23:53:02.136912+00:00"
+    },
+    "Benzinga_Palo Alto Posts Q1 Double Beat, Announces Applied Compute Acquisition_2026-11-18 21:26": {
+        "source": "Benzinga",
+        "titre": "Palo Alto Posts Q1 Double Beat, Announces Applied Compute Acquisition",
+        "date": "2026-11-18 21:26",
+        "note": 90,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795046012/actualites_financieres/zidrzlnp257fxr6y7q0f.jpg",
+        "publie_le": "2026-11-18T23:53:38.975148+00:00"
+    },
+    "Bloomberg Economics_RBNZ Sees Signs of Higher Fuel Costs Adding to Broader Inflation_2026-11-18 20:10": {
+        "source": "Bloomberg Economics",
+        "titre": "RBNZ Sees Signs of Higher Fuel Costs Adding to Broader Inflation",
+        "date": "2026-11-18 20:10",
+        "note": 80,
+        "categorie": "Central banks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795046043/actualites_financieres/bddkzzombfsxq5pwsgwt.jpg",
+        "publie_le": "2026-11-18T23:54:15.222305+00:00"
+    },
+    "Bloomberg Economics_Colombia Touts $43 Billion in Investments Amid Fiscal Strain_2026-11-18 19:33": {
+        "source": "Bloomberg Economics",
+        "titre": "Colombia Touts $43 Billion in Investments Amid Fiscal Strain",
+        "date": "2026-11-18 19:33",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795046071/actualites_financieres/xvrykhug4ww2ithmvhb4.jpg",
+        "publie_le": "2026-11-18T23:54:43.752434+00:00"
+    },
+    "Benzinga_Nvidia Made $10 Billion on Private AI Bets. But $2 Billion Warning Is Emerging_2026-11-18 17:45": {
+        "source": "Benzinga",
+        "titre": "Nvidia Made $10 Billion on Private AI Bets. But $2 Billion Warning Is Emerging",
+        "date": "2026-11-18 17:45",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795046111/actualites_financieres/nllwunpjhsbucpzufkia.jpg",
+        "publie_le": "2026-11-18T23:55:23.791775+00:00"
+    },
+    "Benzinga_Could Dogecoin Hit $2? Sharks Accumulate 440M DOGE_2026-11-18 17:35": {
+        "source": "Benzinga",
+        "titre": "Could Dogecoin Hit $2? Sharks Accumulate 440M DOGE",
+        "date": "2026-11-18 17:35",
+        "note": 80,
+        "categorie": "Crypto",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795046162/actualites_financieres/yuamaga7k82xfnqmmlw4.jpg",
+        "publie_le": "2026-11-18T23:56:14.296289+00:00"
+    },
+    "Benzinga_Why Is i3 Verticals Stock Climbing Wednesday?_2026-11-18 17:34": {
+        "source": "Benzinga",
+        "titre": "Why Is i3 Verticals Stock Climbing Wednesday?",
+        "date": "2026-11-18 17:34",
+        "note": 85,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795046215/actualites_financieres/vw5kqetjk1sude4lzrzu.jpg",
+        "publie_le": "2026-11-18T23:57:03.273055+00:00"
+    },
+    "OilPrice_Thiel Doubles Down on Vaca Muerta as Trump Calls Venezuela an “Acquisition”_2026-11-18 17:30": {
+        "source": "OilPrice",
+        "titre": "Thiel Doubles Down on Vaca Muerta as Trump Calls Venezuela an “Acquisition”",
+        "date": "2026-11-18 17:30",
+        "note": 80,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795046252/actualites_financieres/jxatd0yddl0t34zuekoe.jpg",
+        "publie_le": "2026-11-18T23:57:44.075316+00:00"
+    },
+    "OilPrice_Mozambique Approves Exxon’s Redesigned $30 Billion Rovuma LNG Plan_2026-11-18 17:30": {
+        "source": "OilPrice",
+        "titre": "Mozambique Approves Exxon’s Redesigned $30 Billion Rovuma LNG Plan",
+        "date": "2026-11-18 17:30",
+        "note": 80,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795046284/actualites_financieres/fc4bzpwfa1vkmd7stsry.jpg",
+        "publie_le": "2026-11-18T23:58:15.807209+00:00"
+    },
+    "Bloomberg Markets_Stocks Fall on Nvidia Rout With Anthropic in Focus: Markets Wrap_2026-11-17 22:07": {
+        "source": "Bloomberg Markets",
+        "titre": "Stocks Fall on Nvidia Rout With Anthropic in Focus: Markets Wrap",
+        "date": "2026-11-17 22:07",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795046348/actualites_financieres/adnut4hln2erl9hmuj9s.jpg",
+        "publie_le": "2026-11-18T23:59:20.715785+00:00"
     }
 }
