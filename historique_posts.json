@@ -26774,5 +26774,41 @@
         "categorie": "Oil",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795049582/actualites_financieres/gluiwxklas1yrjyq9m5u.jpg",
         "publie_le": "2026-11-19T00:53:14.044498+00:00"
+    },
+    "OilPrice_Permian Growth Turns Moderate Despite War_2026-11-19 01:00": {
+        "source": "OilPrice",
+        "titre": "Permian Growth Turns Moderate Despite War",
+        "date": "2026-11-19 01:00",
+        "note": 80,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795050080/actualites_financieres/aog2jk7szfomz5cgpgvj.jpg",
+        "publie_le": "2026-11-19T01:01:32.020681+00:00"
+    },
+    "Bloomberg Markets_Anthropic Prices at $83 a Share in Record-Sized Offering_2026-11-19 00:45": {
+        "source": "Bloomberg Markets",
+        "titre": "Anthropic Prices at $83 a Share in Record-Sized Offering",
+        "date": "2026-11-19 00:45",
+        "note": 95,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795050107/actualites_financieres/zzlzrf97ppdrxlt5qflq.jpg",
+        "publie_le": "2026-11-19T01:01:58.878628+00:00"
+    },
+    "Bloomberg Markets_Korea Investors Buy Record Amount of Treasuries in September_2026-11-19 00:45": {
+        "source": "Bloomberg Markets",
+        "titre": "Korea Investors Buy Record Amount of Treasuries in September",
+        "date": "2026-11-19 00:45",
+        "note": 80,
+        "categorie": "Bonds",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795050135/actualites_financieres/i7jwws4gmtyepeyouo3y.jpg",
+        "publie_le": "2026-11-19T01:02:24.089532+00:00"
+    },
+    "Bloomberg Markets_China Oil Imports Rebound as Beijing Turns Back to Stockpiling_2026-11-19 00:36": {
+        "source": "Bloomberg Markets",
+        "titre": "China Oil Imports Rebound as Beijing Turns Back to Stockpiling",
+        "date": "2026-11-19 00:36",
+        "note": 80,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795050166/actualites_financieres/vawa9eh7ltzh0jru1pxo.jpg",
+        "publie_le": "2026-11-19T01:02:58.463256+00:00"
     }
 }
