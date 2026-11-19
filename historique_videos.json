@@ -2017,7 +2017,10 @@
         "122209999604988135",
         "122209999754988135",
         "122210000144988135",
-        "122210000486988135"
+        "122210000486988135",
+        "122209998332988135",
+        "122209998662988135",
+        "122209998962988135"
     ],
     "videos": [
         {
@@ -12659,6 +12662,25 @@
             "musique": "news_musique5.mp3.mp3",
             "transitions": [
                 "fade",
+                "slidedown",
+                "slideleft"
+            ],
+            "source": "page Facebook"
+        },
+        {
+            "date": "2026-11-19T00:48:57.474354+00:00",
+            "post_ids": [
+                "122209998332988135",
+                "122209998662988135",
+                "122209998962988135"
+            ],
+            "facebook_video_id": "1490712743163683",
+            "instagram_media_id": null,
+            "youtube_video_id": null,
+            "tiktok": true,
+            "duree_s": 17.2,
+            "musique": "news_musique3.mp3.mp3",
+            "transitions": [
                 "slidedown",
                 "slideleft"
             ],

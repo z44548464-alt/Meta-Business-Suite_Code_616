@@ -26711,5 +26711,68 @@
         "categorie": "Stocks",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795046348/actualites_financieres/adnut4hln2erl9hmuj9s.jpg",
         "publie_le": "2026-11-18T23:59:20.715785+00:00"
+    },
+    "Bloomberg Economics_Australian Unemployment Jumps to 4.9% After RBA Rate Hikes_2026-11-19 00:32": {
+        "source": "Bloomberg Economics",
+        "titre": "Australian Unemployment Jumps to 4.9% After RBA Rate Hikes",
+        "date": "2026-11-19 00:32",
+        "note": 85,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795049361/actualites_financieres/z4mbb8ptjxcnlxaui8yp.jpg",
+        "publie_le": "2026-11-19T00:49:33.278404+00:00"
+    },
+    "Financial Times Markets_City firms told to tighten cyber defences as AI exposes vulnerabilities_2026-11-19 00:01": {
+        "source": "Financial Times Markets",
+        "titre": "City firms told to tighten cyber defences as AI exposes vulnerabilities",
+        "date": "2026-11-19 00:01",
+        "note": 80,
+        "categorie": "Crypto",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795049391/actualites_financieres/qrlcwtnfb1xqdc6h7ssy.jpg",
+        "publie_le": "2026-11-19T00:50:04.726697+00:00"
+    },
+    "OilPrice_Google Signs Landmark Superhot Geothermal Deal_2026-11-19 00:00": {
+        "source": "OilPrice",
+        "titre": "Google Signs Landmark Superhot Geothermal Deal",
+        "date": "2026-11-19 00:00",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795049427/actualites_financieres/p8qa1vivn1hg0mjx376v.jpg",
+        "publie_le": "2026-11-19T00:50:33.791598+00:00"
+    },
+    "Seeking Alpha_Nasdaq Breaks Losing Streak As Dow And S&P Slide Again_2026-11-18 23:45": {
+        "source": "Seeking Alpha",
+        "titre": "Nasdaq Breaks Losing Streak As Dow And S&P Slide Again",
+        "date": "2026-11-18 23:45",
+        "note": 80,
+        "categorie": "Indices",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795049451/actualites_financieres/p0s8pzutupu0xjwcqsqb.jpg",
+        "publie_le": "2026-11-19T00:51:01.905377+00:00"
+    },
+    "Bloomberg Markets_US Stock Futures Climb on Anthropic IPO Pricing: Markets Wrap_2026-11-18 22:07": {
+        "source": "Bloomberg Markets",
+        "titre": "US Stock Futures Climb on Anthropic IPO Pricing: Markets Wrap",
+        "date": "2026-11-18 22:07",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795049502/actualites_financieres/imlxj7nqqt2z5p1w3kdk.jpg",
+        "publie_le": "2026-11-19T00:51:54.248741+00:00"
+    },
+    "Financial Times Markets_Anthropic raises $81bn in record IPO_2026-11-18 22:04": {
+        "source": "Financial Times Markets",
+        "titre": "Anthropic raises $81bn in record IPO",
+        "date": "2026-11-18 22:04",
+        "note": 95,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795049527/actualites_financieres/u2cqalzknkmls60cxq78.jpg",
+        "publie_le": "2026-11-19T00:52:19.648296+00:00"
+    },
+    "OilPrice_U.S.-Iran Conflict Flares Again as Gulf Nations Brace for Attacks_2026-11-18 14:30": {
+        "source": "OilPrice",
+        "titre": "U.S.-Iran Conflict Flares Again as Gulf Nations Brace for Attacks",
+        "date": "2026-11-18 14:30",
+        "note": 90,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795049582/actualites_financieres/gluiwxklas1yrjyq9m5u.jpg",
+        "publie_le": "2026-11-19T00:53:14.044498+00:00"
     }
 }
