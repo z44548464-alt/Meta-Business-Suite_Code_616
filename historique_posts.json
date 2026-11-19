@@ -27008,5 +27008,41 @@
         "categorie": "Stocks",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795071774/actualites_financieres/s7nbajvpnijvnmkgw508.jpg",
         "publie_le": "2026-11-19T07:03:08.086592+00:00"
+    },
+    "Bloomberg Economics_South Korea’s Exports Top $1 Trillion for First Time on AI Boom_2026-11-19 08:25": {
+        "source": "Bloomberg Economics",
+        "titre": "South Korea’s Exports Top $1 Trillion for First Time on AI Boom",
+        "date": "2026-11-19 08:25",
+        "note": 85,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795078790/actualites_financieres/naehjvfmgpbixapdhxlm.jpg",
+        "publie_le": "2026-11-19T09:00:01.090836+00:00"
+    },
+    "Bank of England_Cyber resilience guidance consultation and AI and quantum effective practices_2026-11-19 08:00": {
+        "source": "Bank of England",
+        "titre": "Cyber resilience guidance consultation and AI and quantum effective practices",
+        "date": "2026-11-19 08:00",
+        "note": 80,
+        "categorie": "Central banks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795078828/actualites_financieres/pdiogznqogy90gq87avl.jpg",
+        "publie_le": "2026-11-19T09:00:38.586441+00:00"
+    },
+    "Bloomberg Markets_Hong Kong Family Office Unwinds $3.9 Billion of Bets Around AI_2026-11-19 07:58": {
+        "source": "Bloomberg Markets",
+        "titre": "Hong Kong Family Office Unwinds $3.9 Billion of Bets Around AI",
+        "date": "2026-11-19 07:58",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795078864/actualites_financieres/cyxvmztvdzwhtqkctpxi.jpg",
+        "publie_le": "2026-11-19T09:01:14.738177+00:00"
+    },
+    "Bloomberg Markets_Oil Traders in Talks With QatarEnergy for Long-Term Supplies_2026-11-19 07:32": {
+        "source": "Bloomberg Markets",
+        "titre": "Oil Traders in Talks With QatarEnergy for Long-Term Supplies",
+        "date": "2026-11-19 07:32",
+        "note": 80,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795078895/actualites_financieres/ialmhsqxnqvni0nyfmgo.jpg",
+        "publie_le": "2026-11-19T09:01:44.790481+00:00"
     }
 }
