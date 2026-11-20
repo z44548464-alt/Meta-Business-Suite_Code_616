@@ -28259,5 +28259,203 @@
         "categorie": "Stocks",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795125557/actualites_financieres/lyvv5l8dv7poi1qkdv7p.jpg",
         "publie_le": "2026-11-19T21:59:28.789263+00:00"
+    },
+    "Seeking Alpha_AAII Sentiment Survey: Pessimism Backtracks_2026-11-20 00:36": {
+        "source": "Seeking Alpha",
+        "titre": "AAII Sentiment Survey: Pessimism Backtracks",
+        "date": "2026-11-20 00:36",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795135362/actualites_financieres/ccebk9zngtmen8l0p06g.jpg",
+        "publie_le": "2026-11-20T00:43:01.536958+00:00"
+    },
+    "Seeking Alpha_The Big Four Recession Indicators: Industrial Production_2026-11-20 00:35": {
+        "source": "Seeking Alpha",
+        "titre": "The Big Four Recession Indicators: Industrial Production",
+        "date": "2026-11-20 00:35",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795135396/actualites_financieres/mwtajrff9fkofaw48ie0.jpg",
+        "publie_le": "2026-11-20T00:43:30.495735+00:00"
+    },
+    "CNBC Economy_Japan core inflation soars to highest this year as energy subsidy expiry pushes up consumer prices_2026-11-20 00:29": {
+        "source": "CNBC Economy",
+        "titre": "Japan core inflation soars to highest this year as energy subsidy expiry pushes up consumer prices",
+        "date": "2026-11-20 00:29",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795135426/actualites_financieres/qskun6ry040uhf0o96xh.jpg",
+        "publie_le": "2026-11-20T00:44:00.555531+00:00"
+    },
+    "Bloomberg Markets_Dollar Heads for Fourth Week of Gains Following Anthropic IPO_2026-11-20 00:20": {
+        "source": "Bloomberg Markets",
+        "titre": "Dollar Heads for Fourth Week of Gains Following Anthropic IPO",
+        "date": "2026-11-20 00:20",
+        "note": 80,
+        "categorie": "Forex",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795135456/actualites_financieres/wwllu5osmx0okpsguwhr.jpg",
+        "publie_le": "2026-11-20T00:44:25.867598+00:00"
+    },
+    "Seeking Alpha_United States Lime & Minerals: Higher Sales, Lower Profit_2026-11-20 00:03": {
+        "source": "Seeking Alpha",
+        "titre": "United States Lime & Minerals: Higher Sales, Lower Profit",
+        "date": "2026-11-20 00:03",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795135484/actualites_financieres/gt6samgzhm21fqsjxsuh.jpg",
+        "publie_le": "2026-11-20T00:44:53.533139+00:00"
+    },
+    "Bloomberg Economics_UK Consumers Become More Willing to Spend, GfK Survey Finds_2026-11-20 00:01": {
+        "source": "Bloomberg Economics",
+        "titre": "UK Consumers Become More Willing to Spend, GfK Survey Finds",
+        "date": "2026-11-20 00:01",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795135507/actualites_financieres/fbompaxunyul5mfni9pm.jpg",
+        "publie_le": "2026-11-20T00:45:21.739767+00:00"
+    },
+    "Bloomberg Economics_Thailand Opens Door to US Pork, Raising Risks for Farmers_2026-11-20 00:00": {
+        "source": "Bloomberg Economics",
+        "titre": "Thailand Opens Door to US Pork, Raising Risks for Farmers",
+        "date": "2026-11-20 00:00",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795135537/actualites_financieres/ahfqaxqanfsbdl6ypobf.jpg",
+        "publie_le": "2026-11-20T00:45:53.905831+00:00"
+    },
+    "Seeking Alpha_Anthropic Hits The Market, But Wall Street Hits The Brakes_2026-11-20 00:00": {
+        "source": "Seeking Alpha",
+        "titre": "Anthropic Hits The Market, But Wall Street Hits The Brakes",
+        "date": "2026-11-20 00:00",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795135569/actualites_financieres/cvqfluprsuouxgg1ztcx.jpg",
+        "publie_le": "2026-11-20T00:46:23.434286+00:00"
+    },
+    "OilPrice_Guyana Oil Boom Rekindles Frontier Drilling Appetite_2026-11-20 00:00": {
+        "source": "OilPrice",
+        "titre": "Guyana Oil Boom Rekindles Frontier Drilling Appetite",
+        "date": "2026-11-20 00:00",
+        "note": 80,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795135601/actualites_financieres/tdtpudfjq8yvmuvkqkqr.jpg",
+        "publie_le": "2026-11-20T00:46:55.966777+00:00"
+    },
+    "Bloomberg Markets_Gold Set for Worst Week Since March on Hawkish Fed, AI Selloff_2026-11-19 23:56": {
+        "source": "Bloomberg Markets",
+        "titre": "Gold Set for Worst Week Since March on Hawkish Fed, AI Selloff",
+        "date": "2026-11-19 23:56",
+        "note": 80,
+        "categorie": "Gold",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795135630/actualites_financieres/ygd2b6c7ld7rmnld0hov.jpg",
+        "publie_le": "2026-11-20T00:47:25.714329+00:00"
+    },
+    "MarketWatch_After Anthropic’s ‘bittersweet’ IPO, here’s what lies ahead_2026-11-19 23:56": {
+        "source": "MarketWatch",
+        "titre": "After Anthropic’s ‘bittersweet’ IPO, here’s what lies ahead",
+        "date": "2026-11-19 23:56",
+        "note": 75,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795135660/actualites_financieres/kwwx15xsldmxbz2t08eb.jpg",
+        "publie_le": "2026-11-20T00:48:12.748749+00:00"
+    },
+    "Bloomberg Markets_Anthropic IPO Raises Only $110 Million From Australian Investors_2026-11-19 23:35": {
+        "source": "Bloomberg Markets",
+        "titre": "Anthropic IPO Raises Only $110 Million From Australian Investors",
+        "date": "2026-11-19 23:35",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795135715/actualites_financieres/qe7aa8ecbpfallkz6tuo.jpg",
+        "publie_le": "2026-11-20T00:48:51.263288+00:00"
+    },
+    "Bloomberg Economics_Japan CPI Rises to Fastest This Year, Backing BOJ Hike Case_2026-11-19 23:34": {
+        "source": "Bloomberg Economics",
+        "titre": "Japan CPI Rises to Fastest This Year, Backing BOJ Hike Case",
+        "date": "2026-11-19 23:34",
+        "note": 90,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795135745/actualites_financieres/cnphprwcocuwcskwod2s.jpg",
+        "publie_le": "2026-11-20T00:49:19.295702+00:00"
+    },
+    "Bloomberg Markets_Anthropic Becomes World’s 7th Most Valuable Company After IPO_2026-11-19 23:16": {
+        "source": "Bloomberg Markets",
+        "titre": "Anthropic Becomes World’s 7th Most Valuable Company After IPO",
+        "date": "2026-11-19 23:16",
+        "note": 90,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795135777/actualites_financieres/m1rbsu8g5rextv1poxw1.jpg",
+        "publie_le": "2026-11-20T00:49:51.829353+00:00"
+    },
+    "MarketWatch_These were the only stocks that rose amid the stock market’s wipeout Thursday_2026-11-19 23:11": {
+        "source": "MarketWatch",
+        "titre": "These were the only stocks that rose amid the stock market’s wipeout Thursday",
+        "date": "2026-11-19 23:11",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795135808/actualites_financieres/cj1aqrnahcxnrugkcnoe.jpg",
+        "publie_le": "2026-11-20T00:50:19.192009+00:00"
+    },
+    "OilPrice_Hormuz Oil Exports Could Decline amid Inbound Tanker Shortage_2026-11-19 23:00": {
+        "source": "OilPrice",
+        "titre": "Hormuz Oil Exports Could Decline amid Inbound Tanker Shortage",
+        "date": "2026-11-19 23:00",
+        "note": 80,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795135841/actualites_financieres/ldeqmaf4lsyyuyezcqyj.jpg",
+        "publie_le": "2026-11-20T00:50:53.140507+00:00"
+    },
+    "Benzinga_Anthropic Stock Slips as Apple Aims to Develop AI Agent_2026-11-19 22:13": {
+        "source": "Benzinga",
+        "titre": "Anthropic Stock Slips as Apple Aims to Develop AI Agent",
+        "date": "2026-11-19 22:13",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795135878/actualites_financieres/tfupayk9lpwk3ipgojii.jpg",
+        "publie_le": "2026-11-20T00:51:29.468945+00:00"
+    },
+    "MarketWatch_Anthropic’s stock surges in its debut — and the rest of the market dives anyway_2026-11-19 22:12": {
+        "source": "MarketWatch",
+        "titre": "Anthropic’s stock surges in its debut — and the rest of the market dives anyway",
+        "date": "2026-11-19 22:12",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795135908/actualites_financieres/tznqhi9wzim3i9wuiol7.jpg",
+        "publie_le": "2026-11-20T00:51:59.902013+00:00"
+    },
+    "Bloomberg Markets_Asian Stocks Fall, Anthropic Slips in After-Hours: Markets Wrap_2026-11-19 22:03": {
+        "source": "Bloomberg Markets",
+        "titre": "Asian Stocks Fall, Anthropic Slips in After-Hours: Markets Wrap",
+        "date": "2026-11-19 22:03",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795135936/actualites_financieres/p1d6afswycn2kpwsyupc.jpg",
+        "publie_le": "2026-11-20T00:52:27.944129+00:00"
+    },
+    "OilPrice_5 Energy Stocks to Benefit from Anthropic’s $1.5 Trillion Debut_2026-11-19 22:00": {
+        "source": "OilPrice",
+        "titre": "5 Energy Stocks to Benefit from Anthropic’s $1.5 Trillion Debut",
+        "date": "2026-11-19 22:00",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795135962/actualites_financieres/prdpmz4t9l9sqtrwwcia.jpg",
+        "publie_le": "2026-11-20T00:52:53.609753+00:00"
+    },
+    "Benzinga_Gap Reports Q3 Results, Appoints New Athleta CEO_2026-11-19 21:48": {
+        "source": "Benzinga",
+        "titre": "Gap Reports Q3 Results, Appoints New Athleta CEO",
+        "date": "2026-11-19 21:48",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795135994/actualites_financieres/ppqvypdtalmxsx5x9qpk.jpg",
+        "publie_le": "2026-11-20T00:53:25.858334+00:00"
+    },
+    "Bloomberg Markets_Shenkman, Blackstone, GDA Among Lenders to Take Over Vivid_2026-11-19 21:22": {
+        "source": "Bloomberg Markets",
+        "titre": "Shenkman, Blackstone, GDA Among Lenders to Take Over Vivid",
+        "date": "2026-11-19 21:22",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795136022/actualites_financieres/vpwxdtmopmkeswqzbthj.jpg",
+        "publie_le": "2026-11-20T00:53:54.132534+00:00"
     }
 }
