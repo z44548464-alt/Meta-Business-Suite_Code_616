@@ -29078,5 +29078,437 @@
         "categorie": "Economic news",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795175786/actualites_financieres/gcjaqraidcv8ilbyjn2l.jpg",
         "publie_le": "2026-11-20T11:56:37.245293+00:00"
+    },
+    "Benzinga_Seven in 10 Nasdaq 100 Stocks Are Bearish: Black Friday Sale or Value Trap?_2026-11-20 15:41": {
+        "source": "Benzinga",
+        "titre": "Seven in 10 Nasdaq 100 Stocks Are Bearish: Black Friday Sale or Value Trap?",
+        "date": "2026-11-20 15:41",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795189819/actualites_financieres/hnqe390mr4oheuyj8o5j.jpg",
+        "publie_le": "2026-11-20T15:50:29.126336+00:00"
+    },
+    "MarketWatch_Anthropic’s stock slides closer to IPO price and drags down the AI trade_2026-11-20 15:38": {
+        "source": "MarketWatch",
+        "titre": "Anthropic’s stock slides closer to IPO price and drags down the AI trade",
+        "date": "2026-11-20 15:38",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795189844/actualites_financieres/hmdqwmjtgdmupwzhgexs.jpg",
+        "publie_le": "2026-11-20T15:50:54.582982+00:00"
+    },
+    "MarketWatch_Nvidia’s stock heads for a stretch of weekly losses unseen since 2008_2026-11-20 15:38": {
+        "source": "MarketWatch",
+        "titre": "Nvidia’s stock heads for a stretch of weekly losses unseen since 2008",
+        "date": "2026-11-20 15:38",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795189878/actualites_financieres/osb9sjmcmwi0hdago6eq.jpg",
+        "publie_le": "2026-11-20T15:51:30.709870+00:00"
+    },
+    "OilPrice_China’s Oil Imports from Persian Gulf Jump to Wartime High_2026-11-20 15:36": {
+        "source": "OilPrice",
+        "titre": "China’s Oil Imports from Persian Gulf Jump to Wartime High",
+        "date": "2026-11-20 15:36",
+        "note": 90,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795189913/actualites_financieres/jtvokqb3brurzakmwoxh.jpg",
+        "publie_le": "2026-11-20T15:52:07.307263+00:00"
+    },
+    "Bloomberg Markets_Turkey Asks Hundreds to Return Gains From Fund Crisis_2026-11-20 15:04": {
+        "source": "Bloomberg Markets",
+        "titre": "Turkey Asks Hundreds to Return Gains From Fund Crisis",
+        "date": "2026-11-20 15:04",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795189956/actualites_financieres/mjzky0wkrkcgqoguegud.jpg",
+        "publie_le": "2026-11-20T15:52:52.019509+00:00"
+    },
+    "Seeking Alpha_BUZZ Investing: AI Reassessment Drives Tech Rotation, BUZZ Index Declines_2026-11-20 15:03": {
+        "source": "Seeking Alpha",
+        "titre": "BUZZ Investing: AI Reassessment Drives Tech Rotation, BUZZ Index Declines",
+        "date": "2026-11-20 15:03",
+        "note": 80,
+        "categorie": "Indices",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795189990/actualites_financieres/w4jpe5jjqhi8tvm9mijc.jpg",
+        "publie_le": "2026-11-20T15:53:25.912378+00:00"
+    },
+    "Bloomberg Economics_US Consumer Sentiment Up on Improved Post-Election Outlook_2026-11-20 15:00": {
+        "source": "Bloomberg Economics",
+        "titre": "US Consumer Sentiment Up on Improved Post-Election Outlook",
+        "date": "2026-11-20 15:00",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795190026/actualites_financieres/jurfutouesp0b5slxlom.jpg",
+        "publie_le": "2026-11-20T15:54:01.356583+00:00"
+    },
+    "Federal Reserve_Federal Reserve Board releases results from survey of senior financial officers at banks about their strategies and practices for managing reserve balances_2026-11-20 15:00": {
+        "source": "Federal Reserve",
+        "titre": "Federal Reserve Board releases results from survey of senior financial officers at banks about their strategies and practices for managing reserve balances",
+        "date": "2026-11-20 15:00",
+        "note": 80,
+        "categorie": "Central banks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795190055/actualites_financieres/eq8ttcuyypdmkijgtq4x.jpg",
+        "publie_le": "2026-11-20T15:54:27.917894+00:00"
+    },
+    "Seeking Alpha_A $178 Billion Holiday Showdown May Rock Markets Next Week_2026-11-20 14:55": {
+        "source": "Seeking Alpha",
+        "titre": "A $178 Billion Holiday Showdown May Rock Markets Next Week",
+        "date": "2026-11-20 14:55",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795190091/actualites_financieres/cjnftc9jkfzezhhqy7ix.jpg",
+        "publie_le": "2026-11-20T15:55:10.868862+00:00"
+    },
+    "ActionForex Fundamental_First look at Canada’s Economy in Q4 with Manufacturing and Wholesales_2026-11-20 14:53": {
+        "source": "ActionForex Fundamental",
+        "titre": "First look at Canada’s Economy in Q4 with Manufacturing and Wholesales",
+        "date": "2026-11-20 14:53",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795190127/actualites_financieres/an7us1mlnxdxtqugytvr.jpg",
+        "publie_le": "2026-11-20T15:55:42.705895+00:00"
+    },
+    "ActionForex Fundamental_Week Ahead – Flash PMIs and PCE Inflation in Focus Ahead of Thanksgiving_2026-11-20 14:50": {
+        "source": "ActionForex Fundamental",
+        "titre": "Week Ahead – Flash PMIs and PCE Inflation in Focus Ahead of Thanksgiving",
+        "date": "2026-11-20 14:50",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795190169/actualites_financieres/pueeinajjgaeybu70h1k.jpg",
+        "publie_le": "2026-11-20T15:56:24.353439+00:00"
+    },
+    "ActionForex Fundamental_Weekly Focus – Anthropic IPO and Nvidia Earnings Bring No Relief for Tech_2026-11-20 14:47": {
+        "source": "ActionForex Fundamental",
+        "titre": "Weekly Focus – Anthropic IPO and Nvidia Earnings Bring No Relief for Tech",
+        "date": "2026-11-20 14:47",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795190208/actualites_financieres/mpfn9m9fd4n3mvj1nxzo.jpg",
+        "publie_le": "2026-11-20T15:56:58.442366+00:00"
+    },
+    "ActionForex Fundamental_Canada: Retail Sales Post a Solid Q3, but Point to a Subdued Start to the Holiday Season_2026-11-20 14:45": {
+        "source": "ActionForex Fundamental",
+        "titre": "Canada: Retail Sales Post a Solid Q3, but Point to a Subdued Start to the Holiday Season",
+        "date": "2026-11-20 14:45",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795190238/actualites_financieres/hdyqydtxventejmyde8j.jpg",
+        "publie_le": "2026-11-20T15:57:27.204610+00:00"
+    },
+    "Benzinga_Bausch + Lomb Post-Surgery Eye Pain Drug Misses Study Goal But Shows Early Relief_2026-11-20 14:41": {
+        "source": "Benzinga",
+        "titre": "Bausch + Lomb Post-Surgery Eye Pain Drug Misses Study Goal But Shows Early Relief",
+        "date": "2026-11-20 14:41",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795190268/actualites_financieres/kbxspknufndchyzxzp6f.jpg",
+        "publie_le": "2026-11-20T15:58:01.859441+00:00"
+    },
+    "Bloomberg Markets_Anthropic Share Slump Nearly Erases IPO Pop as AI Trade Unravels_2026-11-20 14:36": {
+        "source": "Bloomberg Markets",
+        "titre": "Anthropic Share Slump Nearly Erases IPO Pop as AI Trade Unravels",
+        "date": "2026-11-20 14:36",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795190297/actualites_financieres/xd6rwkoknjvguo8tnz42.jpg",
+        "publie_le": "2026-11-20T15:58:32.707113+00:00"
+    },
+    "Benzinga_PayPal Names New CFO, Overhauls Venmo, Crypto and AI Leadership As Three-Year Strategy Takes Shape_2026-11-20 14:30": {
+        "source": "Benzinga",
+        "titre": "PayPal Names New CFO, Overhauls Venmo, Crypto and AI Leadership As Three-Year Strategy Takes Shape",
+        "date": "2026-11-20 14:30",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795190334/actualites_financieres/b9hajwsgm5t0se1s5a0c.jpg",
+        "publie_le": "2026-11-20T15:59:06.336679+00:00"
+    },
+    "Benzinga_Revolution Medicines Highlights Strong 12-Month Overall Survival Rate for Lead Cancer Drug Regimen_2026-11-20 14:26": {
+        "source": "Benzinga",
+        "titre": "Revolution Medicines Highlights Strong 12-Month Overall Survival Rate for Lead Cancer Drug Regimen",
+        "date": "2026-11-20 14:26",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795190366/actualites_financieres/adsb9tnfr46htdvhpldx.jpg",
+        "publie_le": "2026-11-20T15:59:35.471876+00:00"
+    },
+    "Benzinga_Why Is AMD Stock Falling on Friday?_2026-11-20 14:24": {
+        "source": "Benzinga",
+        "titre": "Why Is AMD Stock Falling on Friday?",
+        "date": "2026-11-20 14:24",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795190400/actualites_financieres/uxwnrlpcgqqrjafkpyni.jpg",
+        "publie_le": "2026-11-20T16:00:10.464823+00:00"
+    },
+    "CNBC Finance_The bull market has a new problem. The 'smart money' is selling_2026-11-20 14:15": {
+        "source": "CNBC Finance",
+        "titre": "The bull market has a new problem. The 'smart money' is selling",
+        "date": "2026-11-20 14:15",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795190473/actualites_financieres/q0iahljalnhtpabyrj5w.jpg",
+        "publie_le": "2026-11-20T16:01:23.640621+00:00"
+    },
+    "Benzinga_Bitcoin Sheds $25,000 in 7 Weeks, but Peter Schiff Says It ‘Hasn’t Gone Down Enough’_2026-11-20 14:12": {
+        "source": "Benzinga",
+        "titre": "Bitcoin Sheds $25,000 in 7 Weeks, but Peter Schiff Says It ‘Hasn’t Gone Down Enough’",
+        "date": "2026-11-20 14:12",
+        "note": 80,
+        "categorie": "Crypto",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795190509/actualites_financieres/jglzfuca9iugxgjoz8d0.jpg",
+        "publie_le": "2026-11-20T16:02:00.066603+00:00"
+    },
+    "Financial Times Markets_Anthropic shares tumble as AI giant swept up in tech sell-off_2026-11-20 14:01": {
+        "source": "Financial Times Markets",
+        "titre": "Anthropic shares tumble as AI giant swept up in tech sell-off",
+        "date": "2026-11-20 14:01",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795190536/actualites_financieres/w6qqpesg3nobmqrrjcim.jpg",
+        "publie_le": "2026-11-20T16:02:26.367986+00:00"
+    },
+    "Bloomberg Economics_ECB Needs December Rate Hike Into Restrictive Zone, Nagel Says_2026-11-20 13:56": {
+        "source": "Bloomberg Economics",
+        "titre": "ECB Needs December Rate Hike Into Restrictive Zone, Nagel Says",
+        "date": "2026-11-20 13:56",
+        "note": 90,
+        "categorie": "Central banks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795190567/actualites_financieres/h1mg7rj0aqau84yxabnm.jpg",
+        "publie_le": "2026-11-20T16:02:59.583366+00:00"
+    },
+    "Bloomberg Markets_India Seeks Easier Foreign Fund Disclosure to Draw Money_2026-11-20 13:47": {
+        "source": "Bloomberg Markets",
+        "titre": "India Seeks Easier Foreign Fund Disclosure to Draw Money",
+        "date": "2026-11-20 13:47",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795190601/actualites_financieres/i2ved7icmiyf94kh4xxl.jpg",
+        "publie_le": "2026-11-20T16:03:34.200353+00:00"
+    },
+    "Bloomberg Economics_Canada Retail Sales Tracking Largest Decline Since Feb. 2025_2026-11-20 13:30": {
+        "source": "Bloomberg Economics",
+        "titre": "Canada Retail Sales Tracking Largest Decline Since Feb. 2025",
+        "date": "2026-11-20 13:30",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795190632/actualites_financieres/djrizcjukhwobds7xmlx.jpg",
+        "publie_le": "2026-11-20T16:04:04.244587+00:00"
+    },
+    "OilPrice_India’s LPG Consumption Hits 8-Month High as Supply Rebounds_2026-11-20 13:30": {
+        "source": "OilPrice",
+        "titre": "India’s LPG Consumption Hits 8-Month High as Supply Rebounds",
+        "date": "2026-11-20 13:30",
+        "note": 80,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795190664/actualites_financieres/vc9i7wyizft6xlfizdww.jpg",
+        "publie_le": "2026-11-20T16:04:32.752991+00:00"
+    },
+    "ActionForex Fundamental_The Yen Capitalised on the Flight from Risk_2026-11-20 13:12": {
+        "source": "ActionForex Fundamental",
+        "titre": "The Yen Capitalised on the Flight from Risk",
+        "date": "2026-11-20 13:12",
+        "note": 80,
+        "categorie": "Forex",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795190694/actualites_financieres/lloxbjwkgqhljzqlllgw.jpg",
+        "publie_le": "2026-11-20T16:05:01.479173+00:00"
+    },
+    "Bloomberg Markets_European Tech Stocks Fall As AI Trade Buckles_2026-11-20 13:05": {
+        "source": "Bloomberg Markets",
+        "titre": "European Tech Stocks Fall As AI Trade Buckles",
+        "date": "2026-11-20 13:05",
+        "note": 85,
+        "categorie": "Indices",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795190718/actualites_financieres/dsqb3lhlwrxlshlzerug.jpg",
+        "publie_le": "2026-11-20T16:05:23.972885+00:00"
+    },
+    "Benzinga_Ethereum Lost $1,000 in 7 Weeks: What’s Going On?_2026-11-20 13:00": {
+        "source": "Benzinga",
+        "titre": "Ethereum Lost $1,000 in 7 Weeks: What’s Going On?",
+        "date": "2026-11-20 13:00",
+        "note": 80,
+        "categorie": "Crypto",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795190752/actualites_financieres/tucyfnwoibj3lzf3t3u6.jpg",
+        "publie_le": "2026-11-20T16:05:58.554984+00:00"
+    },
+    "Financial Times_Burnham’s EU deal in brief_2026-11-20 12:45": {
+        "source": "Financial Times",
+        "titre": "Burnham’s EU deal in brief",
+        "date": "2026-11-20 12:45",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795190787/actualites_financieres/ehtxx75zwlrvolrjbzzl.jpg",
+        "publie_le": "2026-11-20T16:06:33.601111+00:00"
+    },
+    "Benzinga_Lumentum CEO Says Marvell Deal Is ‘Even More Powerful’ Despite Stock Selloff_2026-11-20 12:34": {
+        "source": "Benzinga",
+        "titre": "Lumentum CEO Says Marvell Deal Is ‘Even More Powerful’ Despite Stock Selloff",
+        "date": "2026-11-20 12:34",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795190811/actualites_financieres/yxun5yluvf3von3xfide.jpg",
+        "publie_le": "2026-11-20T16:06:58.440445+00:00"
+    },
+    "Benzinga_Coinbase Targets In-House Prediction Markets as Shares Sink to 2023 Levels_2026-11-20 12:32": {
+        "source": "Benzinga",
+        "titre": "Coinbase Targets In-House Prediction Markets as Shares Sink to 2023 Levels",
+        "date": "2026-11-20 12:32",
+        "note": 80,
+        "categorie": "Crypto",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795190851/actualites_financieres/osx621fpkti0bgnamgwe.jpg",
+        "publie_le": "2026-11-20T16:07:42.975149+00:00"
+    },
+    "OilPrice_Trump’s Ukraine Energy Truce Unravels as Russian Missiles Hit Kyiv_2026-11-20 12:30": {
+        "source": "OilPrice",
+        "titre": "Trump’s Ukraine Energy Truce Unravels as Russian Missiles Hit Kyiv",
+        "date": "2026-11-20 12:30",
+        "note": 85,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795190883/actualites_financieres/wi2keae8j5ovjv5rcl7t.jpg",
+        "publie_le": "2026-11-20T16:08:15.767795+00:00"
+    },
+    "OilPrice_Iraq's Oil Crackdown Sparks New Showdown With Kurdistan_2026-11-20 12:30": {
+        "source": "OilPrice",
+        "titre": "Iraq's Oil Crackdown Sparks New Showdown With Kurdistan",
+        "date": "2026-11-20 12:30",
+        "note": 80,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795190914/actualites_financieres/lhbge7d3eteu3ilkj0y8.jpg",
+        "publie_le": "2026-11-20T16:08:41.426857+00:00"
+    },
+    "OilPrice_WTI Crude Sinks More Than 5% as Global Oil Glut Fears Grow_2026-11-20 12:30": {
+        "source": "OilPrice",
+        "titre": "WTI Crude Sinks More Than 5% as Global Oil Glut Fears Grow",
+        "date": "2026-11-20 12:30",
+        "note": 90,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795190938/actualites_financieres/owu0t9yqsnlmosrkhdwk.jpg",
+        "publie_le": "2026-11-20T16:09:05.670442+00:00"
+    },
+    "OilPrice_Iran Steps Up Hormuz Tanker Attacks as Oil Prices Slide_2026-11-20 12:30": {
+        "source": "OilPrice",
+        "titre": "Iran Steps Up Hormuz Tanker Attacks as Oil Prices Slide",
+        "date": "2026-11-20 12:30",
+        "note": 80,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795190964/actualites_financieres/ahvdxjdjzfpxystaskrw.jpg",
+        "publie_le": "2026-11-20T16:09:31.302188+00:00"
+    },
+    "Benzinga_Procter & Gamble Plans up to 30% Supply Job Cuts by 2030, Aims for $10 Billion in Cost Savings_2026-11-20 12:26": {
+        "source": "Benzinga",
+        "titre": "Procter & Gamble Plans up to 30% Supply Job Cuts by 2030, Aims for $10 Billion in Cost Savings",
+        "date": "2026-11-20 12:26",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795190990/actualites_financieres/x02qomips1olznzktdlj.jpg",
+        "publie_le": "2026-11-20T16:09:57.762011+00:00"
+    },
+    "Bloomberg Markets_Nvidia Turmoil Leaves Few Stock Market Winners in Sea of Losers_2026-11-20 12:21": {
+        "source": "Bloomberg Markets",
+        "titre": "Nvidia Turmoil Leaves Few Stock Market Winners in Sea of Losers",
+        "date": "2026-11-20 12:21",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795191014/actualites_financieres/xjyt8yhs7jgy82apadws.jpg",
+        "publie_le": "2026-11-20T16:10:21.081565+00:00"
+    },
+    "Benzinga_Intuit Revenue Forecast Shows AI Disruption Concerns Linger_2026-11-20 12:10": {
+        "source": "Benzinga",
+        "titre": "Intuit Revenue Forecast Shows AI Disruption Concerns Linger",
+        "date": "2026-11-20 12:10",
+        "note": 85,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795191041/actualites_financieres/lsvj8ygjabidtuwxoybq.jpg",
+        "publie_le": "2026-11-20T16:10:49.139041+00:00"
+    },
+    "Benzinga_Strategy’s $3B STRC Buyback Is About ‘Supporting the Brand,’ Saylor Says_2026-11-20 11:54": {
+        "source": "Benzinga",
+        "titre": "Strategy’s $3B STRC Buyback Is About ‘Supporting the Brand,’ Saylor Says",
+        "date": "2026-11-20 11:54",
+        "note": 80,
+        "categorie": "Crypto",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795191090/actualites_financieres/hnwo2doyusdmrix9xmxb.jpg",
+        "publie_le": "2026-11-20T16:11:37.028932+00:00"
+    },
+    "Financial Times_UK and EU agree Brexit ‘reset’ but delivery rests on tuition fees_2026-11-20 10:47": {
+        "source": "Financial Times",
+        "titre": "UK and EU agree Brexit ‘reset’ but delivery rests on tuition fees",
+        "date": "2026-11-20 10:47",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795191118/actualites_financieres/ya3nccpkny5bgpjdqerz.jpg",
+        "publie_le": "2026-11-20T16:12:05.323235+00:00"
+    },
+    "Financial Times Markets_Trump to host memecoin dinner as Democrats take aim at ‘conflicts of interest’_2026-11-20 05:00": {
+        "source": "Financial Times Markets",
+        "titre": "Trump to host memecoin dinner as Democrats take aim at ‘conflicts of interest’",
+        "date": "2026-11-20 05:00",
+        "note": 80,
+        "categorie": "Crypto",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795191156/actualites_financieres/bbooccybdgb5rd2ysbqx.jpg",
+        "publie_le": "2026-11-20T16:12:43.688291+00:00"
+    },
+    "Financial Times Markets_Oil loses grip on bond markets as inflation ‘virus’ spreads_2026-11-20 05:00": {
+        "source": "Financial Times Markets",
+        "titre": "Oil loses grip on bond markets as inflation ‘virus’ spreads",
+        "date": "2026-11-20 05:00",
+        "note": 80,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795191179/actualites_financieres/tj624qpvwifn8uy3bvqv.jpg",
+        "publie_le": "2026-11-20T16:13:07.279484+00:00"
+    },
+    "Financial Times Markets_Anthropic’s Wall Street stimulus fades_2026-11-20 05:00": {
+        "source": "Financial Times Markets",
+        "titre": "Anthropic’s Wall Street stimulus fades",
+        "date": "2026-11-20 05:00",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795191217/actualites_financieres/d9fk2aynwr9hc0fsmoar.jpg",
+        "publie_le": "2026-11-20T16:13:45.062399+00:00"
+    },
+    "Financial Times Markets_China seeks to re-enter US private equity with ‘disaster scenario’ protections_2026-11-20 05:00": {
+        "source": "Financial Times Markets",
+        "titre": "China seeks to re-enter US private equity with ‘disaster scenario’ protections",
+        "date": "2026-11-20 05:00",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795191254/actualites_financieres/nextpe6xgab70rch7dis.jpg",
+        "publie_le": "2026-11-20T16:14:35.435374+00:00"
+    },
+    "Bloomberg Markets_Treasuries Build on Big Weekly Gain as Investors Flee Stocks_2026-11-20 04:33": {
+        "source": "Bloomberg Markets",
+        "titre": "Treasuries Build on Big Weekly Gain as Investors Flee Stocks",
+        "date": "2026-11-20 04:33",
+        "note": 80,
+        "categorie": "Bonds",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795191294/actualites_financieres/poc6sdxgezvfurjid8vs.jpg",
+        "publie_le": "2026-11-20T16:15:06.401023+00:00"
+    },
+    "Bloomberg Markets_Nasdaq 100 Falls 2% as Anthropic Plunge Deepens: Markets Wrap_2026-11-19 22:03": {
+        "source": "Bloomberg Markets",
+        "titre": "Nasdaq 100 Falls 2% as Anthropic Plunge Deepens: Markets Wrap",
+        "date": "2026-11-19 22:03",
+        "note": 80,
+        "categorie": "Indices",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795191333/actualites_financieres/qfzgnarjvzr5zbdyaqqr.jpg",
+        "publie_le": "2026-11-20T16:15:45.489270+00:00"
+    },
+    "Financial Times Markets_Anthropic’s rocketing IPO_2026-11-19 21:44": {
+        "source": "Financial Times Markets",
+        "titre": "Anthropic’s rocketing IPO",
+        "date": "2026-11-19 21:44",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795191364/actualites_financieres/jgxyi0fbqlnox0sjrcmu.jpg",
+        "publie_le": "2026-11-20T16:16:12.713561+00:00"
+    },
+    "Bloomberg Economics_Rand Dips After South Africa Hawkishly Holds Rate_2026-11-19 13:06": {
+        "source": "Bloomberg Economics",
+        "titre": "Rand Dips After South Africa Hawkishly Holds Rate",
+        "date": "2026-11-19 13:06",
+        "note": 85,
+        "categorie": "Central banks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795191406/actualites_financieres/rbrubuhj0oq9gifn7icu.jpg",
+        "publie_le": "2026-11-20T16:16:54.924862+00:00"
     }
 }
