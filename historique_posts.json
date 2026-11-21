@@ -30111,8 +30111,8 @@
         "date": "2026-11-21 05:20",
         "note": 80,
         "categorie": "Stocks",
-        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795240219/actualites_financieres/zqcuig0t6cdazccwcyvk.jpg",
-        "publie_le": "2026-11-21T05:50:29.797471+00:00"
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795240773/actualites_financieres/nnrzljur4qedtgwyqajc.jpg",
+        "publie_le": "2026-11-21T05:59:45.593841+00:00"
     },
     "Bloomberg Markets_China Military Bans SF Express From Procurement Over Misconduct_2026-11-21 05:00": {
         "source": "Bloomberg Markets",
@@ -30120,8 +30120,8 @@
         "date": "2026-11-21 05:00",
         "note": 80,
         "categorie": "Stocks",
-        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795240253/actualites_financieres/ezcxuvrozbsbdldmy5pz.jpg",
-        "publie_le": "2026-11-21T05:51:03.061954+00:00"
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795240922/actualites_financieres/gwausuq1ir9im8bb1nhr.jpg",
+        "publie_le": "2026-11-21T06:02:13.693258+00:00"
     },
     "Bloomberg Economics_S&P Upgrades Zambia as Robust Growth, Narrower Fiscal Gaps Seen_2026-11-21 05:00": {
         "source": "Bloomberg Economics",
@@ -30129,8 +30129,8 @@
         "date": "2026-11-21 05:00",
         "note": 90,
         "categorie": "Economic news",
-        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795240282/actualites_financieres/ycanpemp4hbew90gg0nc.jpg",
-        "publie_le": "2026-11-21T05:51:32.988452+00:00"
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795240950/actualites_financieres/gyjm4afhpugmt007swtb.jpg",
+        "publie_le": "2026-11-21T06:02:37.026119+00:00"
     },
     "Financial Times_Oil shipped through Hormuz falls as Iranian strikes increase_2026-11-21 05:00": {
         "source": "Financial Times",
@@ -30138,8 +30138,8 @@
         "date": "2026-11-21 05:00",
         "note": 80,
         "categorie": "Oil",
-        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795240310/actualites_financieres/bsudfesbyaiu7u4xudqy.jpg",
-        "publie_le": "2026-11-21T05:52:02.616270+00:00"
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795240970/actualites_financieres/flcdsqszswzof516q6xy.jpg",
+        "publie_le": "2026-11-21T06:02:56.853029+00:00"
     },
     "Bloomberg Markets_Vietnam Amends Laws to Speed Land Clearance, Development of New Projects_2026-11-21 04:51": {
         "source": "Bloomberg Markets",
@@ -30147,7 +30147,34 @@
         "date": "2026-11-21 04:51",
         "note": 80,
         "categorie": "Economic news",
-        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795240344/actualites_financieres/thvpejgkvwxzcg9quwqf.jpg",
-        "publie_le": "2026-11-21T05:52:34.961640+00:00"
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795240994/actualites_financieres/wt3plozllokjfc9xtdxv.jpg",
+        "publie_le": "2026-11-21T06:03:25.696214+00:00"
+    },
+    "Bloomberg Markets_China’s Top Planner Seeks Faster Construction of State Projects_2026-11-21 05:24": {
+        "source": "Bloomberg Markets",
+        "titre": "China’s Top Planner Seeks Faster Construction of State Projects",
+        "date": "2026-11-21 05:24",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795240736/actualites_financieres/gyw9tdtkfmgm5wm4p5oi.jpg",
+        "publie_le": "2026-11-21T05:59:10.188379+00:00"
+    },
+    "Bloomberg Markets_Australian Energy Officials Warned of Data Center Risk, Age Says_2026-11-21 05:18": {
+        "source": "Bloomberg Markets",
+        "titre": "Australian Energy Officials Warned of Data Center Risk, Age Says",
+        "date": "2026-11-21 05:18",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795240799/actualites_financieres/jj94pkwqbrff0uvoudkc.jpg",
+        "publie_le": "2026-11-21T06:00:11.158644+00:00"
+    },
+    "Seeking Alpha_Circle Feeling Crypto Pain_2026-11-21 03:52": {
+        "source": "Seeking Alpha",
+        "titre": "Circle Feeling Crypto Pain",
+        "date": "2026-11-21 03:52",
+        "note": 80,
+        "categorie": "Crypto",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795241033/actualites_financieres/xalbwcru1z2wsimylpcs.jpg",
+        "publie_le": "2026-11-21T06:04:05.459469+00:00"
     }
 }
