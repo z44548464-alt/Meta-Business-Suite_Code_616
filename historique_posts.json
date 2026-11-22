@@ -30608,5 +30608,32 @@
         "categorie": "Economic news",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795369561/actualites_financieres/fw7ktxadndbrohyzfiyk.jpg",
         "publie_le": "2026-11-22T17:46:15.268256+00:00"
+    },
+    "OilPrice_Google Backs Superhot Geothermal in 50 MW Oregon Power Deal_2026-11-22 18:00": {
+        "source": "OilPrice",
+        "titre": "Google Backs Superhot Geothermal in 50 MW Oregon Power Deal",
+        "date": "2026-11-22 18:00",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795372447/actualites_financieres/tfwo43cj0lzo2owmqnio.jpg",
+        "publie_le": "2026-11-22T18:34:20.650021+00:00"
+    },
+    "Bloomberg Markets_Compass Plans to Move Main Listing to New York, FT Says_2026-11-22 17:08": {
+        "source": "Bloomberg Markets",
+        "titre": "Compass Plans to Move Main Listing to New York, FT Says",
+        "date": "2026-11-22 17:08",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795372474/actualites_financieres/zaynzfgiw96ylmz6cgob.jpg",
+        "publie_le": "2026-11-22T18:34:48.532956+00:00"
+    },
+    "Financial Times_Sanctioned Russian vessel attacked by drones near Finland_2026-11-22 14:15": {
+        "source": "Financial Times",
+        "titre": "Sanctioned Russian vessel attacked by drones near Finland",
+        "date": "2026-11-22 14:15",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795372534/actualites_financieres/zvu208w2knpcbdkxipqh.jpg",
+        "publie_le": "2026-11-22T18:35:47.764155+00:00"
     }
 }
