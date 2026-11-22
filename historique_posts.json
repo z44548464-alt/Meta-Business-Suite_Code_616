@@ -30401,5 +30401,23 @@
         "categorie": "Oil",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795322897/actualites_financieres/zurwnvanrcgwafgeptdb.jpg",
         "publie_le": "2026-11-22T04:48:33.378036+00:00"
+    },
+    "Financial Times_Argentina’s borrowing costs jump as Milei’s falling popularity rattles investors_2026-11-22 05:00": {
+        "source": "Financial Times",
+        "titre": "Argentina’s borrowing costs jump as Milei’s falling popularity rattles investors",
+        "date": "2026-11-22 05:00",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795326475/actualites_financieres/iwjffcwrauocirzs3tm3.jpg",
+        "publie_le": "2026-11-22T05:48:09.860423+00:00"
+    },
+    "Financial Times_Tech suppliers hike AI server prices up to 45% months after deals are signed_2026-11-22 05:00": {
+        "source": "Financial Times",
+        "titre": "Tech suppliers hike AI server prices up to 45% months after deals are signed",
+        "date": "2026-11-22 05:00",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795326506/actualites_financieres/sg9bnzxrlwatoptmicuj.jpg",
+        "publie_le": "2026-11-22T05:48:42.987498+00:00"
     }
 }
