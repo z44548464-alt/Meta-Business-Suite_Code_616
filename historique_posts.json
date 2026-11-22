@@ -30498,8 +30498,8 @@
         "date": "2026-11-22 12:24",
         "note": 80,
         "categorie": "Economic news",
-        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795351263/actualites_financieres/ofqmspw94x5kjqnkoqwx.jpg",
-        "publie_le": "2026-11-22T12:41:17.304988+00:00"
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795351766/actualites_financieres/toaljrkou5gnj0sbo2yf.jpg",
+        "publie_le": "2026-11-22T12:49:39.641396+00:00"
     },
     "Financial Times_Nscale slows hiring and curtails spending ahead of planned $35bn IPO_2026-11-22 11:32": {
         "source": "Financial Times",
@@ -30507,8 +30507,8 @@
         "date": "2026-11-22 11:32",
         "note": 80,
         "categorie": "Stocks",
-        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795351293/actualites_financieres/olhdsj6ymz9jltlh3ph7.jpg",
-        "publie_le": "2026-11-22T12:41:46.914573+00:00"
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795351799/actualites_financieres/tx1tjtrpn8gfi5euyoap.jpg",
+        "publie_le": "2026-11-22T12:50:13.646578+00:00"
     },
     "Bloomberg Markets_Asia’s Stock Rescue Efforts Gather Pace After Wall Street Plunge_2026-11-22 11:06": {
         "source": "Bloomberg Markets",
@@ -30516,7 +30516,16 @@
         "date": "2026-11-22 11:06",
         "note": 85,
         "categorie": "Stocks",
-        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795351329/actualites_financieres/ichk7agxildupg8wjczb.jpg",
-        "publie_le": "2026-11-22T12:42:23.674424+00:00"
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795351832/actualites_financieres/wjlli0coxpbsnora0o0w.jpg",
+        "publie_le": "2026-11-22T12:50:45.180721+00:00"
+    },
+    "Bloomberg Markets_Taiwan Mulls Lowering Margin Requirement to Support Stock Market_2026-11-22 12:35": {
+        "source": "Bloomberg Markets",
+        "titre": "Taiwan Mulls Lowering Margin Requirement to Support Stock Market",
+        "date": "2026-11-22 12:35",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795351732/actualites_financieres/fqqnaeiwqlfxjcnqtn1s.jpg",
+        "publie_le": "2026-11-22T12:49:07.862318+00:00"
     }
 }
