@@ -30455,5 +30455,41 @@
         "categorie": "Central banks",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795344523/actualites_financieres/e414lutbfdtbjaynyclb.jpg",
         "publie_le": "2026-11-22T10:48:52.436265+00:00"
+    },
+    "Bloomberg Markets_China Lowers Margin Requirement to 80% to Boost Stock Liquidity_2026-11-22 11:06": {
+        "source": "Bloomberg Markets",
+        "titre": "China Lowers Margin Requirement to 80% to Boost Stock Liquidity",
+        "date": "2026-11-22 11:06",
+        "note": 85,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795347368/actualites_financieres/jzxjydqs7rikss0z3ktq.jpg",
+        "publie_le": "2026-11-22T11:36:19.089431+00:00"
+    },
+    "Financial Times_The American dream of home ownership recedes as mortgage rates surge_2026-11-22 11:00": {
+        "source": "Financial Times",
+        "titre": "The American dream of home ownership recedes as mortgage rates surge",
+        "date": "2026-11-22 11:00",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795347392/actualites_financieres/flnx764wk5v7etnij4h8.jpg",
+        "publie_le": "2026-11-22T11:36:41.944601+00:00"
+    },
+    "Financial Times_Did Anthropic and its bankers get a key call wrong after IPO?_2026-11-22 11:00": {
+        "source": "Financial Times",
+        "titre": "Did Anthropic and its bankers get a key call wrong after IPO?",
+        "date": "2026-11-22 11:00",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795347413/actualites_financieres/em6wbzjvjsbiovxjelio.jpg",
+        "publie_le": "2026-11-22T11:37:10.806830+00:00"
+    },
+    "Financial Times_Democrats will seek to unwind Trump’s tax and tariff policies_2026-11-22 11:00": {
+        "source": "Financial Times",
+        "titre": "Democrats will seek to unwind Trump’s tax and tariff policies",
+        "date": "2026-11-22 11:00",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795347442/actualites_financieres/ma0pvv2iipwlqd6w4nwy.jpg",
+        "publie_le": "2026-11-22T11:37:31.151360+00:00"
     }
 }
