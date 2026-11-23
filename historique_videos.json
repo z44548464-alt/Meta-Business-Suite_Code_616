@@ -16070,6 +16070,26 @@
                 "slideright"
             ],
             "source": "page Facebook"
+        },
+        {
+            "date": "2026-11-23T16:04:25.874774+00:00",
+            "post_ids": [
+                "122211097004988135",
+                "122211097124988135",
+                "122211097340988135",
+                "122211097616988135"
+            ],
+            "facebook_video_id": "1111398081662941",
+            "instagram_media_id": null,
+            "youtube_video_id": null,
+            "duree_s": 20.3,
+            "musique": "news_musique6.mp3.mp3",
+            "transitions": [
+                "fade",
+                "slidedown",
+                "slideright"
+            ],
+            "source": "page Facebook"
         }
     ]
 }
