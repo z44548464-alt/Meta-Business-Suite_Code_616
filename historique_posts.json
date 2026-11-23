@@ -31481,5 +31481,131 @@
         "categorie": "Stocks",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795435704/actualites_financieres/govgzwbwbgdsxzksuirc.jpg",
         "publie_le": "2026-11-23T12:08:30.577401+00:00"
+    },
+    "Benzinga_Capricor Therapeutics Hits 52-Week Low after Second FDA Rejection for Duchenne Cell Therapy_2026-11-23 12:58": {
+        "source": "Benzinga",
+        "titre": "Capricor Therapeutics Hits 52-Week Low after Second FDA Rejection for Duchenne Cell Therapy",
+        "date": "2026-11-23 12:58",
+        "note": 90,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795439328/actualites_financieres/sbxxtymgnhccysgtychz.jpg",
+        "publie_le": "2026-11-23T13:08:59.285813+00:00"
+    },
+    "Seeking Alpha_Ralph Lauren Q2: Strong China, Europe Remains Weak, Soft Holiday Growth Outlook_2026-11-23 12:54": {
+        "source": "Seeking Alpha",
+        "titre": "Ralph Lauren Q2: Strong China, Europe Remains Weak, Soft Holiday Growth Outlook",
+        "date": "2026-11-23 12:54",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795439379/actualites_financieres/wdp7pyvcq0uu2a3vo7fa.jpg",
+        "publie_le": "2026-11-23T13:09:50.977576+00:00"
+    },
+    "Seeking Alpha_Black Monday Averted By Bargain Hunters_2026-11-23 12:50": {
+        "source": "Seeking Alpha",
+        "titre": "Black Monday Averted By Bargain Hunters",
+        "date": "2026-11-23 12:50",
+        "note": 80,
+        "categorie": "Indices",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795439427/actualites_financieres/huveljmu9rvw2dji9rpx.jpg",
+        "publie_le": "2026-11-23T13:10:37.511386+00:00"
+    },
+    "Benzinga_Strategy Stock Rebounds as Bitcoin Recovers. These 2X ETFs Are Leading the Premarket Rally_2026-11-23 12:45": {
+        "source": "Benzinga",
+        "titre": "Strategy Stock Rebounds as Bitcoin Recovers. These 2X ETFs Are Leading the Premarket Rally",
+        "date": "2026-11-23 12:45",
+        "note": 80,
+        "categorie": "Crypto",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795439470/actualites_financieres/l8hu4tx22smcnqk8puym.jpg",
+        "publie_le": "2026-11-23T13:11:19.727155+00:00"
+    },
+    "Seeking Alpha_COP31 Climate Talks Run Out Of Gas_2026-11-23 12:30": {
+        "source": "Seeking Alpha",
+        "titre": "COP31 Climate Talks Run Out Of Gas",
+        "date": "2026-11-23 12:30",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795439500/actualites_financieres/whhltzawgnsvsah1k0tf.jpg",
+        "publie_le": "2026-11-23T13:11:50.450583+00:00"
+    },
+    "OilPrice_Trump Says Strikes on Iran Could Resume After New Year_2026-11-23 12:30": {
+        "source": "OilPrice",
+        "titre": "Trump Says Strikes on Iran Could Resume After New Year",
+        "date": "2026-11-23 12:30",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795439547/actualites_financieres/m9x63pco38vlakcdrcpr.jpg",
+        "publie_le": "2026-11-23T13:12:33.966125+00:00"
+    },
+    "Financial Times_Rene Haas affirms ‘long-term commitment’ to Arm after Nvidia approach_2026-11-23 12:28": {
+        "source": "Financial Times",
+        "titre": "Rene Haas affirms ‘long-term commitment’ to Arm after Nvidia approach",
+        "date": "2026-11-23 12:28",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795439585/actualites_financieres/yjqurzdbkopamuky34ve.jpg",
+        "publie_le": "2026-11-23T13:13:12.960327+00:00"
+    },
+    "ActionForex Fundamental_As the AI Bubble Deflates, So Do Hawkish Dollar Bets_2026-11-23 12:25": {
+        "source": "ActionForex Fundamental",
+        "titre": "As the AI Bubble Deflates, So Do Hawkish Dollar Bets",
+        "date": "2026-11-23 12:25",
+        "note": 80,
+        "categorie": "Forex",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795439624/actualites_financieres/uw7xzi3yasef8pamq4ma.jpg",
+        "publie_le": "2026-11-23T13:13:50.470532+00:00"
+    },
+    "Bloomberg Markets_European Chip Stocks Bounce After AI Rout_2026-11-23 12:18": {
+        "source": "Bloomberg Markets",
+        "titre": "European Chip Stocks Bounce After AI Rout",
+        "date": "2026-11-23 12:18",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795439655/actualites_financieres/zaeflq93guxtztbfkbbj.jpg",
+        "publie_le": "2026-11-23T13:14:22.749478+00:00"
+    },
+    "MarketWatch_Cybersecurity stocks have been hot — and now CrowdStrike inks deal to buy Zscaler_2026-11-23 12:16": {
+        "source": "MarketWatch",
+        "titre": "Cybersecurity stocks have been hot — and now CrowdStrike inks deal to buy Zscaler",
+        "date": "2026-11-23 12:16",
+        "note": 95,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795439677/actualites_financieres/jjnlualp6dugabcrajwj.jpg",
+        "publie_le": "2026-11-23T13:14:44.329216+00:00"
+    },
+    "Bloomberg Markets_Mahanadi Coalfields’ $953 Million India IPO Subscribed 1.5 Times_2026-11-23 12:15": {
+        "source": "Bloomberg Markets",
+        "titre": "Mahanadi Coalfields’ $953 Million India IPO Subscribed 1.5 Times",
+        "date": "2026-11-23 12:15",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795439709/actualites_financieres/uvfmcvimzbxrykhqjk3v.jpg",
+        "publie_le": "2026-11-23T13:15:17.610839+00:00"
+    },
+    "Bloomberg Economics_Mexico Economy Sees Faster Growth as Optimism for US Deal Rises_2026-11-23 12:11": {
+        "source": "Bloomberg Economics",
+        "titre": "Mexico Economy Sees Faster Growth as Optimism for US Deal Rises",
+        "date": "2026-11-23 12:11",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795439761/actualites_financieres/on75ykp7mdz2qfstrmxz.jpg",
+        "publie_le": "2026-11-23T13:16:08.808444+00:00"
+    },
+    "Bloomberg Markets_US, UK Firms Cut FX Hedges to Lowest Since 2024 as Losses Jump_2026-11-23 12:00": {
+        "source": "Bloomberg Markets",
+        "titre": "US, UK Firms Cut FX Hedges to Lowest Since 2024 as Losses Jump",
+        "date": "2026-11-23 12:00",
+        "note": 80,
+        "categorie": "Forex",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795439807/actualites_financieres/miksemmm30vz38ua3wkc.jpg",
+        "publie_le": "2026-11-23T13:16:55.172970+00:00"
+    },
+    "Bloomberg Economics_Copper Slump Tests Kast’s Push to Rein In Chile’s Fiscal Deficit_2026-11-23 11:00": {
+        "source": "Bloomberg Economics",
+        "titre": "Copper Slump Tests Kast’s Push to Rein In Chile’s Fiscal Deficit",
+        "date": "2026-11-23 11:00",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795439880/actualites_financieres/owrfnb03ijaewavtyf3q.jpg",
+        "publie_le": "2026-11-23T13:18:07.714601+00:00"
     }
 }
