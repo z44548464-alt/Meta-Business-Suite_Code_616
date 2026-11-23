@@ -30698,5 +30698,50 @@
         "categorie": "Stocks",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795390402/actualites_financieres/zlaj1ozvwhbtepysmxz8.jpg",
         "publie_le": "2026-11-22T23:33:32.236217+00:00"
+    },
+    "Bloomberg Economics_South Korea’s Early Exports Gain After $1 Trillion Milestone_2026-11-23 00:00": {
+        "source": "Bloomberg Economics",
+        "titre": "South Korea’s Early Exports Gain After $1 Trillion Milestone",
+        "date": "2026-11-23 00:00",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795394404/actualites_financieres/tq0i8rqfxeuuzteugryu.jpg",
+        "publie_le": "2026-11-23T00:40:13.362437+00:00"
+    },
+    "OilPrice_Oil Markets Are Betting on a Surplus That Hasn't Arrived Yet_2026-11-23 00:00": {
+        "source": "OilPrice",
+        "titre": "Oil Markets Are Betting on a Surplus That Hasn't Arrived Yet",
+        "date": "2026-11-23 00:00",
+        "note": 80,
+        "categorie": "Oil",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795394430/actualites_financieres/mt8v1almubhaotwsakif.jpg",
+        "publie_le": "2026-11-23T00:40:45.243826+00:00"
+    },
+    "Bloomberg Markets_Treasury Futures Fall as Rising Stock Futures Damp Haven Demand_2026-11-22 23:59": {
+        "source": "Bloomberg Markets",
+        "titre": "Treasury Futures Fall as Rising Stock Futures Damp Haven Demand",
+        "date": "2026-11-22 23:59",
+        "note": 80,
+        "categorie": "Bonds",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795394459/actualites_financieres/ic6diapsrxsgz3p36ict.jpg",
+        "publie_le": "2026-11-23T00:41:14.624620+00:00"
+    },
+    "Bloomberg Markets_Gold Deluge Keeps China’s $1 Trillion Trade Surplus in Check_2026-11-22 23:00": {
+        "source": "Bloomberg Markets",
+        "titre": "Gold Deluge Keeps China’s $1 Trillion Trade Surplus in Check",
+        "date": "2026-11-22 23:00",
+        "note": 80,
+        "categorie": "Gold",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795394496/actualites_financieres/hleapmoqe8tnmh2uudwm.jpg",
+        "publie_le": "2026-11-23T00:41:50.505283+00:00"
+    },
+    "Bloomberg Markets_Nasdaq, S&P 500 Futures Bounce After Friday’s Rout: Markets Wrap_2026-11-22 22:02": {
+        "source": "Bloomberg Markets",
+        "titre": "Nasdaq, S&P 500 Futures Bounce After Friday’s Rout: Markets Wrap",
+        "date": "2026-11-22 22:02",
+        "note": 80,
+        "categorie": "Indices",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795394544/actualites_financieres/q4ipmc8phaag3kvmrcrh.jpg",
+        "publie_le": "2026-11-23T00:42:40.160177+00:00"
     }
 }
