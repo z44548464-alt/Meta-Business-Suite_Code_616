@@ -30941,5 +30941,50 @@
         "categorie": "Stocks",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795407218/actualites_financieres/mfql2bwmmxsn0yeoi1ra.jpg",
         "publie_le": "2026-11-23T04:13:51.212995+00:00"
+    },
+    "MarketWatch_The number of 401(k) millionaires drops amid stock-market swings_2026-11-23 05:01": {
+        "source": "MarketWatch",
+        "titre": "The number of 401(k) millionaires drops amid stock-market swings",
+        "date": "2026-11-23 05:01",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795410326/actualites_financieres/e5l1duxdgmsr4xfcfgdf.jpg",
+        "publie_le": "2026-11-23T05:05:39.062558+00:00"
+    },
+    "Financial Times Markets_Wall Street set to rebound after AI stock sell-off_2026-11-23 04:58": {
+        "source": "Financial Times Markets",
+        "titre": "Wall Street set to rebound after AI stock sell-off",
+        "date": "2026-11-23 04:58",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795410358/actualites_financieres/kxftoedri0wbvbnqkrol.jpg",
+        "publie_le": "2026-11-23T05:06:09.779017+00:00"
+    },
+    "Financial Times Markets_Asian regulators rush to support sagging markets as AI trade falters_2026-11-23 04:54": {
+        "source": "Financial Times Markets",
+        "titre": "Asian regulators rush to support sagging markets as AI trade falters",
+        "date": "2026-11-23 04:54",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795410382/actualites_financieres/xrwfgkyr9x0fsqgvayiz.jpg",
+        "publie_le": "2026-11-23T05:06:34.378979+00:00"
+    },
+    "Bloomberg Markets_Indian Stocks Briefly Erase 2026 Losses on Record Foreign Buying_2026-11-23 03:50": {
+        "source": "Bloomberg Markets",
+        "titre": "Indian Stocks Briefly Erase 2026 Losses on Record Foreign Buying",
+        "date": "2026-11-23 03:50",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795410423/actualites_financieres/gbrrtfxtqdnfmnumhfgj.jpg",
+        "publie_le": "2026-11-23T05:07:13.611310+00:00"
+    },
+    "Bloomberg Markets_Gold Rebounds as Dip-Buyers Step In After Worst Week Since March_2026-11-23 00:28": {
+        "source": "Bloomberg Markets",
+        "titre": "Gold Rebounds as Dip-Buyers Step In After Worst Week Since March",
+        "date": "2026-11-23 00:28",
+        "note": 80,
+        "categorie": "Gold",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795410458/actualites_financieres/kb8tyqpceew0nx2gdmqf.jpg",
+        "publie_le": "2026-11-23T05:07:49.512194+00:00"
     }
 }
