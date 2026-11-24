@@ -32750,5 +32750,50 @@
         "categorie": "Stocks",
         "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795497827/actualites_financieres/pqhlbuvvlmzn1nkfr1na.jpg",
         "publie_le": "2026-11-24T05:23:53.599842+00:00"
+    },
+    "Financial Times Markets_SpaceX-Tesla: the directors negotiating the biggest merger ever_2026-11-24 05:00": {
+        "source": "Financial Times Markets",
+        "titre": "SpaceX-Tesla: the directors negotiating the biggest merger ever",
+        "date": "2026-11-24 05:00",
+        "note": 90,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795499587/actualites_financieres/z3mxry4pshcllexszpio.jpg",
+        "publie_le": "2026-11-24T05:53:13.821542+00:00"
+    },
+    "Financial Times Markets_Compass reignites City exodus fears_2026-11-24 05:00": {
+        "source": "Financial Times Markets",
+        "titre": "Compass reignites City exodus fears",
+        "date": "2026-11-24 05:00",
+        "note": 80,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795499611/actualites_financieres/imzm8ypolyjqbfsgietg.jpg",
+        "publie_le": "2026-11-24T05:53:43.709794+00:00"
+    },
+    "Financial Times_Pentagon delays Patriot missile shipments to Ukraine_2026-11-24 05:00": {
+        "source": "Financial Times",
+        "titre": "Pentagon delays Patriot missile shipments to Ukraine",
+        "date": "2026-11-24 05:00",
+        "note": 80,
+        "categorie": "Economic news",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795499640/actualites_financieres/smxpbinhhr7ibcdvlbqy.jpg",
+        "publie_le": "2026-11-24T05:54:07.750361+00:00"
+    },
+    "Financial Times Markets_Does Jensen Huang’s return to Nvidia mean the chip group is too big to fail?_2026-11-24 05:00": {
+        "source": "Financial Times Markets",
+        "titre": "Does Jensen Huang’s return to Nvidia mean the chip group is too big to fail?",
+        "date": "2026-11-24 05:00",
+        "note": 90,
+        "categorie": "Stocks",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795499667/actualites_financieres/jnypmvohkqflaglb8oxv.jpg",
+        "publie_le": "2026-11-24T05:54:39.158960+00:00"
+    },
+    "Seeking Alpha_Rates Spark: Jensen Who?_2026-11-24 03:25": {
+        "source": "Seeking Alpha",
+        "titre": "Rates Spark: Jensen Who?",
+        "date": "2026-11-24 03:25",
+        "note": 80,
+        "categorie": "Bonds",
+        "image_url": "https://res.cloudinary.com/qa6nkdi8/image/upload/v1795499708/actualites_financieres/leq1gopnghbdx4vfdo9e.jpg",
+        "publie_le": "2026-11-24T05:55:19.849719+00:00"
     }
 }
